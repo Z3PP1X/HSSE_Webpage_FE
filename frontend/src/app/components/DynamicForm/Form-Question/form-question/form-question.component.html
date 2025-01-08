@@ -1,0 +1,24 @@
+<div class="m-4 flex-auto"[formGroup]="form">
+
+  @switch (question.controlType) {
+    @case ('textbox') {
+        <input class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" [formControlName]="question.key" [id]="question.key" placeholder="{{question.label}}">
+
+    }
+    @case ('dropdown') {
+
+    }
+    @case ('location') {
+
+    }
+    @case ('datetime') {
+
+      <input class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" [formControlName]="question.key" [id]="question.key" placeholder="{{question.label}}" type="{{question.type}}">
+
+    }
+  }
+
+@if (!isValid) {
+  <div class="errorMessage">{{question.label}} is required</div>
+}
+</div>
