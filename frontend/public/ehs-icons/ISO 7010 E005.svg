@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ebene_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 113.39 113.39">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #fff;
+      }
+
+      .st0, .st1 {
+        fill-rule: evenodd;
+      }
+
+      .st1 {
+        fill: #008e5e;
+      }
+    </style>
+  </defs>
+  <polygon class="st1" points="0 0 113.39 0 113.39 113.39 0 113.39 0 0 0 0"/>
+  <polygon class="st0" points="16.43 65.81 63.9 65.81 37.87 91.84 61.81 91.84 96.95 56.69 61.81 21.55 37.87 21.55 63.9 47.58 16.43 47.58 16.43 65.81 16.43 65.81"/>
+</svg>
