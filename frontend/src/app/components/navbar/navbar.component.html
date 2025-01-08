@@ -1,0 +1,41 @@
+<div class="fixed top-0 left-0 h-screen w-16 p-4 flex flex-col bg-gray-900 text-white shadow-lg items-center">
+  <div>
+    @for (icon of icons; track icon) {
+
+      @if (icon.category === 'branding') {
+        <div class="mt-2">
+        <img [src]="icon.path" alt="{{icon.tooltip}}">
+        <div class="w-full h-12 bg-transparent"></div>
+
+      </div>
+      }
+
+      @if (icon.enabled && icon.category === 'module') {
+
+        <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip"> </app-navbar-icon>
+
+      }
+    }
+  </div>
+
+  <div class="fixed bottom-3">
+
+    @for (icon of icons; track icons) {
+      @if (icon.enabled && icon.category === 'menu') {
+        <button class="navbar-icon text-white rounded group">
+          <span class="material-icons">{{icon.iconName}}</span>
+          <span class="navbar-tooltip group-hover:scale-100">{{icon.tooltip}}</span>
+
+        </button>
+      }
+    }
+
+
+
+  </div>
+
+</div>
+
+
+
+
