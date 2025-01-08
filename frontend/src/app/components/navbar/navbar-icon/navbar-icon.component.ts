@@ -15,4 +15,10 @@ export class NavbarIconComponent {
   modulLink = input();
 
 
+  doSomething() {
+
+    console.log("clicked")
+
+  }
+
 }
