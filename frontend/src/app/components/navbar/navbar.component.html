@@ -11,8 +11,10 @@
       }
 
       @if (icon.enabled && icon.category === 'module') {
+        <a routerLink="{{icon.route}}">
+          <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip"> </app-navbar-icon>
+        </a>
 
-        <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip"> </app-navbar-icon>
 
       }
     }
@@ -22,11 +24,13 @@
 
     @for (icon of icons; track icons) {
       @if (icon.enabled && icon.category === 'menu') {
-        <button class="navbar-icon text-white rounded group">
-          <span class="material-icons">{{icon.iconName}}</span>
-          <span class="navbar-tooltip group-hover:scale-100">{{icon.tooltip}}</span>
+        <a routerLink="{{icon.route}}">
+          <button class="navbar-icon text-white rounded group">
+            <span class="material-icons">{{icon.iconName}}</span>
+            <span class="navbar-tooltip group-hover:scale-100">{{icon.tooltip}}</span>
+          </button>
+        </a>
 
-        </button>
       }
     }
 
