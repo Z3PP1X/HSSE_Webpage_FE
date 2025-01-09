@@ -13,5 +13,6 @@ import { HealthModuleConfig } from '../health-module.config';
 export class HealthModuleComponent {
 
   moduleConfig = HealthModuleConfig;
+  iconPath = "ehs-icons/health-white.svg";
 
 }

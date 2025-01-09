@@ -13,6 +13,8 @@ export class ModuleNavigationComponent {
 
   configurationItem = input.required<ModuleConfigurationItem[]>();
 
+  iconPath = input.required<string>();
+
 
 
 
