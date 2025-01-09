@@ -12,7 +12,7 @@
 
       @if (icon.enabled && icon.category === 'module') {
         <a routerLink="{{icon.route}}">
-          <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip"> </app-navbar-icon>
+          <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip" [id]="icon.id"> </app-navbar-icon>
         </a>
 
 

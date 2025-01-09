@@ -1,6 +1,19 @@
-<div class="navbar-icon group" (click)="doSomething()">
-  <img [src]="iconPath()">
-  <span class="navbar-tooltip group-hover:scale-100">
-    {{iconTooltip()}}
-  </span>
-</div>
+
+@if (this.isActive()) {
+
+  <div class="navbar-icon bg-sixt-orange group" (click)="onIconClick()">
+    <img [src]="iconPath()">
+    <span class="navbar-tooltip group-hover:scale-100">
+      {{iconTooltip()}}
+    </span>
+  </div>
+
+}
+@else {
+  <div class="navbar-icon group" (click)="onIconClick()">
+    <img [src]="iconPath()">
+    <span class="navbar-tooltip group-hover:scale-100">
+      {{iconTooltip()}}
+    </span>
+  </div>
+}
