@@ -2,7 +2,7 @@
 
 export const HealthModuleConfig = [
   {
-    title: 'Verbandbucheintrag erstellen',
+    title: 'Arbeitsunfälle',
     subtitle: 'Erstellen und Verwalten von Verbandbucheinträgen',
     endpoint: '/api/verbandbucheintrag',
     order: 1,
@@ -34,7 +34,7 @@ export const HealthModuleConfig = [
     ],
   },
   {
-    title: 'Ergonomisches Equipment',
+    title: 'Ergonomie',
     subtitle: 'Förderung und Bereitstellung ergonomischer Arbeitsmittel',
     endpoint: '/api/ergonomisches-equipment',
     order: 2,
