@@ -1,9 +1,24 @@
-<div class="rounded-lg shadow-md w-3/5 pb-6">
-  <div>
-    <h1></h1>
-    <img>
+
+<div class="bg-gray-50 mt-5 rounded-md drop-shadow-sm shadow-sm">
+
+  <div class="flex flex-row relative mb-4 justify-center text-center">
+    <h1 class="text-2xl font-bold mt-2">{{formTitle()}}</h1>
+    <div class="w-20 object-contain absolute right-2 top-2">
+      <img src="branding/SIXT_Logo_Pos.svg" alt="Sixt-Logo" class="">
+    </div>
+
+
   </div>
+  <div class="w-full h-[1px] bg-black"></div>
+  <div>
+    <form (ngSubmit)="onSubmit()" [formGroup]="form">
+      @for (question of questions; track question){
+        <div>
+          <app-form-question [question]="question" [form]="form"></app-form-question>
+        </div>
+      }
 
-  <div></div>
-
+    </form>
+  </div>
 </div>
+

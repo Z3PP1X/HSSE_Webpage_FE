@@ -1,12 +1,14 @@
 import { Component, Input, OnInit, input } from '@angular/core';
 import { QuestionBase } from '../../question-base';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { QuestionControlService } from '../../services/question-control.service';
+import { FormQuestionComponent } from '../../Form-Question/form-question/form-question.component';
 
 @Component({
   selector: 'app-form',
   standalone: true,
-  imports: [],
+  providers:[QuestionControlService, FormQuestionComponent],
+  imports: [ReactiveFormsModule, FormQuestionComponent],
   templateUrl: './form.component.html',
   styleUrl: './form.component.css'
 })
@@ -21,6 +23,10 @@ export class FormComponent implements OnInit{
 
   ngOnInit(): void {
       this.form = this.qcs.toFormGroup(this.questions as QuestionBase<string>[])
+  }
+
+  onSubmit() {
+    this.payLoad = JSON.stringify(this.form.getRawValue());
   }
 
 
