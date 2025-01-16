@@ -3,7 +3,7 @@
       [@openClose]="state"
       (click)="toggleExpand()">
       <button class="bg-gray-700 w-full flex flex-row rounded-md p-4 h-14">
-        @if (isOpen()) {
+        @if (this.state === "open") {
           <span class="material-icons text-sixt-orange ml-1 mr-2">add</span>
 
         }
