@@ -1,0 +1,23 @@
+@if(this.isOpen()){
+
+  <div
+  class="w-full flex flex-row bg-900/60 rounded-md p-4 hover:scale-105 transition duration-300 ease-in h-56 border border-solid border-green-800"
+  (click)="toggleExpand()">
+    <span class="material-icons text-green-800 ml-1 mr-2">add</span>
+    {{ catalogItemTitle() }}
+</div>
+
+}
+
+@else {
+  <div
+  class="w-full flex flex-row bg-red-700 rounded-md p-4 hover:scale-105 transition duration-300 ease-in"
+  (click)="toggleExpand()">
+
+    <span class="material-icons text-green-800 ml-1 mr-2">add</span>
+    {{ catalogItemTitle() }}
+
+</div>
+}
+
+

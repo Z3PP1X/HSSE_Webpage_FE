@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ModuleNavigationComponent } from '../../../components/module-navigation/module-navigation/module-navigation.component';
 
-import { HealthModuleConfig } from '../health-module.config';
+import { HealthModuleConfig } from './health-module.config';
 
 @Component({
   selector: 'app-health-module',

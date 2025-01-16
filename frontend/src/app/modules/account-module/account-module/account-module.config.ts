@@ -1,11 +1,13 @@
 
 
-export const HealthModuleConfig = [
+
+export const AccountModuleConfig = [
   {
     title: 'Arbeitsunfälle',
     subtitle: 'Erstellen und Verwalten von Verbandbucheinträgen',
     endpoint: '/api/verbandbucheintrag',
     order: 1,
+    id: 100,
     enabled: true,
     expandItemsOnInit: true,
     allowedActions: ['GET', 'POST', 'PUT', 'DELETE'] as const,
@@ -38,6 +40,7 @@ export const HealthModuleConfig = [
     subtitle: 'Förderung und Bereitstellung ergonomischer Arbeitsmittel',
     endpoint: '/api/ergonomisches-equipment',
     order: 2,
+    id: 200,
     enabled: true,
     expandItemsOnInit: false,
     allowedActions: ['GET', 'POST'] as const,
@@ -70,6 +73,7 @@ export const HealthModuleConfig = [
     subtitle: 'Häufig gestellte Fragen und Antworten',
     endpoint: '/api/faqs',
     order: 3,
+    id: 300,
     enabled: true,
     expandItemsOnInit: false,
     allowedActions: ['GET'] as const,
