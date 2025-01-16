@@ -9,25 +9,27 @@ import { ActiveModuleService } from '../../../navbar/services/selected-module.se
   imports: [CommonModule],
   animations: [
 
-    trigger('openClose', [
-      state(
-        'open',
-        style({
-
-        })
-      ),
-      state(
-        'closed',
-        style({
-
-        })
-      ),
-      transition('open => closed', [animate('300ms 100ms ease-in')]),
-      transition('closed => open', [animate('300ms 100ms ease-out')]),
-    ])
-
-
-
+    [
+      trigger('openClose', [
+        state(
+          'open',
+          style({
+            height: '300px',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'rgb(22, 101, 52)',
+          })
+        ),
+        state(
+          'closed',
+          style({
+            height: '*',
+            borderWidth: '0',
+          })
+        ),
+        transition('open <=> closed', [animate('250ms 100ms ease-in-out')]),
+      ]),
+    ],
   ],
   templateUrl: './expandable-accordion-card.component.html',
   styleUrl: './expandable-accordion-card.component.css'
@@ -38,32 +40,19 @@ export class ExpandableAccordionCardComponent implements OnInit{
   id = input.required<string>();
   isOpen = signal<boolean>(false);
 
-  constructor(private activeCategory: ActiveModuleService){}
+  state: 'open' | 'closed' = 'closed';
+
+  constructor( activeMenu: ActiveModuleService){
+  }
 
   ngOnInit(): void {
-
-    this.activeCategory.selectedModule$.subscribe((activeId) => {
-      if (activeId === this.id()) {
-        this.isOpen.set(!this.isOpen());
-      } else {
-        switch (this.isOpen()) {
-          case true: {
-            this.isOpen.set(false);
-            break;
-          }
-          case false: {
-            break;
-          }
-        }
-      }
-    });
 
   }
 
   toggleExpand(){
 
-    this.activeCategory.setActiveModule(this.id())
-    console.log("value - changed")
+    this.state = this.state === 'open' ? 'closed' : 'open';
+    this.isOpen.set(!this.isOpen())
 
   }
 

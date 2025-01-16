@@ -1,23 +1,17 @@
-@if(this.isOpen()){
+<div
+      class="w-full flex flex-row rounded-md border-8 border-solid border-transparent hover:border-green-800"
+      [@openClose]="state"
+      (click)="toggleExpand()">
+      <button class="bg-gray-700 w-full flex flex-row rounded-md p-4 h-14">
+        @if (isOpen()) {
+          <span class="material-icons text-sixt-orange ml-1 mr-2">add</span>
 
-  <div
-  class="w-full flex flex-row bg-900/60 rounded-md p-4 hover:scale-105 transition duration-300 ease-in h-56 border border-solid border-green-800"
-  (click)="toggleExpand()">
-    <span class="material-icons text-green-800 ml-1 mr-2">add</span>
-    {{ catalogItemTitle() }}
-</div>
+        }
+        @else {
+          <span class="material-icons text-green-800 ml-1 mr-2">add</span>
 
-}
+        }
+        <span class="text-white">{{ catalogItemTitle() }}</span>
+      </button>
 
-@else {
-  <div
-  class="w-full flex flex-row bg-red-700 rounded-md p-4 hover:scale-105 transition duration-300 ease-in"
-  (click)="toggleExpand()">
-
-    <span class="material-icons text-green-800 ml-1 mr-2">add</span>
-    {{ catalogItemTitle() }}
-
-</div>
-}
-
-
+    </div>
