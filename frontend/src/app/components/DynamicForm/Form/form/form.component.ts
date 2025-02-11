@@ -23,6 +23,18 @@ export class FormComponent implements OnInit{
 
   ngOnInit(): void {
       this.form = this.qcs.toFormGroup(this.questions as QuestionBase<string>[])
+
+      if (this.questions) {
+
+        for (let question = 0; question < this.questions.length; question++) {
+          const element = this.questions[question];
+
+          console.log("UP")
+          console.log(element)
+
+        }
+
+      }
   }
 
   onSubmit() {

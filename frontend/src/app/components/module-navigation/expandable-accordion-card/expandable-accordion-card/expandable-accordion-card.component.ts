@@ -47,6 +47,8 @@ export class ExpandableAccordionCardComponent implements OnInit{
 
     this.expandedCard.selectedModule$.subscribe((activeId) => {
       if (activeId === this.id()){
+
+
         this.state = 'open';
       }
       else {
