@@ -58,6 +58,9 @@ export class QuestionService {
           })
           questions.push(dropdownquestion)
           break;
+          default:
+            console.warn('Unknown controlType: ', element.controlType);
+            break;
       }
 
     };

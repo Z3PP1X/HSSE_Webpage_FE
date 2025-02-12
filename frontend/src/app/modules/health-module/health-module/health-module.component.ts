@@ -38,8 +38,10 @@ export class HealthModuleComponent implements OnInit{
 
     this.subscription = this.dataset.getMetadata("http://127.0.0.1:8000/api/digitalfirstaid/meta/?format=json").subscribe({
       next: (data) => {
-        this.questions$ = this.questionservice.getQuestions(data);
+        console.log("This is the data")
         console.log(data)
+        console.log("----")
+        this.questions$ = this.questionservice.getQuestions(data);
       }
     });
 
