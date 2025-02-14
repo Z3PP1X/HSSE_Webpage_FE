@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+
 @Component({
   selector: 'app-alarmplan',
   standalone: true,
@@ -8,5 +9,6 @@ import { Component } from '@angular/core';
   styleUrl: './alarmplan.component.css'
 })
 export class AlarmplanComponent {
+
 
 }
