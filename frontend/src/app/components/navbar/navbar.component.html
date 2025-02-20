@@ -1,4 +1,4 @@
-<div class="fixed top-0 left-0 h-screen w-16 p-4 flex flex-col bg-gray-900 text-white shadow-lg items-center">
+<div class="fixed top-0 left-0 h-screen w-16 p-4 flex flex-col bg-sixt-black text-white shadow-lg items-center">
   <div>
     @for (icon of icons; track icon) {
 
@@ -12,7 +12,7 @@
 
       @if (icon.enabled && icon.category === 'module') {
         <a routerLink="{{icon.route}}">
-          <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip"> </app-navbar-icon>
+          <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip" [id]="icon.id"> </app-navbar-icon>
         </a>
 
 

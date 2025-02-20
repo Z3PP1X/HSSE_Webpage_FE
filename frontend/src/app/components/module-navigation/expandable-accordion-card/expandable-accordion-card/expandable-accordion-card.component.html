@@ -1,0 +1,17 @@
+<div
+      class="w-full flex flex-row rounded-md border-8 border-solid border-transparent hover:border-green-800"
+      [@openClose]="state"
+      (click)="toggleExpand()">
+      <button class="bg-gray-700 w-full flex flex-row rounded-md p-4 h-14">
+        @if (this.state === "open") {
+          <span class="material-icons text-sixt-orange ml-1 mr-2">add</span>
+
+        }
+        @else {
+          <span class="material-icons text-green-800 ml-1 mr-2">add</span>
+
+        }
+        <span class="text-white">{{ catalogItemTitle() }}</span>
+      </button>
+
+    </div>
