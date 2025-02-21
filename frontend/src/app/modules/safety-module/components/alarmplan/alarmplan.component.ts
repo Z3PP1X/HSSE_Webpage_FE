@@ -13,6 +13,7 @@ export class AlarmplanComponent {
   healthIcon = "ehs-icons/safety.svg"
   employeeIcon = "ehs-icons/health.svg"
   safetyIcon = "ehs-icons/person.svg"
+  qrCode = "qr-codes/qr-code-png"
 
 
 }
