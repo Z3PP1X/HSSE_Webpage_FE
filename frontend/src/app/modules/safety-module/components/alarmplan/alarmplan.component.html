@@ -94,29 +94,139 @@
           <div class="w-16 h-16"><img [src]="safetyIcon"></div>
         </div>
       </div>
-      
+
     </div>
     <div class="bg-white col-span-1 border-2 border-customAlarmplanRed">
       <h1 class="text-black font-bold text-center mt-4">RUHE BEWAHREN!</h1>
       <div>
-        <h1>1 Menschen retten</h1>
-        <div>
-          <h1>2</h1>
-          <img>
-          <h1>Feuermelder betätigen</h1>
-          
+        <h1 class="font-bold text-black ml-2 mt-4">1 Menschen retten</h1>
+        <div class="flex flex-row ml-2 mt-2">
+          <h1 class="font-bold text-black">2</h1>
+          <div class="w-9 h-9 ml-1 mr-1"><img [src]="fireAlarmIcon"></div>
+          <h1 class="font-bold text-black">Feuermelder betätigen</h1>
         </div>
-        <div>
-          <h1>3</h1>
-          <img>
-          <h1>Brand sofort melden</h1>
+        <div class="grid grid-cols-[1fr_8fr]">
+          <div class="ml-2 flex flex-row mt-1">
+            <h1 class="text-black font-bold">3</h1>
+            <div class="w-9 h-9 ml-1"><img [src]="callFireDepartmentIcon"></div>
+          </div>
+          <div class="">
+            <h1 class="font-bold text-black">Brand sofort melden:</h1>
+            <h1 class="font-bold text-orange-600">Telefon: 112</h1>
+          </div>
+
         </div>
-        <h1>4 Löschversuch unternehmen</h1>
-        <p></p>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">4 Löschversuch unternehmen</h1>
+        <p><span class="font-bold text-orange-600">Wo</span> brennt es? <span class="font-bold text-orange-600">Was</span> brennt? Sind <span class="font-bold text-orange-600">Menschen in Gefahr</span>? <span class="font-bold text-orange-600">Wer</span> meldet? <span class="font-bold text-orange-600">Warten</span> auf Rückfragen.</p>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">5 Verhalten</h1>
+          <div class="ml-8">
+            <ul class="list-disc">
+
+              <li>Gefahrenbereich verlassen</li>
+              <li>Verletzten und Hilfsvedürftigen helfen</li>
+              <li class="flex flex-row">Gekennzeichnette Rettungswege benutzen <div class="w-9 h-9 ml-1"><img [src]="escapeRouteIcon"></div></li>
+              <li>Keine Aufzüge benutzen</li>
+              <li>Verqualmte Räume in Bodennähe verlassen</li>
+              <li>Türen und Fenster schließen</li>
+              <li>Entstehungsbrand bekämpfen, sofern Eigenschutz gewährleistet!</li>
+              <li class="flex flex-row">Nächster Feuerlöscher in max. 20m <div class="w-9 h-9 ml-1"><img [src]="fireExtinguisherIcon"></div></li>
+              <li>Sammelplatz aufsuchen und auf Anweisungen warten:</li>
+
+                <div class="grid grid-cols-[1fr_8fr] mt-1 mb-1">
+                  <div class="w-12 h-12"><img [src]="assemblyPointIcon"></div>
+                  <div>
+                    <p>Ausgang durch</p>
+                    <p>---Variable---</p>
+                  </div>
+                </div>
+
+              <li>Feuerwehr einweisen</li>
+
+
+            </ul>
+          </div>
+
+        </div>
+
       </div>
     </div>
     <div class="bg-white col-span-1 border-2 border-customAlarmplanBlack">
       <h1 class="text-black font-bold text-center mt-4">RUHE BEWAHREN!</h1>
+      <div class="grid grid-cols-2 ml-2 mt-4">
+        <div class="font-bold text-orange-600">
+          <h1>Polizei-Notruf:</h1>
+          <h1>Feuerwehr:</h1>
+          <h1>Giftnotruf:</h1>
+        </div>
+        <div class="font-bold text-orange-600 mr-2 text-right">
+          <p>110</p>
+          <p>112</p>
+          <p>---Variable---</p>
+        </div>
+      </div>
+      <div class="mt-4 ml-2">
+        <h1 class="font-bold text-black">Nächstes Krankenhaus</h1>
+        <div class="grid grid-cols-[1fr_8fr]">
+          <div class="ml-2">
+            <div><p>Name:</p></div>
+            <div><p>Adresse:</p></div>
+            <div><p>Adresse:</p></div>
+          </div>
+          <div class="mr-2 text-right">
+            <div class="text-rigt mr-2"><p>-------------Variable------------</p></div>
+            <div class="text-rigt mr-2"><p>---Variable---</p></div>
+            <div class="text-rigt mr-2"><p>---Variable---</p></div>
+          </div>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">Branch Manager</h1>
+          <div class="grid grid-cols-2">
+            <div><p>Vorname Nachname</p></div>
+            <div class="mr-2 text-right"><p>---Variable---</p></div>
+          </div>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">Geschäftsleitung</h1>
+          <div class="grid grid-cols-2">
+            <div><p>Vorname Nachname</p></div>
+            <div class="mr-2 text-right"><p>---Variable---</p></div>
+          </div>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">Beauftragte für Umweltschutz</h1>
+          <div class="grid grid-cols-2">
+            <div><p>Vorname Nachname</p></div>
+            <div class="mr-2 text-right"><p>---Variable---</p></div>
+          </div>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">Safety</h1>
+          <div class="grid grid-cols-2">
+            <div><p>Antje Raichle (SiFa)</p></div>
+            <div class="mr-2 text-right"><p>---Variable---</p></div>
+          </div>
+        </div>
+
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">QM DE Operation</h1>
+          <div class="grid grid-cols-2">
+            <div><p>Michale Müller (QM/SiBe)</p></div>
+            <div class="mr-2 text-right"><p>---Variable---</p></div>
+          </div>
+        </div>
+
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black">Betriebsarzt</h1>
+          <div class="grid grid-cols-2">
+            <div><p>CompanyCheck Hotline</p></div>
+            <div class="mr-2 text-right"><p>---Variable---</p></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
