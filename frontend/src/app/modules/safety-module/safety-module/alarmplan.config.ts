@@ -1,9 +1,11 @@
+import { FormGroup } from "@angular/forms";
 import { QuestionBase } from "../../../components/DynamicForm/question-base";
-import { TextboxQuestion } from "../../../components/DynamicForm/questions/textbox";
+
 
 export const AlarmplanConfig = {
+  categories:["Test", "Test2", "Test3", "Test4"],
   questions: [
-    new TextboxQuestion({
+    {
       key: 'kostenstelle',
       label: 'Was ist ihre Kostenstelle?',
       required: true,
@@ -14,45 +16,36 @@ export const AlarmplanConfig = {
       apiEndpoint: '',
       options: [],
       value: '',
+      category: "Test",
       ajaxConfig: {
         endpoint: '/api/kostenstelle',
         method: 'GET',
         triggerEvents: ['init', 'change'],
         paramMap: { query: 'kostenstelle' },
         debounceTime: 300,
-        onSuccess: ({ response, form, question, value }) => {
+        onSuccess: ({ response, form, question, value }: { response: any; form: FormGroup; question: QuestionBase<any>; value: any }) => {
           console.log('Kostenstelle fetch success:', response);
         },
-        onError: (error) => {
+        onError: (error: any) => {
           console.error('Kostenstelle fetch error:', error);
         }
       }
-    }),
-    new TextboxQuestion({
+    },
+    {
       key: 'ersthelferName',
       label: 'Name des Ersthelfers',
       required: true,
       order: 1,
-      controlType: 'textbox',
+      controlType: 'contactdata',
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
-      value: ''
-    }),
-    new TextboxQuestion({
-      key: 'ersthelferTelefon',
-      label: 'Telefonnummer des Ersthelfers',
-      required: true,
-      order: 2,
-      controlType: 'textbox',
-      type: 'text',
-      fetchOptions: false,
-      apiEndpoint: '',
-      options: [],
-      value: ''
-    }),
-    new TextboxQuestion({
+      value: '',
+      maxContacts: 5,
+    },
+    
+    {
       key: 'sammelplatz',
       label: 'Wo befindet sich der Sammelplatz?',
       required: true,
@@ -63,8 +56,8 @@ export const AlarmplanConfig = {
       apiEndpoint: '',
       options: [],
       value: ''
-    }),
-    new TextboxQuestion({
+    },
+    {
       key: 'giftnotrufNummer',
       label: 'Nummer des Giftnotrufs',
       required: true,
@@ -75,66 +68,66 @@ export const AlarmplanConfig = {
       apiEndpoint: '',
       options: [],
       value: ''
-    }),
-    new TextboxQuestion({
+    },
+    {
       key: 'krankenhausAdresse',
       label: 'Adresse des nächsten Krankenhauses',
       required: true,
       order: 5,
-      controlType: 'textbox',
+      controlType: 'adressdata',
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
       value: ''
-    }),
-    new TextboxQuestion({
+    },
+    {
       key: 'branchManagerKontaktdaten',
       label: 'Kontaktdaten des Branch Managers',
       required: true,
       order: 6,
-      controlType: 'textbox',
+      controlType: 'contactdata',
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
       value: ''
-    }),
-    new TextboxQuestion({
+    },
+    {
       key: 'geschaeftsleitungKontaktdaten',
       label: 'Kontaktdaten der Geschäftsleitung',
       required: true,
       order: 7,
-      controlType: 'textbox',
+      controlType: 'contactdata',
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
       value: ''
-    }),
-    new TextboxQuestion({
+    },
+    {
       key: 'umweltschutzBeauftragteKontaktdaten',
       label: 'Kontaktdaten der Beauftragten für Umweltschutz',
       required: true,
       order: 8,
-      controlType: 'textbox',
+      controlType: 'contactdata',
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
       value: ''
-    }),
-    new TextboxQuestion({
+    },
+    {
       key: 'arbeitssicherheitsfachkraftKontaktdaten',
       label: 'Kontaktdaten der Arbeitssicherheitsfachkraft',
       required: true,
       order: 9,
-      controlType: 'textbox',
+      controlType: 'contactdata',
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
       value: ''
-    })
+    }
   ]
 };

@@ -14,12 +14,13 @@ import { HttpParams } from '@angular/common/http';
   providers: [QuestionControlService, FormQuestionComponent],
   imports: [ReactiveFormsModule, FormQuestionComponent],
   templateUrl: './form.component.html',
-  styleUrls: ['./form.component.css'] // Corrected to styleUrls
+  styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  formTitle = input.required<string>() // Corrected to @Input
+  formTitle = input.required<string>();
+  formCategories = input.required<string[]>();
   @Input() questions: QuestionBase<string>[] | null = [];
   form!: FormGroup;
   payLoad = '';
@@ -101,5 +102,15 @@ export class FormComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  trackByFn(index: number, item: any): any {
+    return item.key || index;
+  }
+
+  getQuestionsByCategory(category: string) {
+    console.log('category:', category);
+    return this.questions?.filter(question => question.category === category) || [];
+
   }
 }

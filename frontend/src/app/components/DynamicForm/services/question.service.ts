@@ -1,13 +1,12 @@
 import { Injectable } from "@angular/core";
-
+import { of } from "rxjs";
+import { QuestionBase } from "../question-base";
 import { DropdownQuestion } from "../questions/dropdown";
 import { TextboxQuestion } from "../questions/textbox";
 import { DateTimeQuestion } from "../questions/datetime";
 import { LocationQuestion } from "../questions/location";
-
-import { of } from "rxjs";
-
-import { QuestionBase } from "../question-base";
+import { ContactDataQuestion } from "../questions/contact-data";
+import { AdressFieldQuestion } from "../questions/adressfield";
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +14,7 @@ import { QuestionBase } from "../question-base";
 export class QuestionService {
 
   getQuestions(data: any) {
-    const questions: QuestionBase<string>[] = []
+    const questions: QuestionBase<any>[] = [];
 
     for (const element of data) {
       const baseConfig = {
@@ -26,44 +25,39 @@ export class QuestionService {
         order: element.order,
         fetchOptions: element.fetchOptions,
         apiEndpoint: element.apiEndpoint,
-        ajaxConfig: element.ajaxConfig,   
-        value: element.value,             
-        controlType: element.controlType, 
-        options: element.options          
+        ajaxConfig: element.ajaxConfig,
+        value: element.value,
+        controlType: element.controlType,
+        options: element.options,
+        maxContacts: element.maxContacts,
+        category: element.category
       };
 
       switch (element.controlType) {
         case "textbox":
-           const textboxquestion = new TextboxQuestion({
-            ...baseConfig,  
-          })
-          questions.push(textboxquestion);
+          questions.push(new TextboxQuestion({ ...baseConfig }));
+          break;
+        case "contactdata":
+          questions.push(new ContactDataQuestion({ ...baseConfig,}));
+          break;
+          case "adressdata":
+          questions.push(new AdressFieldQuestion({ ...baseConfig,}));
           break;
         case "location":
-          const locationquestion = new LocationQuestion({
-            ...baseConfig,
-          })
-          questions.push(locationquestion)
+          questions.push(new LocationQuestion({ ...baseConfig }));
           break;
         case "datetime":
-          const datetimequestion = new DateTimeQuestion({
-            ...baseConfig,
-          })
-          questions.push(datetimequestion)
+          questions.push(new DateTimeQuestion({ ...baseConfig }));
           break;
         case "dropdown":
-          const dropdownquestion = new DropdownQuestion({
-            ...baseConfig,
-            options: element.options || []
-          })
-          questions.push(dropdownquestion)
+          questions.push(new DropdownQuestion({ ...baseConfig, options: element.options || [] }));
           break;
-          default:
-            console.warn('Unknown controlType: ', element.controlType);
-            break;
+        default:
+          console.warn('Unknown controlType: ', element.controlType);
+          break;
       }
+    }
 
-    };
     return of(questions.sort((a, b) => a.order - b.order));
   }
 }

@@ -16,6 +16,62 @@
         [type]="question.type"
         [placeholder]="question.label">
     }
+    @case ('adressdata') {
+      <h3 class="text-lg font-semibold mb-2">{{ question.label }}</h3>
+      <div class="flex space-x-4 mb-2">
+      <input 
+        class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key"
+        [id]="question.key" 
+        type="text"
+        placeholder="Street"
+        required>
+      </div>
+      <div class="flex space-x-4">
+        <input 
+        class="w-1/2 leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key"
+        [id]="question.key" 
+        type="text"
+        placeholder="ZIP Code"
+        required>
+      <input 
+        class="w-1/2 leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key"
+        [id]="question.key" 
+        type="text"
+        placeholder="City"
+        required>
+      <input 
+        class="w-1/2 leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key"
+        [id]="question.key" 
+        type="text"
+        placeholder="House Number"
+        required>
+      </div>
+    }
+
+    
+    @case ('contactdata') {
+      <h3 class="text-lg font-semibold mb-2">{{ question.label }}</h3>
+    <div class="flex space-x-4">
+      <input 
+        class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key"
+        [id]="question.key" 
+        type="text"
+        placeholder="Name"
+        required>
+      <input 
+        class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key"
+        [id]="question.key" 
+        type="tel"
+        placeholder="Telephone Number"
+        required>
+    </div>
+    }
     @case ('dropdown') {
       <select 
         class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500"

@@ -27,6 +27,8 @@ export class QuestionBase<T>{
   type: string;
   fetchOptions: boolean;
   apiEndpoint: string;
+  maxFields: number;
+  category: string; 
   options: {key: string, value: number}[];
   ajaxConfig?: AjaxConfig
 
@@ -42,6 +44,8 @@ export class QuestionBase<T>{
       fetchOptions?: boolean;
       apiEndpoint?: string;
       options?: {key: string; value: number}[];
+      maxFields?: number;
+      category?: string;
       ajaxConfig?: AjaxConfig;
     } = {}
   ){
@@ -55,6 +59,8 @@ export class QuestionBase<T>{
     this.fetchOptions = options.fetchOptions || false;
     this.apiEndpoint = options.apiEndpoint || '';
     this.options = options.options || [];
+    this.maxFields = options.maxFields || 1;
+    this.category = options.category || '';
     this.ajaxConfig = options.ajaxConfig
   }
 }

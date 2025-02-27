@@ -1,24 +1,33 @@
-
 <div class="bg-gray-50 mt-5 rounded-md drop-shadow-sm shadow-sm">
-
   <div class="flex flex-row relative mb-4 justify-center text-center">
     <h1 class="text-2xl font-bold mt-2">{{formTitle()}}</h1>
     <div class="w-20 object-contain absolute right-2 top-2">
       <img src="branding/SIXT_Logo_Pos.svg" alt="Sixt-Logo" class="">
     </div>
-
-
   </div>
   <div class="w-full h-[1px] bg-black"></div>
   <div class="flex">
-    <form (ngSubmit)="onSubmit()" [formGroup]="form">
-      @for (question of questions; track question){
-        <div>
-          <app-form-question [question]="question" [form]="form"></app-form-question>
+    <form (ngSubmit)="onSubmit()" [formGroup]="form" class="w-full">
+      <div class="flex flex-row justify-between ml-8 mr-8 mt-8 mb-8 relative">
+        @for (category of formCategories(); track category) {
+          <div class="flex flex-col items-center">
+            <button type="button" class="w-6 h-6 rounded-full bg-black hover:bg-orange-500 relative z-10"></button>
+            <span class="text-sm">{{category}}</span>
+          </div>
+        }
+      </div>
+      @for (category of formCategories(); track category) {
+        <div class="category-section mb-8">
+          <h2 class="text-xl font-semibold mb-4">{{category}}</h2>
+
+          @for (question of getQuestionsByCategory(category); track question) {
+            <div>
+              <app-form-question [question]="question" [form]="form"></app-form-question>
+            </div>
+          }
+          
         </div>
       }
-
     </form>
   </div>
 </div>
-

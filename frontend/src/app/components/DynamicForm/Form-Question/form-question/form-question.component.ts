@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuestionBase } from '../../question-base';
@@ -19,6 +19,7 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
   loading = false;
   error: string | null = null;
   private destroy$ = new Subject<void>();
+  
 
   constructor(private apiService: ApiService) {}
 

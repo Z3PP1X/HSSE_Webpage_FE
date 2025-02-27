@@ -19,6 +19,7 @@ export class SafetyModuleComponent implements OnInit {
   configurationItem = SafetyModuleConfig;
   iconPath = "ehs-icons/safety-white.svg";
   formTitle = "Digitaler Alarmplan";
+  formCategories = AlarmplanConfig.categories;
 
   questions: QuestionBase<string>[] = [];
 
