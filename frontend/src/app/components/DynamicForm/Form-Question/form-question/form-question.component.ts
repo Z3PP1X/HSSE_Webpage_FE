@@ -35,9 +35,9 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
       if (control) {
         control.valueChanges
           .pipe(
-            debounceTime(500), // Debounce to avoid too many API calls
-            distinctUntilChanged(), // Only emit if the value changes
-            takeUntil(this.destroy$) // Clean up on destroy
+            debounceTime(500), 
+            distinctUntilChanged(), 
+            takeUntil(this.destroy$) 
           )
           .subscribe((value) => {
             if (value) {
