@@ -1,24 +1,43 @@
-<div class="m-4 flex-auto"[formGroup]="form">
-
+<!-- form-question.component.html -->
+<div class="m-4 flex-auto" [formGroup]="form">
   @switch (question.controlType) {
     @case ('textbox') {
-        <input class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" [formControlName]="question.key" [id]="question.key" placeholder="{{question.label}}">
-
+      <input 
+        class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key" 
+        [id]="question.key" 
+        [type]="question.type"
+        [placeholder]="question.label">
     }
     @case ('dropdown') {
-
-    }
-    @case ('location') {
-
+      <div class="relative">
+        @if (loading) {
+          <div class="loading-indicator">Loading options...</div>
+        }
+        @if (error) {
+          <div class="error-message">{{ error }}</div>
+        }
+        <select 
+          class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500"
+          [formControlName]="question.key">
+          <option value="" disabled selected>Select {{ question.label }}</option>
+          @for (opt of question.options; track opt.key) {
+            <option [value]="opt.key">{{ opt.value }}</option>
+          }
+        </select>
+      </div>
     }
     @case ('datetime') {
-
-      <input class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" [formControlName]="question.key" [id]="question.key" placeholder="{{question.label}}" type="{{question.type}}">
-
+      <input 
+        class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" 
+        [formControlName]="question.key" 
+        [id]="question.key" 
+        [type]="question.type"
+        [placeholder]="question.label">
     }
   }
 
-@if (!isValid) {
-  <div class="errorMessage">{{question.label}} is required</div>
-}
+  @if (!isValid) {
+    <div class="errorMessage">{{ question.label }} is required</div>
+  }
 </div>
