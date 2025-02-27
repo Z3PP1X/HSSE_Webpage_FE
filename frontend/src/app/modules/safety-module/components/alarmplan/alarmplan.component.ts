@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal, input } from '@angular/core';
+
+import { AlarmplanFields } from './alarmplan.model.interface';
 
 
 @Component({
@@ -19,6 +21,8 @@ export class AlarmplanComponent {
   escapeRouteIcon = "ehs-icons/escapeRouteIcon.svg"
   fireExtinguisherIcon = "ehs-icons/fireExtinguisherIcon.svg"
   assemblyPointIcon = "ehs-icons/assemblyPointIcon.svg"
+
+  config = input.required<AlarmplanFields>()
 
 
 }

@@ -48,16 +48,14 @@
         <div>
         </div>
         <div class="ml-8 text-gray-600 grid grid-cols-2">
-          <p>Name Vorname Test</p>
-          <p class="text-right mr-2 ">+00498141888415</p>
-          <p>Name Vorname Test</p>
-          <p class="text-right mr-2 ">+00498141888415</p>
-          <p>Name Vorname Test</p>
-          <p class="text-right mr-2 ">+00498141888415</p>
-          <p>Name Vorname Test</p>
-          <p class="text-right mr-2 ">+00498141888415</p>
-          <p>Name Vorname Test</p>
-          <p class="text-right mr-2 ">+00498141888415</p>
+          
+            @for (person of config().firstAiderDict; track person.id) {
+
+              <p>{{person.name}}</p>
+            <p class="text-right mr-2 ">{{person.phoneNumber}}</p>
+  
+            }
+          
         </div>
         <ul class="ml-8 mt-4 list-disc">
           <li>Beseitigung der Unfallgefahr</li>
@@ -139,7 +137,7 @@
                   <div class="w-12 h-12"><img [src]="assemblyPointIcon"></div>
                   <div>
                     <p>Ausgang durch</p>
-                    <p>---Variable---</p>
+                    <p>{{config().assemblyPoint}}</p>
                   </div>
                 </div>
 
@@ -164,7 +162,7 @@
         <div class="font-bold text-orange-600 mr-2 text-right">
           <p>110</p>
           <p>112</p>
-          <p>---Variable---</p>
+          <p>{{config().poisonEmergencyCall}}</p>
         </div>
       </div>
       <div class="mt-4 ml-2">
@@ -176,53 +174,78 @@
             <div><p>Adresse:</p></div>
           </div>
           <div class="mr-2 text-right">
-            <div class="text-rigt mr-2"><p>-------------Variable------------</p></div>
-            <div class="text-rigt mr-2"><p>---Variable---</p></div>
-            <div class="text-rigt mr-2"><p>---Variable---</p></div>
+            <div class="text-rigt mr-2"><p>{{config().nextHospital?.name}}</p></div>
+            <div class="text-rigt mr-2"><p>{{config().nextHospital?.adress}}</p></div>
+            <div class="text-rigt mr-2"><p>{{config().nextHospital?.zipcode}}</p></div>
           </div>
         </div>
         <div class="ml-2 mt-4">
           <h1 class="font-bold text-black">Branch Manager</h1>
           <div class="grid grid-cols-2">
-            <div><p>Vorname Nachname</p></div>
-            <div class="mr-2 text-right"><p>---Variable---</p></div>
+            @for (element of config().addedContact; track element.id) {
+              @if (element.contactClass === "BranchManager") {
+                <div><p>{{element.name}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
+              }
+            }
+            
           </div>
         </div>
         <div class="ml-2 mt-4">
           <h1 class="font-bold text-black">Geschäftsleitung</h1>
           <div class="grid grid-cols-2">
-            <div><p>Vorname Nachname</p></div>
-            <div class="mr-2 text-right"><p>---Variable---</p></div>
+            @for (element of config().addedContact; track element.id) {
+              @if (element.contactClass === "BranchManager") {
+                <div><p>{{element.name}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
+              }
+            }
           </div>
         </div>
         <div class="ml-2 mt-4">
           <h1 class="font-bold text-black">Beauftragte für Umweltschutz</h1>
           <div class="grid grid-cols-2">
-            <div><p>Vorname Nachname</p></div>
-            <div class="mr-2 text-right"><p>---Variable---</p></div>
+            @for (element of config().addedContact; track element.id) {
+              @if (element.contactClass === "Management") {
+                <div><p>{{element.name}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
+              }
+            }
           </div>
         </div>
         <div class="ml-2 mt-4">
           <h1 class="font-bold text-black">Safety</h1>
           <div class="grid grid-cols-2">
-            <div><p>Antje Raichle (SiFa)</p></div>
-            <div class="mr-2 text-right"><p>---Variable---</p></div>
+            @for (element of config().addedContact; track element.id) {
+              @if (element.contactClass === "SafetyAdvisor") {
+                <div><p>{{element.name}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
+              }
+            }
           </div>
         </div>
 
         <div class="ml-2 mt-4">
           <h1 class="font-bold text-black">QM DE Operation</h1>
           <div class="grid grid-cols-2">
-            <div><p>Michale Müller (QM/SiBe)</p></div>
-            <div class="mr-2 text-right"><p>---Variable---</p></div>
+            @for (element of config().addedContact; track element.id) {
+              @if (element.contactClass === "QualityManagement") {
+                <div><p>{{element.name}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
+              }
+            }
           </div>
         </div>
 
         <div class="ml-2 mt-4">
           <h1 class="font-bold text-black">Betriebsarzt</h1>
           <div class="grid grid-cols-2">
-            <div><p>CompanyCheck Hotline</p></div>
-            <div class="mr-2 text-right"><p>---Variable---</p></div>
+            @for (element of config().addedContact; track element.id) {
+              @if (element.contactClass === "CompanyDoctor") {
+                <div><p>{{element.name}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
+              }
+            }
           </div>
         </div>
       </div>
