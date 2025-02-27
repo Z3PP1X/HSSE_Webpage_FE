@@ -9,7 +9,7 @@
 
     @for (module of configurationItem(); track module) {
       <div class="mt-3 mb-3 text-white flex flex-col items-center w-full">
-        <app-expandable-accordion-card [catalogItemTitle]="module.title" class="w-11/12" [id]="module.title"></app-expandable-accordion-card>
+        <app-expandable-accordion-card [catalogItemTitle]="module.title || ''" class="w-11/12" [id]="module.title || ''"></app-expandable-accordion-card>
       </div>
 
     }

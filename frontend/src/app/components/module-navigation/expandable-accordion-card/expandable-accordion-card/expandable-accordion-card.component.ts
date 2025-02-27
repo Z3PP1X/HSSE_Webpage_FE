@@ -3,6 +3,7 @@ import { Component, input, HostBinding, signal, OnInit } from '@angular/core';
 import { trigger, state, style, animate, transition, } from '@angular/animations';
 import { ExpandedCardService } from '../services/expanded-card.service';
 
+
 @Component({
   selector: 'app-expandable-accordion-card',
   standalone: true,
@@ -39,6 +40,7 @@ export class ExpandableAccordionCardComponent implements OnInit{
   catalogItemTitle = input.required<string>();
   id = input.required<string>();
   state: 'open' | 'closed' = 'closed';
+  
 
   constructor(private expandedCard: ExpandedCardService){
   }

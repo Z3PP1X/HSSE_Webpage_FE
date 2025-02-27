@@ -21,11 +21,16 @@ export class QuestionService {
       const baseConfig = {
         key: element.key,
         label: element.label,
-        type: element.type, 
+        type: element.type,
+        required: element.required,
         order: element.order,
         fetchOptions: element.fetchOptions,
-        apiEndpoint: element.apiEndpoint
-      }
+        apiEndpoint: element.apiEndpoint,
+        ajaxConfig: element.ajaxConfig,   
+        value: element.value,             
+        controlType: element.controlType, 
+        options: element.options          
+      };
 
       switch (element.controlType) {
         case "textbox":

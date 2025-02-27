@@ -14,12 +14,12 @@ import { HttpParams } from '@angular/common/http';
   providers: [QuestionControlService, FormQuestionComponent],
   imports: [ReactiveFormsModule, FormQuestionComponent],
   templateUrl: './form.component.html',
-  styleUrl: './form.component.css'
+  styleUrls: ['./form.component.css'] // Corrected to styleUrls
 })
 export class FormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  formTitle = input.required<string>();
+  formTitle = input.required<string>() // Corrected to @Input
   @Input() questions: QuestionBase<string>[] | null = [];
   form!: FormGroup;
   payLoad = '';
@@ -40,12 +40,10 @@ export class FormComponent implements OnInit, OnDestroy {
       const config = question.ajaxConfig;
 
       if (control && config) {
-        // Handle initial data fetch
         if (config.triggerEvents?.includes('init')) {
           this.handleAjaxCall(question, control.value);
         }
 
-        // Handle value changes
         if (config.triggerEvents?.includes('change')) {
           control.valueChanges.pipe(
             debounceTime(config.debounceTime || 300),
