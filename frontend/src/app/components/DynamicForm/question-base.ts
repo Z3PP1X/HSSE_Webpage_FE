@@ -6,6 +6,7 @@ export interface AjaxConfig {
   triggerEvents?: ('init' | 'change' | 'blur')[];
   paramMap?: Record<string, string>;
   debounceTime?: number;
+  targetKey?: string; // Add this
   onSuccess?: (context: {
     response: any;
     form: FormGroup;
@@ -14,6 +15,7 @@ export interface AjaxConfig {
   }) => void;
   onError?: (error: any) => void;
 }
+
 
 export class QuestionBase<T>{
   value: T | undefined;

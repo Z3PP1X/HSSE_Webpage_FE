@@ -1,5 +1,12 @@
 <!-- form-question.component.html -->
 <div class="m-4 flex-auto" [formGroup]="form">
+  @if (loading) {
+    <div class="loading-indicator">Loading {{ question.label }}...</div>
+  }
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+
   @switch (question.controlType) {
     @case ('textbox') {
       <input 
@@ -10,22 +17,14 @@
         [placeholder]="question.label">
     }
     @case ('dropdown') {
-      <div class="relative">
-        @if (loading) {
-          <div class="loading-indicator">Loading options...</div>
+      <select 
+        class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500"
+        [formControlName]="question.key">
+        <option value="" disabled selected>Select {{ question.label }}</option>
+        @for (opt of question.options; track opt.key) {
+          <option [value]="opt.key">{{ opt.value }}</option>
         }
-        @if (error) {
-          <div class="error-message">{{ error }}</div>
-        }
-        <select 
-          class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500"
-          [formControlName]="question.key">
-          <option value="" disabled selected>Select {{ question.label }}</option>
-          @for (opt of question.options; track opt.key) {
-            <option [value]="opt.key">{{ opt.value }}</option>
-          }
-        </select>
-      </div>
+      </select>
     }
     @case ('datetime') {
       <input 
