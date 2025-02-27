@@ -19,6 +19,7 @@ export interface AjaxConfig {
 
 export class QuestionBase<T>{
   value: T | undefined;
+  title: string;
   key: string;
   label: string;
   required: boolean;
@@ -35,6 +36,7 @@ export class QuestionBase<T>{
   constructor(
     options: {
       value?: T;
+      title?: string;
       key?: string;
       label?: string;
       required?: boolean;
@@ -50,6 +52,7 @@ export class QuestionBase<T>{
     } = {}
   ){
     this.value = options.value;
+    this.title = options.title || '';
     this.key = options.key || '';
     this.label = options.label || '';
     this.required = !!options.required;

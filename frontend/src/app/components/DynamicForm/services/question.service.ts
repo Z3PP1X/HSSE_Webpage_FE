@@ -18,6 +18,7 @@ export class QuestionService {
 
     for (const element of data) {
       const baseConfig = {
+        title: element.title,
         key: element.key,
         label: element.label,
         type: element.type,

@@ -3,7 +3,7 @@ import { QuestionBase } from "../../../components/DynamicForm/question-base";
 
 
 export const AlarmplanConfig = {
-  categories:["Test", "Test2", "Test3", "Test4"],
+  categories:["Allgemeine Informationen", "Ersthelfer", "Kontaktdaten",],
   questions: [
     {
       key: 'kostenstelle',
@@ -16,9 +16,9 @@ export const AlarmplanConfig = {
       apiEndpoint: '',
       options: [],
       value: '',
-      category: "Test",
+      category: "Allgemeine Informationen",
       ajaxConfig: {
-        endpoint: '/api/kostenstelle',
+        endpoint: 'localhost:8000',
         method: 'GET',
         triggerEvents: ['init', 'change'],
         paramMap: { query: 'kostenstelle' },
@@ -41,7 +41,9 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
+      
       value: '',
+      category: "Ersthelfer",
       maxContacts: 5,
     },
     
@@ -55,6 +57,7 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
+      category: "Allgemeine Informationen",
       value: ''
     },
     {
@@ -67,11 +70,13 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
+      category: "Allgemeine Informationen",
       value: ''
     },
     {
-      key: 'krankenhausAdresse',
-      label: 'Adresse des nächsten Krankenhauses',
+      title: 'Adresse des nächsten Krankenhauses',
+      key: 'Name des Krankenhauses',
+      label: 'Name des Krankenhauses',
       required: true,
       order: 5,
       controlType: 'adressdata',
@@ -79,6 +84,59 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
+      category: "Allgemeine Informationen",
+      value: ''
+    },
+    {
+      key: 'ZIP Code',
+      label: 'ZIP Code',
+      required: true,
+      order: 5,
+      controlType: 'adressdata',
+      type: 'text',
+      fetchOptions: false,
+      apiEndpoint: '',
+      options: [],
+      category: "Allgemeine Informationen",
+      value: ''
+    },
+    {
+      key: 'City',
+      label: 'City',
+      required: true,
+      order: 5,
+      controlType: 'adressdata',
+      type: 'text',
+      fetchOptions: false,
+      apiEndpoint: '',
+      options: [],
+      category: "Allgemeine Informationen",
+      value: ''
+    },
+    {
+      key: 'Street',
+      label: 'Street',
+      required: true,
+      order: 5,
+      controlType: 'adressdata',
+      type: 'text',
+      fetchOptions: false,
+      apiEndpoint: '',
+      options: [],
+      category: "Allgemeine Informationen",
+      value: ''
+    },
+    {
+      key: 'House Number',
+      label: 'House Number',
+      required: true,
+      order: 5,
+      controlType: 'adressdata',
+      type: 'text',
+      fetchOptions: false,
+      apiEndpoint: '',
+      options: [],
+      category: "Allgemeine Informationen",
       value: ''
     },
     {
@@ -90,6 +148,7 @@ export const AlarmplanConfig = {
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
+      category: "Kontaktdaten",
       options: [],
       value: ''
     },
@@ -102,6 +161,7 @@ export const AlarmplanConfig = {
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
+      category: "Kontaktdaten",
       options: [],
       value: ''
     },
@@ -115,6 +175,7 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
+      category: "Kontaktdaten",
       value: ''
     },
     {
@@ -126,6 +187,7 @@ export const AlarmplanConfig = {
       type: 'text',
       fetchOptions: false,
       apiEndpoint: '',
+      category: "Kontaktdaten",
       options: [],
       value: ''
     }

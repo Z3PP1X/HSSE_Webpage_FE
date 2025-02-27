@@ -17,8 +17,8 @@
         }
       </div>
       @for (category of formCategories(); track category) {
-        <div class="category-section mb-8">
-          <h2 class="text-xl font-semibold mb-4">{{category}}</h2>
+        <div class="category-section mb-8 border border-black m-2" [id]="category">
+          <h2 class="text-xl font-semibold mb-4 ml-4">{{category}}</h2>
 
           @for (question of getQuestionsByCategory(category); track question) {
             <div>
