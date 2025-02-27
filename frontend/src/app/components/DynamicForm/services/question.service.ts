@@ -17,44 +17,39 @@ export class QuestionService {
   getQuestions(data: any) {
     const questions: QuestionBase<string>[] = []
 
-    for (let index = 0; index < data.length; index++) {
-
-      const element = data[index];
+    for (const element of data) {
+      const baseConfig = {
+        key: element.key,
+        label: element.label,
+        type: element.type, 
+        order: element.order,
+        fetchOptions: element.fetchOptions,
+        apiEndpoint: element.apiEndpoint
+      }
 
       switch (element.controlType) {
         case "textbox":
            const textboxquestion = new TextboxQuestion({
-            key: element.key,
-            label: element.label,
-            type: element.type,
-            order: element.order
+            ...baseConfig,  
           })
           questions.push(textboxquestion);
           break;
         case "location":
           const locationquestion = new LocationQuestion({
-            key: element.key,
-            label: element.label,
-            type: element.type,
-            order: element.order
+            ...baseConfig,
           })
           questions.push(locationquestion)
           break;
         case "datetime":
           const datetimequestion = new DateTimeQuestion({
-            key: element.key,
-            label: element.label,
-            type: element.type,
-            order: element.order
+            ...baseConfig,
           })
           questions.push(datetimequestion)
           break;
         case "dropdown":
           const dropdownquestion = new DropdownQuestion({
-            key: element.key,
-            label: element.label,
-            type: element.type,
-            options: element.options
+            ...baseConfig,
+            options: element.options || []
           })
           questions.push(dropdownquestion)
           break;

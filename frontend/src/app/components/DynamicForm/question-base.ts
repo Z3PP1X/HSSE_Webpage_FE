@@ -6,6 +6,8 @@ export class QuestionBase<T>{
   order: number;
   controlType: string;
   type: string;
+  fetchOptions: boolean;
+  apiEndpoint: string;
   options: {key: string, value: number}[];
 
   constructor(
@@ -17,6 +19,8 @@ export class QuestionBase<T>{
       order?: number;
       controlType?: string;
       type?: string;
+      fetchOptions?: boolean;
+      apiEndpoint?: string;
       options?: {key: string; value: number}[];
     } = {}
   ){
@@ -27,6 +31,8 @@ export class QuestionBase<T>{
     this.order = options.order === undefined ? 1 : options.order;
     this.controlType = options.controlType || '';
     this.type = options.type || '';
+    this.fetchOptions = options.fetchOptions || false;
+    this.apiEndpoint = options.apiEndpoint || '';
     this.options = options.options || [];
   }
 }
