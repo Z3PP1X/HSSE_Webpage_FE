@@ -3,7 +3,7 @@ import { QuestionBase } from "../../../components/DynamicForm/question-base";
 
 
 export const AlarmplanConfig = {
-  categories:["Allgemeine Informationen", "Ersthelfer", "Kontaktdaten",],
+  categories:["Allgemeine Informationen", "Nächstes Krankenhaus","Ersthelfer", "Kontaktdaten",],
   questions: [
     {
       key: 'kostenstelle',
@@ -84,7 +84,7 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
-      category: "Allgemeine Informationen",
+      category: "Nächstes Krankenhaus",
       value: ''
     },
     {
@@ -97,7 +97,7 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
-      category: "Allgemeine Informationen",
+      category: "Nächstes Krankenhaus",
       value: ''
     },
     {
@@ -110,7 +110,7 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
-      category: "Allgemeine Informationen",
+      category: "Nächstes Krankenhaus",
       value: ''
     },
     {
@@ -123,7 +123,7 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
-      category: "Allgemeine Informationen",
+      category: "Nächstes Krankenhaus",
       value: ''
     },
     {
@@ -136,7 +136,7 @@ export const AlarmplanConfig = {
       fetchOptions: false,
       apiEndpoint: '',
       options: [],
-      category: "Allgemeine Informationen",
+      category: "Nächstes Krankenhaus",
       value: ''
     },
     {
