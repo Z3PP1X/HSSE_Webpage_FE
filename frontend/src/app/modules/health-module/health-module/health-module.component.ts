@@ -27,6 +27,8 @@ export class HealthModuleComponent implements OnInit{
   iconPath = "ehs-icons/health-white.svg";
 
   formTitle = "Unfallbericht"
+  formCategories: string[] = ["General", "Medical Information", "Emergency Contacts"];
+  
 
   questions$: Observable<QuestionBase<any>[]> = of([]);
 
