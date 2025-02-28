@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { QuestionBase } from '../../question-base';
@@ -23,6 +23,7 @@ export class FormComponent implements OnInit, OnDestroy {
   formTitle = input.required<string>();
   formCategories = input.required<string[]>();
   @Input() questions: QuestionBase<string>[] | null = [];
+  @Output() formSubmitted = new EventEmitter<any>();
   form!: FormGroup;
   payLoad = '';
   selectedCategory: string = '';
@@ -69,8 +70,10 @@ export class FormComponent implements OnInit, OnDestroy {
   }
   
   onSubmit() {
-    this.payLoad = JSON.stringify(this.form.getRawValue());
+    const formData = this.form.getRawValue();
+    this.payLoad = JSON.stringify(formData);
     console.log('Form submitted:', this.payLoad);
+    this.formSubmitted.emit(formData);
   }
 
   private setupAjaxHandlers() {
