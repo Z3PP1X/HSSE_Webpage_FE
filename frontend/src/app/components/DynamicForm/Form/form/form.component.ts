@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, OnDestroy, input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { QuestionBase } from '../../question-base';
 import { QuestionControlService } from '../../services/question-control.service';
@@ -11,19 +12,20 @@ import { HttpParams } from '@angular/common/http';
 @Component({
   selector: 'app-form',
   standalone: true,
-  providers: [QuestionControlService, FormQuestionComponent],
+  providers: [QuestionControlService, FormQuestionComponent, CommonModule],
   imports: [ReactiveFormsModule, FormQuestionComponent],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-
+  
   formTitle = input.required<string>();
   formCategories = input.required<string[]>();
   @Input() questions: QuestionBase<string>[] | null = [];
   form!: FormGroup;
   payLoad = '';
+  selectedCategory: string = '';
 
   constructor(
     private qcs: QuestionControlService,
@@ -33,6 +35,42 @@ export class FormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.form = this.qcs.toFormGroup(this.questions as QuestionBase<string>[]);
     this.setupAjaxHandlers();
+    
+    // Set the first category as selected by default
+    if (this.formCategories().length > 0) {
+      this.selectedCategory = this.formCategories()[0];
+    }
+  }
+
+  selectCategory(category: string) {
+    this.selectedCategory = category;
+  }
+
+  getQuestionsByCategory(category: string) {
+    return this.questions?.filter(question => question.category === category) || [];
+  }
+
+  isCategorySelected(category: string): boolean {
+    return this.selectedCategory === category;
+  }
+
+  isCategoryComplete(category: string): boolean {
+    const questionsInCategory = this.getQuestionsByCategory(category);
+    
+    if (questionsInCategory.length === 0) {
+      return false;
+    }
+    
+    // Check if all questions in this category have valid form controls
+    return questionsInCategory.every(question => {
+      const control = this.form.get(question.key);
+      return control && control.valid && control.value;
+    });
+  }
+  
+  onSubmit() {
+    this.payLoad = JSON.stringify(this.form.getRawValue());
+    console.log('Form submitted:', this.payLoad);
   }
 
   private setupAjaxHandlers() {
@@ -95,22 +133,8 @@ export class FormComponent implements OnInit, OnDestroy {
     return params;
   }
 
-  onSubmit() {
-    this.payLoad = JSON.stringify(this.form.getRawValue());
-  }
-
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  trackByFn(index: number, item: any): any {
-    return item.key || index;
-  }
-
-  getQuestionsByCategory(category: string) {
-    console.log('category:', category);
-    return this.questions?.filter(question => question.category === category) || [];
-
   }
 }
