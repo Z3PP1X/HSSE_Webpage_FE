@@ -4,6 +4,7 @@
     <div class="col-span-3 flex justify-center">
       <app-form [formTitle]="formTitle" [questions]="questions" [formCategories]="formCategories" (formSubmitted)="handleFormSubmit($event)" class="w-1/2"></app-form>
     </div>
+    <app-pdf *ngIf="showPdfComponent"></app-pdf>
   </div>
 
 
