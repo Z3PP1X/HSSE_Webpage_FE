@@ -18,8 +18,8 @@ import { PdfComponent } from '../components/pdf-gen/pdf/pdf.component';
   selector: 'app-safety-module',
   standalone: true,
   imports: [
-    AlarmplanComponent, 
-    ModuleNavigationComponent, 
+    AlarmplanComponent,
+    ModuleNavigationComponent,
     FormComponent,
     CommonModule,
     PdfComponent  // Import the PDF component
@@ -34,11 +34,11 @@ export class SafetyModuleComponent implements OnInit {
   iconPath = "ehs-icons/safety-white.svg";
   formTitle = "Digitaler Alarmplan";
   formCategories = AlarmplanConfig.categories;
-  
+
   questions: QuestionBase<string>[] = [];
   alarmplanData: AlarmplanFields = {} as AlarmplanFields;
   showPdfComponent = false;
-  
+
   constructor(
     private questionService: QuestionService,
     private alarmplanDataService: AlarmplanDataService,
@@ -49,35 +49,30 @@ export class SafetyModuleComponent implements OnInit {
     this.questionService.getQuestions(AlarmplanConfig.questions).subscribe(questions => {
       this.questions = questions;
     });
-    
-    
+
+
     this.alarmplanDataService.formData$.subscribe(data => {
       this.alarmplanData = data;
     });
   }
-  
-  handleFormSubmit(formData: any) {
-    // Update the data service with form data
-    this.alarmplanDataService.updateFormData(formData);
-    
-    // Make PDF component visible
-    this.showPdfComponent = true;
-    
-    // Give the component time to render
-    setTimeout(() => {
-        if (this.pdfComponent) {
-            // Prepare component for PDF generation
-            this.pdfComponent.prepareForPdfGeneration();
-            
-            // Generate the PDF
-            this.pdfService.generatePDF('pdf-container', 'alarmplan.pdf');
-            
-            // Clean up after PDF generation
-            setTimeout(() => {
-                this.pdfComponent.cleanupAfterPdfGeneration();
-                this.showPdfComponent = false;
-            }, 500);
-        }
-    }, 1000);
+
+  // Optional improvement for safety-module.component.ts
+handleFormSubmit(formData: any) {
+  this.alarmplanDataService.updateFormData(formData);
+  this.showPdfComponent = true;
+
+  // Give the component time to render
+  setTimeout(async () => {
+      if (this.pdfComponent) {
+          this.pdfComponent.prepareForPdfGeneration();
+
+          // Await PDF generation completion
+          await this.pdfService.generatePDF('pdf-container', 'alarmplan.pdf');
+
+          // Clean up immediately after completion
+          this.pdfComponent.cleanupAfterPdfGeneration();
+          this.showPdfComponent = false;
+      }
+  }, 300);
 }
 }

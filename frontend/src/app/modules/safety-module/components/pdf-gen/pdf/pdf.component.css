@@ -1,4 +1,9 @@
 /* pdf.component.css */
+* {
+  font-family: inherit !important;
+}
+
+
 .pdf-container {
   width: 297mm;  /* A4 landscape width */
   height: 210mm;  /* A4 landscape height */
@@ -9,14 +14,14 @@
   position: relative;
 }
 
-/* Make sure the component doesn't disappear entirely */
+
 :host {
   display: block;
-  /* Instead of fixed positioning with negative values, use visibility */
+
   visibility: hidden;
 }
 
-/* When pdf is being generated, make it visible */
+
 :host.generating-pdf {
   visibility: visible;
   position: fixed;

@@ -16,28 +16,32 @@ import { Subscription } from 'rxjs';
 export class PdfComponent implements OnInit, OnDestroy {
   alarmplanData: AlarmplanFields = {} as AlarmplanFields;
   private subscription: Subscription = new Subscription();
-  
+
   constructor(
     private alarmplanDataService: AlarmplanDataService,
     private elementRef: ElementRef
   ) {}
-  
+
   ngOnInit() {
     this.subscription = this.alarmplanDataService.formData$.subscribe(data => {
       this.alarmplanData = data;
     });
   }
-  
-  // Method to call before generating PDF
+
+
   prepareForPdfGeneration() {
     this.elementRef.nativeElement.classList.add('generating-pdf');
+    document.fonts.ready.then(() => {
+      console.log("Fonts loaded");
+  });
+
   }
-  
-  // Method to call after generating PDF
+
+
   cleanupAfterPdfGeneration() {
     this.elementRef.nativeElement.classList.remove('generating-pdf');
   }
-  
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }

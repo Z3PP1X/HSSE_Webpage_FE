@@ -23,17 +23,17 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
   assemblyPointIcon = "ehs-icons/assemblyPointIcon.svg";
 
   config = signal<AlarmplanFields>({} as AlarmplanFields);
-  
+
   private subscription: Subscription = new Subscription();
-  
+
   constructor(private alarmplanDataService: AlarmplanDataService) {}
-  
+
   ngOnInit() {
     this.subscription = this.alarmplanDataService.formData$.subscribe(data => {
       this.config.set(data);
     });
   }
-  
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
