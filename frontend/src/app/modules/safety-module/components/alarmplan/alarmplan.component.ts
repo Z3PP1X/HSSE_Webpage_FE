@@ -1,8 +1,10 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { AlarmplanFields } from './alarmplan.model.interface';
 import { AlarmplanDataService } from '../../services/alarmplan-data.service';
+
+
 
 @Component({
   selector: 'app-alarmplan',
@@ -21,20 +23,31 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
   escapeRouteIcon = "ehs-icons/escapeRouteIcon.svg";
   fireExtinguisherIcon = "ehs-icons/fireExtinguisherIcon.svg";
   assemblyPointIcon = "ehs-icons/assemblyPointIcon.svg";
+  titleFirstAid = "ehs-icons/firstaidcross.svg"
+  titleFireAlarm = "ehs-icons/fireExtinguisherIcon.svg"
+  titleImportantNumbers = "ehs-icons/phone.svg"
+  timestamp = ""
 
   config = signal<AlarmplanFields>({} as AlarmplanFields);
 
   private subscription: Subscription = new Subscription();
 
-  constructor(private alarmplanDataService: AlarmplanDataService) {}
+
+  constructor(private alarmplanDataService: AlarmplanDataService,) {}
 
   ngOnInit() {
     this.subscription = this.alarmplanDataService.formData$.subscribe(data => {
       this.config.set(data);
+      this.timestamp = this.currentTime();
     });
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  currentTime() {
+    const dateTime = new Date().toLocaleDateString();
+    return dateTime;
   }
 }

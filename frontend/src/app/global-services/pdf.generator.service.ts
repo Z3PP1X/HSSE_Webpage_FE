@@ -59,12 +59,13 @@ export class PdfService {
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'px',
-                format: [canvas.width, canvas.height]
+                format: [canvas.width, canvas.height],
+                compress: true
             });
 
             // Add the canvas to the PDF
             const imgData = canvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+            pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), undefined, 'FAST');
             pdf.save(fileName);
         } catch (error) {
             console.error('PDF Generation Error:', error);
@@ -173,57 +174,68 @@ export class PdfService {
     }
 
     private async svgToImage(svg: SVGElement, width: number, height: number): Promise<HTMLImageElement> {
-        // Get SVG as XML string
-        const svgData = new XMLSerializer().serializeToString(svg);
+      // Get SVG as XML string
+      const svgData = new XMLSerializer().serializeToString(svg);
 
-        // Create canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
+      // Scale factor for higher resolution
+      const scaleFactor = 4; // Increase this for higher quality
 
-        if (!ctx) {
-            throw new Error('Could not get canvas context');
-        }
+      // Create canvas with increased dimensions for better quality
+      const canvas = document.createElement('canvas');
+      canvas.width = width * scaleFactor;
+      canvas.height = height * scaleFactor;
+      const ctx = canvas.getContext('2d');
 
-        // Create image with SVG data
-        const img = new Image();
+      if (!ctx) {
+          throw new Error('Could not get canvas context');
+      }
 
-        // Convert SVG to data URL
-        const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-        const url = URL.createObjectURL(svgBlob);
+      // Enable crisp edges for better rendering quality
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
-        // Wait for image to load
-        await new Promise<void>((resolve, reject) => {
-            img.onload = () => {
-                // Draw to canvas
-                ctx.drawImage(img, 0, 0, width, height);
-                URL.revokeObjectURL(url);
-                resolve();
-            };
+      // Create image with SVG data
+      const img = new Image();
 
-            img.onerror = (e) => {
-                console.error('Error loading SVG in image:', e);
-                URL.revokeObjectURL(url);
-                reject(new Error('Failed to load SVG in image'));
-            };
+      // Prepare SVG with proper dimensions
+      const svgWithDimensions = svgData.replace(/<svg/,
+          `<svg width="${width * scaleFactor}" height="${height * scaleFactor}"`);
 
-            img.src = url;
-        });
+      // Convert modified SVG to data URL
+      const svgBlob = new Blob([svgWithDimensions], {type: 'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(svgBlob);
 
-        // Create result image from canvas
-        const resultImg = new Image();
-        resultImg.src = canvas.toDataURL('image/png');
-        resultImg.width = width;
-        resultImg.height = height;
-        resultImg.style.width = `${width}px`;
-        resultImg.style.height = `${height}px`;
+      // Wait for image to load
+      await new Promise<void>((resolve, reject) => {
+          img.onload = () => {
+              // Draw to canvas at the scaled size
+              ctx.drawImage(img, 0, 0, width * scaleFactor, height * scaleFactor);
+              URL.revokeObjectURL(url);
+              resolve();
+          };
 
-        // Copy classes from original SVG
-        if (svg.className && svg.className.baseVal) {
-            resultImg.className = svg.className.baseVal;
-        }
+          img.onerror = (e) => {
+              console.error('Error loading SVG in image:', e);
+              URL.revokeObjectURL(url);
+              reject(new Error('Failed to load SVG in image'));
+          };
 
-        return resultImg;
-    }
+          img.src = url;
+      });
+
+      // Create result image from canvas
+      const resultImg = new Image();
+      resultImg.src = canvas.toDataURL('image/png');
+      resultImg.width = width;
+      resultImg.height = height;
+      resultImg.style.width = `${width}px`;
+      resultImg.style.height = `${height}px`;
+
+      // Copy classes from original SVG
+      if (svg.className && svg.className.baseVal) {
+          resultImg.className = svg.className.baseVal;
+      }
+
+      return resultImg;
+  }
 }

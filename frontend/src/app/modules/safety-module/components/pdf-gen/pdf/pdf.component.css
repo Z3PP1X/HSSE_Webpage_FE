@@ -9,7 +9,7 @@
   height: 210mm;  /* A4 landscape height */
   background-color: white;
   margin: 0;
-  padding: 0;
+  padding: 8mm;
   overflow: visible;
   position: relative;
 }
