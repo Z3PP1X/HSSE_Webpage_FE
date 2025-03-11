@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { of } from "rxjs";
+import { FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { QuestionBase } from "../question-base";
 import { DropdownQuestion } from "../questions/dropdown";
 import { TextboxQuestion } from "../questions/textbox";
@@ -7,13 +8,19 @@ import { DateTimeQuestion } from "../questions/datetime";
 import { LocationQuestion } from "../questions/location";
 import { ContactDataQuestion } from "../questions/contact-data";
 import { AdressFieldQuestion } from "../questions/adressfield";
+import { FormGroupBase } from "../Form/form/form-group-base";
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuestionService {
 
-  getQuestions(data: any) {
+  formGroups(data: any){
+    const formGroups: FormGroupBase<any>[] = [];
+
+  }
+
+  formQuetions(data: any) {
     const questions: QuestionBase<any>[] = [];
 
     for (const element of data) {
@@ -60,5 +67,10 @@ export class QuestionService {
     }
 
     return of(questions.sort((a, b) => a.order - b.order));
+
+  }
+
+  getQuestions(data: any) {
+    
   }
 }

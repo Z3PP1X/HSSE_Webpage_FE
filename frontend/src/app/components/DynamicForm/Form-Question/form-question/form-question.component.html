@@ -39,7 +39,7 @@
         </div>
       }
       @else {
-        <h3 class="text-lg font-semibold mb-2">{{ question.title}}</h3>
+        <h3 class="text-lg font-semibold mb-2">{{question.title}}</h3>
       <div class="flex space-x-4 mb-2">
         <input 
           class="w-full leading-10 border rounded-lg px-4 focus:outline-none placeholder-gray-500" 
@@ -79,7 +79,7 @@
           }"
           [formControlName]="question.key"
           [id]="question.key" 
-          type="tel"
+          type="text"
           placeholder="Telephone Number"
           required>
       </div>

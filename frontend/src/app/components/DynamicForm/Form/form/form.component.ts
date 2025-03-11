@@ -37,7 +37,6 @@ export class FormComponent implements OnInit, OnDestroy {
     this.form = this.qcs.toFormGroup(this.questions as QuestionBase<string>[]);
     this.setupAjaxHandlers();
     
-    // Set the first category as selected by default
     if (this.formCategories().length > 0) {
       this.selectedCategory = this.formCategories()[0];
     }
@@ -62,7 +61,7 @@ export class FormComponent implements OnInit, OnDestroy {
       return false;
     }
     
-    // Check if all questions in this category have valid form controls
+    
     return questionsInCategory.every(question => {
       const control = this.form.get(question.key);
       return control && control.valid && control.value;
