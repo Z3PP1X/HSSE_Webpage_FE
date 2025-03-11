@@ -6,7 +6,7 @@ import { QuestionBase } from "../question-base";
 
 @Injectable()
 export class QuestionControlService {
-  toFormGroup(questions: QuestionBase<string>[]) {
+  toFormGroup(questions: QuestionBase<string>[], groupName: string) {
     const group: any = {};
 
     questions.forEach((question) => {
@@ -20,6 +20,6 @@ export class QuestionControlService {
     });
     console.log('Form Group:', group);
 
-    return new FormGroup(group);
+    return new FormGroup({ [groupName]: new FormGroup(group) });
   }
 }

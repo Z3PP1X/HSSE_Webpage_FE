@@ -3,17 +3,16 @@ import { QuestionBase } from "../../question-base";
 
 export class FormGroupBase<T>{
     key: string;
-    title: string; 
-    fields: (QuestionBase<T> | FormGroupBase<T>)[];
-    category: string; 
+    title: string;
+    fields: (QuestionBase<T>[] | FormGroupBase<T>[]);
+    isCategory?: boolean;
     isArray?: boolean;
-    formClass: "group";
 
     constructor( options: {
         key?: string;
-        title?: string; 
-        fields?: (QuestionBase<T> | FormGroupBase<T>)[];
-        category?: string;
+        title?: string;
+        fields?: (QuestionBase<T>[]| FormGroupBase<T>[]);
+        isCategory?: boolean;
         isArray?: boolean;
     } = {})
 
@@ -21,8 +20,7 @@ export class FormGroupBase<T>{
         this.key = options.key || "";
         this.title = options.title || "";
         this.fields = options.fields || [];
-        this.category = options.category || "";
+        this.isCategory = options.isCategory || false;
         this.isArray = options.isArray || false;
-        this.formClass = "group";
     }
 };

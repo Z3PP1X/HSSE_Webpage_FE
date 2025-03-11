@@ -28,7 +28,6 @@ export class QuestionBase<T>{
   type: string;
   fetchOptions: boolean;
   apiEndpoint: string;
-  formClass: "question";
   options: {key: string, value: number}[];
   ajaxConfig?: AjaxConfig
 
@@ -59,7 +58,6 @@ export class QuestionBase<T>{
     this.fetchOptions = options.fetchOptions || false;
     this.apiEndpoint = options.apiEndpoint || '';
     this.options = options.options || [];
-    this.formClass = "question";
     this.ajaxConfig = options.ajaxConfig
   }
 }

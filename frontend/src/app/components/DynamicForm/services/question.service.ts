@@ -8,19 +8,17 @@ import { DateTimeQuestion } from "../questions/datetime";
 import { LocationQuestion } from "../questions/location";
 import { ContactDataQuestion } from "../questions/contact-data";
 import { AdressFieldQuestion } from "../questions/adressfield";
-import { FormGroupBase } from "../Form/form/form-group-base";
+
+import { FormCategoryService } from "./form-category.service";
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuestionService {
 
-  formGroups(data: any){
-    const formGroups: FormGroupBase<any>[] = [];
 
-  }
-
-  formQuetions(data: any) {
+  formQuetions(data: any, groupKey?: string, groupTitle?: string) {
     const questions: QuestionBase<any>[] = [];
 
     for (const element of data) {
@@ -71,6 +69,6 @@ export class QuestionService {
   }
 
   getQuestions(data: any) {
-    
+
   }
 }
