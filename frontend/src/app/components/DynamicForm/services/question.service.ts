@@ -18,7 +18,12 @@ import { FormCategoryService } from "./form-category.service";
 export class QuestionService {
 
 
-  formQuetions(data: any, groupKey?: string, groupTitle?: string) {
+  constructor(
+    private fcs: FormCategoryService
+  ){}
+
+
+  formQuetions(data: any) {
     const questions: QuestionBase<any>[] = [];
 
     for (const element of data) {
@@ -69,6 +74,12 @@ export class QuestionService {
   }
 
   getQuestions(data: any) {
+
+    const formGroups = this.fcs.formGroups(data);
+
+    return this.formQuetions(data);
+
+
 
   }
 }

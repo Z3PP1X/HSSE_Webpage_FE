@@ -46,9 +46,8 @@ export class SafetyModuleComponent implements OnInit {
   ){}
 
   ngOnInit() {
-    this.questionService.getQuestions(AlarmplanConfig.questions).subscribe(questions => {
-      this.questions = questions;
-    });
+    this.questionService.getQuestions(AlarmplanConfig.questions)
+    ;
 
 
     this.alarmplanDataService.formData$.subscribe(data => {

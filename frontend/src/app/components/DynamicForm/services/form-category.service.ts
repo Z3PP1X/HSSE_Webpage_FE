@@ -18,11 +18,12 @@ export class FormCategoryService {
 
   formGroups(data: FormGroupBase<any>[] | QuestionBase<any>[], parentCategoryKey?: string){
 
-    let isCategoryActive = false;
+
     let currentCategoryKey = '';
 
     data.forEach((element: FormGroupBase<any> | QuestionBase<any>) => {
 
+      let isCategoryActive = false;
       if (this.isFormGroup(element)){
         if (element.isCategory) {
 
@@ -56,8 +57,8 @@ export class FormCategoryService {
         }
         this.formGroups(element.fields, element.isCategory ? element.key : currentCategoryKey);
       }
-      return this.categoryDict;
     });
+    return this.categoryDict;
   }
 
   addCategory(key: string) {
