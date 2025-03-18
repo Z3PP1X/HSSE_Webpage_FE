@@ -2,7 +2,6 @@ import { Component, Input, OnInit, OnDestroy, input, Output, EventEmitter } from
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { QuestionBase } from '../../question-base';
-import { QuestionControlService } from '../../services/question-control.service';
 import { FormQuestionComponent } from '../../Form-Question/form-question/form-question.component';
 import { ApiService } from '../../../../global-services/ajax-service/ajax.service';
 import { Subject } from 'rxjs';
@@ -12,7 +11,7 @@ import { HttpParams } from '@angular/common/http';
 @Component({
   selector: 'app-form',
   standalone: true,
-  providers: [QuestionControlService, FormQuestionComponent, CommonModule],
+  providers: [FormQuestionComponent, CommonModule],
   imports: [ReactiveFormsModule, FormQuestionComponent],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
@@ -23,19 +22,19 @@ export class FormComponent implements OnInit, OnDestroy {
   formTitle = input.required<string>();
   formCategories = input.required<string[]>();
   @Input() questions: QuestionBase<string>[] | null = [];
+  @Input() form!: FormGroup;
+  @Input() isLoading = false;
   @Output() formSubmitted = new EventEmitter<any>();
-  form!: FormGroup;
+  
   payLoad = '';
   selectedCategory: string = '';
 
-  constructor(
-    private qcs: QuestionControlService,
-    private apiService: ApiService
-  ) {}
+  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.form = this.qcs.toFormGroup(this.questions as QuestionBase<string>[]);
-    this.setupAjaxHandlers();
+    if (this.form) {
+      this.setupAjaxHandlers();
+    }
     
     if (this.formCategories().length > 0) {
       this.selectedCategory = this.formCategories()[0];
@@ -55,12 +54,12 @@ export class FormComponent implements OnInit, OnDestroy {
   }
 
   isCategoryComplete(category: string): boolean {
-    const questionsInCategory = this.getQuestionsByCategory(category);
+    if (!this.form) return false;
     
+    const questionsInCategory = this.getQuestionsByCategory(category);
     if (questionsInCategory.length === 0) {
       return false;
     }
-    
     
     return questionsInCategory.every(question => {
       const control = this.form.get(question.key);
@@ -69,6 +68,11 @@ export class FormComponent implements OnInit, OnDestroy {
   }
   
   onSubmit() {
+    if (!this.form || !this.form.valid) {
+      console.error('Form is invalid or not available');
+      return;
+    }
+    
     const formData = this.form.getRawValue();
     this.payLoad = JSON.stringify(formData);
     console.log('Form submitted:', this.payLoad);
@@ -76,7 +80,9 @@ export class FormComponent implements OnInit, OnDestroy {
   }
 
   private setupAjaxHandlers() {
-    this.questions?.forEach(question => {
+    if (!this.form || !this.questions) return;
+    
+    this.questions.forEach(question => {
       const control = this.form.get(question.key);
       const config = question.ajaxConfig;
 

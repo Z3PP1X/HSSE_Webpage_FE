@@ -29,7 +29,8 @@ export class QuestionBase<T>{
   fetchOptions: boolean;
   apiEndpoint: string;
   options: {key: string, value: number}[];
-  ajaxConfig?: AjaxConfig
+  ajaxConfig?: AjaxConfig;
+  category?: string; // Added missing property
 
   constructor(
     options: {
@@ -45,6 +46,7 @@ export class QuestionBase<T>{
       apiEndpoint?: string;
       options?: {key: string; value: number}[];
       ajaxConfig?: AjaxConfig;
+      category?: string; // Added to constructor options
     } = {}
   ){
     this.value = options.value;
@@ -58,6 +60,7 @@ export class QuestionBase<T>{
     this.fetchOptions = options.fetchOptions || false;
     this.apiEndpoint = options.apiEndpoint || '';
     this.options = options.options || [];
-    this.ajaxConfig = options.ajaxConfig
+    this.ajaxConfig = options.ajaxConfig;
+    this.category = options.category; // Initialize the category property
   }
 }

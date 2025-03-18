@@ -6,7 +6,6 @@ import { ModuleNavigationComponent } from "../../../components/module-navigation
 import { SafetyModuleConfig } from '../safety-module.config';
 import { FormComponent } from '../../../components/DynamicForm/Form/form/form.component';
 import { QuestionBase } from '../../../components/DynamicForm/question-base';
-import { QuestionService } from '../../../components/DynamicForm/services/question.service';
 import { AlarmplanConfig } from './alarmplan.config';
 import { AlarmplanDataService } from '../services/alarmplan-data.service';
 import { AlarmplanFields } from '../components/alarmplan/alarmplan.model.interface';
@@ -40,15 +39,12 @@ export class SafetyModuleComponent implements OnInit {
   showPdfComponent = false;
 
   constructor(
-    private questionService: QuestionService,
     private alarmplanDataService: AlarmplanDataService,
     private pdfService: PdfService
   ){}
 
   ngOnInit() {
-    this.questionService.getQuestions(AlarmplanConfig.questions)
-    ;
-
+   
 
     this.alarmplanDataService.formData$.subscribe(data => {
       this.alarmplanData = data;
