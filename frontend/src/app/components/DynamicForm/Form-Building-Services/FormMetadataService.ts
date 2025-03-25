@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, map } from "rxjs";
+import { Observable, of, map } from "rxjs";
 import { QuestionBase } from "../question-base";
 import { QuestionMetadata } from "../interfaces/question-metadata.interface";
 import { APIMetadata } from "../interfaces/api-metadata.interface";
@@ -8,7 +8,6 @@ import { APIMetadata } from "../interfaces/api-metadata.interface";
 @Injectable({
     providedIn: 'root'
 })
-
 export class FormMetadataService {
     private readonly http = inject(HttpClient);
     
@@ -23,11 +22,48 @@ export class FormMetadataService {
 
     /**
      * Gets and transforms metadata into question models
+     * Accepts either a URL string or a config object
      */
-    getFormMetadata(url: string): Observable<QuestionBase<QuestionMetadata>[]> {
-        return this.fetchMetadata(url).pipe(
-            map((resData) => this.convertMetadataToQuestionModel(resData))
-        );
+    getFormMetadata(source: string | any[]): Observable<QuestionBase<QuestionMetadata>[]> {
+        // If source is a string, treat it as URL and fetch from API
+        if (typeof source === 'string') {
+            return this.fetchMetadata(source).pipe(
+                map(resData => this.convertMetadataToQuestionModel(resData))
+            );
+        } 
+        // Otherwise, treat it as a local config object
+        else {
+            return of(this.convertMetadataToQuestionModel(source));
+        }
+    }
+
+    /**
+     * Find form metadata from a module configuration
+     * Extracts field metadata from a config structure like SafetyModuleConfig
+     */
+    getFormMetadataFromConfig(config: any[], formId: string): Observable<QuestionBase<QuestionMetadata>[]> {
+        // Search through the config to find the form metadata by ID or other identifier
+        let formMetadata: any[] = [];
+        
+        // Example implementation - adjust based on your config structure
+        for (const module of config) {
+            if (module.id?.toString() === formId || module.title === formId) {
+                formMetadata = module.formMetadata || [];
+                break;
+            }
+            
+            // Check items if no match at top level
+            if (module.items) {
+                for (const item of module.items) {
+                    if (item.id?.toString() === formId || item.title === formId) {
+                        formMetadata = item.formMetadata || [];
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return of(this.convertMetadataToQuestionModel(formMetadata));
     }
 
     /**
@@ -71,4 +107,3 @@ export class FormMetadataService {
         return transformedMetadata;
     }
 }
-
