@@ -17,27 +17,21 @@ import { AdressFieldQuestion } from "../questions/adressfield";
 export class FormBuilderService {
     constructor() {}
 
-    /**
-     * Creates a new form group with optional nested group
-     */
     setFormGroup(groupName: string): FormGroup {
         return new FormGroup({ [groupName]: new FormGroup({}) });
     }
 
-    /**
-     * Converts question models to a FormGroup with validators
-     */
     toFormGroup(questions: QuestionBase<string>[]): FormGroup {
         const group: Record<string, FormControl> = {};
 
         questions?.forEach((question) => {
             if (question.key) {
                 const validators = [];
-                
+
                 if (question.required) {
                     validators.push(Validators.required);
                 }
-                
+
                 // Add more validators based on question properties
                 if (question.type === 'email') {
                     validators.push(Validators.email);
@@ -45,12 +39,12 @@ export class FormBuilderService {
                 if (question.type === 'number' || question.controlType === 'integer') {
                     validators.push(Validators.pattern('^[0-9]*$'));
                 }
-                
+
                 const control = new FormControl(
-                    question.value || '', 
+                    question.value || '',
                     validators
                 );
-                
+
                 group[question.key] = control;
             } else {
                 console.error('Missing key for question:', question);
@@ -60,9 +54,6 @@ export class FormBuilderService {
         return new FormGroup(group);
     }
 
-    /**
-     * Processes raw question data into typed question objects
-     */
     formQuestions(data: any[]): Observable<QuestionBase<any>[]> {
         const questions: QuestionBase<any>[] = [];
 
@@ -112,9 +103,6 @@ export class FormBuilderService {
         return of(questions.sort((a, b) => a.order - b.order));
     }
 
-    /**
-     * Adds questions to an existing form group
-     */
     addQuestionToGroup(group: FormGroup, questions: QuestionBase<string>[]): Observable<FormGroup> {
         return this.formQuestions(questions).pipe(
             map(processedQuestions => {
@@ -127,13 +115,10 @@ export class FormBuilderService {
         );
     }
 
-    /**
-     * Creates a complete form from raw question data
-     */
     createForm(formName: string, questions: any[]): Observable<FormGroup> {
         const formGroup = this.setFormGroup(formName);
         const nestedGroup = formGroup.get(formName) as FormGroup;
-        
+
         return this.addQuestionToGroup(nestedGroup, questions).pipe(
             map(() => formGroup)
         );
