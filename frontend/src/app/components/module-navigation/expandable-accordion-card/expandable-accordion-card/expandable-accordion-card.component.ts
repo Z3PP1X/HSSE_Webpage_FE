@@ -39,6 +39,7 @@ export class ExpandableAccordionCardComponent implements OnInit{
 
   catalogItemTitle = input.required<string>();
   id = input.required<string>();
+  isActive = input.required<boolean>();
   state: 'open' | 'closed' = 'closed';
   
 

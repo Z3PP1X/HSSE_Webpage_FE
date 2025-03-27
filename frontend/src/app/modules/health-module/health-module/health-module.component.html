@@ -1,17 +1,19 @@
 <div class="grid grid-cols-4">
-  <div><app-module-navigation [configurationItem]="moduleConfig" [iconPath]="iconPath" class=""></app-module-navigation></div>
-  <ng-container *ngIf="questions$ | async as data">
-
-    @if (data.length > 0) {
-
-      <div class="flex w-screen justify-center"><app-form [formTitle]="formTitle" [formCategories]="formCategories" [questions]="data" class="w-2/5"></app-form></div>
-
-    }
-
-  </ng-container>
-
-
+  <div>
+    <app-module-navigation [configurationItem]="moduleConfig" [iconPath]="iconPath"></app-module-navigation>
+  </div>
+  
+  <div class="flex w-screen justify-center col-span-3">
+    <ng-container *ngIf="form$ | async as formData">
+      <app-form 
+        [formTitle]="formTitle"
+        [form]="formData"
+        (formSubmit)="onFormSubmit($event)"
+        class="w-2/5">
+      </app-form>
+    </ng-container>
+    
+    <div *ngIf="isLoading" class="loading">Loading form...</div>
+    <div *ngIf="error" class="error">{{ error }}</div>
+  </div>
 </div>
-
-
-

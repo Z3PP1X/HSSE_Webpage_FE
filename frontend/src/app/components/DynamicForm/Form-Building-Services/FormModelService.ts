@@ -33,47 +33,72 @@ export class FormModelService {
 
     private buildFormHierarchy(data: FormGroupBase<any>[] | QuestionBase<any>[], parentCategory?: string) {
         let currentCategory = parentCategory || '';
-
+      
         data.forEach(element => {
-            if (this.isFormGroup(element)) {
-                if (element.isCategory) {
-                    const categoryForm = this.addCategory(element.key);
-                    currentCategory = element.key;
-
-
-                    if (element.fields && element.fields.length > 0) {
-                        this.buildFormHierarchy(element.fields, currentCategory);
-                    }
-                } else {
-
-                    const targetCategory = parentCategory || currentCategory;
-                    if (targetCategory) {
-                        const questionFields = element.fields.filter(field => !this.isFormGroup(field)) as QuestionBase<any>[];
-                        this.addItemToCategory(targetCategory, questionFields);
-                    } else {
-
-                        const questionFields = element.fields.filter(field => !this.isFormGroup(field)) as QuestionBase<string>[];
-                        const groupForm = this.formBuilderService.toFormGroup(questionFields);
-                        this.formStructure.addControl(element.key, groupForm);
-                    }
+          if (this.isFormGroup(element)) {
+            if (element.isCategory) {
+              const categoryForm = this.addCategory(element.key);
+              currentCategory = element.key;
+      
+              if (element.fields && element.fields.length > 0) {
+                this.buildFormHierarchy(element.fields, currentCategory);
+              }
+            } else if (element.isArray) {
+              // Handle form arrays
+              const formArray = this.formBuilderService.createFormArray();
+              
+              // Add the form array to the appropriate container
+              const targetContainer = currentCategory && this.categoryMap.has(currentCategory) 
+                ? this.categoryMap.get(currentCategory)! 
+                : this.formStructure;
+                
+              targetContainer.addControl(element.key, formArray);
+              
+              // Add initial item if fields are provided
+              if (element.fields && element.fields.length > 0) {
+                const questionFields = element.fields.filter(field => 
+                  !this.isFormGroup(field)) as QuestionBase<any>[];
+                
+                if (questionFields.length > 0) {
+                  this.formBuilderService.addItemToFormArray(formArray, questionFields).subscribe();
                 }
+                
+                // Handle nested form groups within array items
+                const nestedGroups = element.fields.filter(field => 
+                  this.isFormGroup(field)) as FormGroupBase<any>[];
+                  
+                if (nestedGroups.length > 0) {
+                  // Process nested groups
+                  this.buildFormHierarchy(nestedGroups, currentCategory);
+                }
+              }
             } else {
-
-                const targetCategory = currentCategory;
-                if (targetCategory && this.categoryMap.has(targetCategory)) {
-                    const categoryGroup = this.categoryMap.get(targetCategory);
-                    if (categoryGroup) {
-                        this.formBuilderService.addQuestionToGroup(categoryGroup, [element])
-                            .subscribe();
-                    }
-                } else {
-
-                    this.formBuilderService.addQuestionToGroup(this.formStructure, [element])
-                        .subscribe();
-                }
+              // Handle regular form groups
+              const targetCategory = parentCategory || currentCategory;
+              if (targetCategory) {
+                const questionFields = element.fields.filter(field => !this.isFormGroup(field)) as QuestionBase<any>[];
+                this.addItemToCategory(targetCategory, questionFields);
+              } else {
+                const questionFields = element.fields.filter(field => !this.isFormGroup(field)) as QuestionBase<string>[];
+                const groupForm = this.formBuilderService.toFormGroup(questionFields);
+                this.formStructure.addControl(element.key, groupForm);
+              }
             }
+          } else {
+            // Handle individual questions
+            const targetCategory = currentCategory;
+            if (targetCategory && this.categoryMap.has(targetCategory)) {
+              const categoryGroup = this.categoryMap.get(targetCategory);
+              if (categoryGroup) {
+                this.formBuilderService.addQuestionToGroup(categoryGroup, [element]).subscribe();
+              }
+            } else {
+              this.formBuilderService.addQuestionToGroup(this.formStructure, [element]).subscribe();
+            }
+          }
         });
-    }
+      }
+      
 
 
     addCategory(key: string): FormGroup {

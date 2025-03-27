@@ -20,7 +20,6 @@ export class FormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
   formTitle = input.required<string>();
-  formCategories = input.required<string[]>();
   @Input() questions: QuestionBase<string>[] | null = [];
   @Input() form!: FormGroup;
   @Input() isLoading = false;
@@ -43,6 +42,12 @@ export class FormComponent implements OnInit, OnDestroy {
 
   selectCategory(category: string) {
     this.selectedCategory = category;
+  }
+
+  formCategories(): string[] {
+    if (!this.form) return [];
+    return Object.keys(this.form.controls)
+      .filter(key => this.form.get(key) instanceof FormGroup);
   }
 
   getQuestionsByCategory(category: string) {

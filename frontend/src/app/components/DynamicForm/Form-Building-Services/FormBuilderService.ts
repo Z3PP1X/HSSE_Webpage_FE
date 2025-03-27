@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { FormControl, FormGroup, Validators, FormArray } from "@angular/forms";
 import { Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 
@@ -122,5 +122,25 @@ export class FormBuilderService {
         return this.addQuestionToGroup(nestedGroup, questions).pipe(
             map(() => formGroup)
         );
+    }
+
+    createFormArray(): FormArray<any> {
+        return new FormArray<any>([]);
+    }
+
+    addItemToFormArray(formArray: FormArray, questions: QuestionBase<string>[]): Observable<FormArray> {
+        return this.formQuestions(questions).pipe(
+            map(processedQuestions => {
+                const group = this.toFormGroup(processedQuestions);
+                formArray.push(group);
+                return formArray;
+            })
+        );
+    }
+
+    removeItemFromFormArray(formArray: FormArray, index: number): void {
+        if (index >= 0 && index < formArray.length) {
+            formArray.removeAt(index);
+        }
     }
 }

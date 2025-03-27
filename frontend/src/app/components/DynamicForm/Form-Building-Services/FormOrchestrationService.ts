@@ -30,19 +30,24 @@ export class FormOrchestrationService {
     generateForm(apiEndpoint: string, formName: string = 'dynamicForm'): Observable<FormGroup> {
         this.loading$.next(true);
         this.error$.next(null);
-
-        const formData$: Observable<FormGroupBase<string>> = this.httpclient.get<FormGroupBase<string>>(apiEndpoint)
-
-        formData$.pipe(
-          switchMap(
-            response => this.formModelService.processFormStructure([response].subscribe(
-              (formStructure) => this.createForm(formStructure, formName)
-            ))
-          )
-        )
-
-
-    }
+      
+        return this.httpclient.get<any>(apiEndpoint).pipe(
+          switchMap(response => {
+            
+            const formData = Array.isArray(response) ? response : [response];
+            return this.formModelService.processFormStructure(formData);
+          }),
+          tap(formGroup => {
+            this.currentForm$.next(formGroup);
+            this.loading$.next(false);
+          }),
+          catchError(error => {
+            this.loading$.next(false);
+            this.error$.next(`Error generating form: ${error.message || error}`);
+            return throwError(() => error);
+          })
+        );
+      }
 
     private structureFormData(
         questions: QuestionBase<any>[],
