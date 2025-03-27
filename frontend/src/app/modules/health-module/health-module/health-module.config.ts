@@ -2,7 +2,7 @@
 import { ModuleConfigurationItem } from "../../../components/module-navigation/interfaces/module-content.config.model";
 
 export const HealthModuleConfig: ModuleConfigurationItem = {
-  moduleTitle: 'Health Module', // Changed from title
+  moduleTitle: 'Health Module',
   menus: [
     {
       menuId: 'healthForms',

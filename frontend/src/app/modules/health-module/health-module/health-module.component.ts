@@ -33,19 +33,19 @@ export class HealthModuleComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Determine which form endpoint to use from the config
+    
     const formEndpoint = this.findFormEndpoint('Unfallbericht');
     
     if (formEndpoint) {
-      // Generate the form
+      
       this.form$ = this.formOrchestrationService.generateForm(formEndpoint);
       
-      // Track loading state
+      
       this.formOrchestrationService.isLoading()
         .pipe(takeUntil(this.destroy$))
         .subscribe(isLoading => this.isLoading = isLoading);
 
-      // Track errors
+      
       this.formOrchestrationService.getError()
         .pipe(takeUntil(this.destroy$))
         .subscribe(error => this.error = error);
@@ -55,7 +55,10 @@ export class HealthModuleComponent implements OnInit, OnDestroy {
   }
 
   findFormEndpoint(formName: string): string | undefined {
-    const forms = this.moduleConfig[0]?.forms;
+    
+    const activeMenu = this.moduleConfig[0]?.menus?.[0]; 
+    const forms = activeMenu?.forms;
+    
     if (!forms) return undefined;
     
     const formConfig = forms.find(form => form.name === formName);
