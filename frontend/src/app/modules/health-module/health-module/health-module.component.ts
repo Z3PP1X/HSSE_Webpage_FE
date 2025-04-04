@@ -8,6 +8,8 @@ import { takeUntil } from 'rxjs/operators';
 import { FormOrchestrationService } from '../../../components/DynamicForm/Form-Building-Services/FormOrchestrationService';
 import { FormGroup } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
+import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-health-module',
@@ -29,16 +31,30 @@ export class HealthModuleComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   constructor(
-    private formOrchestrationService: FormOrchestrationService
+    private formOrchestrationService: FormOrchestrationService,
+    private navService: ModuleNavigationService
   ) {}
 
   ngOnInit(): void {
+
+    this.navService.initializeFromConfig(this.moduleConfig);
     
-    const formEndpoint = this.findFormEndpoint('Unfallbericht');
+    const formEndpoint = this.navService.findFormEndpoint(this.moduleConfig, 'Unfallbericht');
     
     if (formEndpoint) {
       
-      this.form$ = this.formOrchestrationService.generateForm(formEndpoint);
+      this.form$ = this.formOrchestrationService.generateForm(formEndpoint).pipe(
+        tap(form => {
+          // Try to update form title if available in the metadata
+          this.formOrchestrationService.getFormMetadata()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(metadata => {
+              if (metadata?.form_title) {
+                this.formTitle = metadata.form_title;
+              }
+            });
+        })
+      );
       
       
       this.formOrchestrationService.isLoading()
@@ -54,16 +70,6 @@ export class HealthModuleComponent implements OnInit, OnDestroy {
     }
   }
 
-  findFormEndpoint(formName: string): string | undefined {
-    
-    const activeMenu = this.moduleConfig[0]?.menus?.[0]; 
-    const forms = activeMenu?.forms;
-    
-    if (!forms) return undefined;
-    
-    const formConfig = forms.find(form => form.name === formName);
-    return formConfig ? `${environment.apiBaseUrl}/${formConfig.path}` : undefined;
-  }
 
   onFormSubmit(formValue: any): void {
     console.log('Form submitted with values:', formValue);

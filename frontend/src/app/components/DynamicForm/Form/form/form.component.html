@@ -10,60 +10,65 @@
     <form (ngSubmit)="onSubmit()" [formGroup]="form" class="w-full">
       <div class="flex flex-row justify-between ml-8 mr-8 mt-8 mb-8 relative">
         @for (category of formCategories(); track category) {
-          <div class="flex flex-col items-center">
-            <button 
-              type="button" 
-              (click)="selectCategory(category)"
-              class="w-6 h-6 rounded-full relative z-10 flex items-center justify-center"
-              [class.bg-orange-500]="isCategorySelected(category) && !isCategoryComplete(category)"
-              [class.bg-green-500]="isCategoryComplete(category)"
-              [class.bg-black]="!isCategorySelected(category) && !isCategoryComplete(category)">
-              @if(isCategoryComplete(category)) {
-                <span class="text-white text-xs">✓</span>
-              }
-            </button>
-            <span class="text-sm">{{category}}</span>
-          </div>
+        <div class="flex flex-col items-center">
+          <button type="button" (click)="selectCategory(category)"
+            class="w-6 h-6 rounded-full relative z-10 flex items-center justify-center"
+            [class.bg-orange-500]="isCategorySelected(category) && !isCategoryComplete(category)"
+            [class.bg-green-500]="isCategoryComplete(category)"
+            [class.bg-black]="!isCategorySelected(category) && !isCategoryComplete(category)">
+            @if(isCategoryComplete(category)) {
+            <span class="text-white text-xs">✓</span>
+            }
+          </button>
+          <span class="text-sm">{{category}}</span>
+        </div>
         }
       </div>
-      
+
       @for (category of formCategories(); track category) {
-        @if (isCategorySelected(category)) {
-          <div class="category-section mb-8 border border-black m-2" [id]="category">
-            <h2 class="text-xl font-semibold mb-4 ml-4">{{category}}</h2>
-  
-            @for (question of getQuestionsByCategory(category); track question) {
-              <div>
-                <app-form-question [question]="question" [form]="form"></app-form-question>
-              </div>
-            }
+      @if (isCategorySelected(category)) {
+      <div class="category-section mb-8 border border-black m-2" [id]="category">
+        <h2 class="text-xl font-semibold mb-4 ml-4">{{category}}</h2>
+
+        <!-- Use the helper method instead of Object.keys() -->
+        @if (form && form.get(category)) {
+        @for (controlName of getControlKeys(category); track controlName) {
+        <div>
+          <!-- Find the question definition for this control if available -->
+          @if (questions && getQuestionForKey(category + '.' + controlName) !== undefined) {
+          <app-form-question [question]="getQuestionForKey(category + '.' + controlName)!" [form]="form">
+          </app-form-question>
+          } @else {
+          <!-- Fallback if question definition not found -->
+          <div class="p-4">
+            <label [for]="controlName" class="block mb-2">{{controlName}}</label>
+            <input [formControlName]="controlName" [id]="controlName" class="w-full p-2 border rounded">
           </div>
+          }
+        </div>
         }
+        }
+      </div>
       }
-      
+      }
+
       <div class="flex justify-between px-4 mt-4">
         @if (selectedCategory !== formCategories()[0]) {
-          <button 
-            type="button" 
-            (click)="selectCategory(formCategories()[formCategories().indexOf(selectedCategory) - 1])"
-            class="px-4 py-2 bg-gray-300 rounded">
-            Previous
-          </button>
+        <button type="button" (click)="selectCategory(formCategories()[formCategories().indexOf(selectedCategory) - 1])"
+          class="px-4 py-2 bg-gray-300 rounded">
+          Previous
+        </button>
         }
         @if (selectedCategory !== formCategories()[formCategories().length - 1]) {
-          <button 
-            type="button" 
-            (click)="selectCategory(formCategories()[formCategories().indexOf(selectedCategory) + 1])"
-            class="px-4 py-2 bg-orange-500 text-white rounded">
-            Next
-          </button>
+        <button type="button" (click)="selectCategory(formCategories()[formCategories().indexOf(selectedCategory) + 1])"
+          class="px-4 py-2 bg-orange-500 text-white rounded">
+          Next
+        </button>
         }
         @if (selectedCategory === formCategories()[formCategories().length - 1]) {
-          <button 
-            type="submit" 
-            class="px-4 py-2 bg-orange-500 text-white rounded">
-            Submit
-          </button>
+        <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded">
+          Submit
+        </button>
         }
       </div>
     </form>

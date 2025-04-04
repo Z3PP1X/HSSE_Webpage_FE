@@ -13,6 +13,7 @@ import { FormGroup } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
 
 @Component({
   selector: 'app-safety-module',
@@ -45,15 +46,15 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   constructor(
     private alarmplanDataService: AlarmplanDataService,
     private pdfService: PdfService,
-    private formOrchestrationService: FormOrchestrationService
+    private formOrchestrationService: FormOrchestrationService, 
+    private navService: ModuleNavigationService
   ){}
 
   ngOnInit() {
-    // Use default menu from config if available
-    this.activeMenuId = this.configurationItem[0].defaultMenu || 'alarmplan';
     
+    this.navService.initializeFromConfig(this.configurationItem);
     // Determine which form endpoint to use from the active menu
-    const formEndpoint = this.findFormEndpoint('Digitaler Alarmplan');
+    const formEndpoint = this.navService.findFormEndpoint(this.configurationItem ,'Digitaler Alarmplan');
     // ...rest of your existing code
   }
   
@@ -64,12 +65,6 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     );
   }
   
-  findFormEndpoint(formName: string): string | undefined {
-    if (!this.activeMenu) return undefined;
-    
-    const formConfig = this.activeMenu.forms?.find(form => form.name === formName);
-    return formConfig ? `${environment.apiBaseUrl}/${formConfig.path}` : undefined;
-  }
 
   handleFormSubmit(formValue: any): void {
     console.log('Form submitted with values:', formValue);
@@ -93,21 +88,6 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     }, 300);
   }
   
-  // Method to change active menu
-  setActiveMenu(menuId: string) {
-    this.activeMenuId = menuId;
-    
-    // Load default form for this menu
-    if (this.activeMenu && this.activeMenu.forms.length > 0) {
-      const defaultForm = this.activeMenu.forms[0];
-      this.formTitle = defaultForm.name;
-      
-      const formEndpoint = this.findFormEndpoint(defaultForm.name);
-      if (formEndpoint) {
-        this.form$ = this.formOrchestrationService.generateForm(formEndpoint);
-      }
-    }
-  }
 
   ngOnDestroy(): void {
     this.destroy$.next();

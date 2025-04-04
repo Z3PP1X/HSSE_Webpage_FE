@@ -1,12 +1,8 @@
-
 import { Injectable } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { Observable, BehaviorSubject, of, throwError } from "rxjs";
 import { catchError, map, switchMap, tap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
-
-
-
 
 import { FormModelService } from "./FormModelService";
 import { FormBuilderService } from "./FormBuilderService";
@@ -20,7 +16,7 @@ export class FormOrchestrationService {
     private currentForm$ = new BehaviorSubject<FormGroup>(new FormGroup({}));
     private loading$ = new BehaviorSubject<boolean>(false);
     private error$ = new BehaviorSubject<string | null>(null);
-
+    private formMetadata$ = new BehaviorSubject<any>(null);
 
     constructor(
         private httpclient: HttpClient,
@@ -32,22 +28,66 @@ export class FormOrchestrationService {
         this.error$.next(null);
       
         return this.httpclient.get<any>(apiEndpoint).pipe(
-          switchMap(response => {
-            
-            const formData = Array.isArray(response) ? response : [response];
-            return this.formModelService.processFormStructure(formData);
-          }),
-          tap(formGroup => {
-            this.currentForm$.next(formGroup);
-            this.loading$.next(false);
-          }),
-          catchError(error => {
-            this.loading$.next(false);
-            this.error$.next(`Error generating form: ${error.message || error}`);
-            return throwError(() => error);
-          })
+            tap(response => {
+                // Store the metadata
+                this.formMetadata$.next({
+                    form_id: response.form_id,
+                    form_title: response.form_title,
+                    shared_configs: response.shared_configs
+                });
+            }),
+            map(response => {
+                // Transform the structure fields to match expected format
+                if (response.structure) {
+                    response.structure.forEach((category: any) => {
+                        if (category.fields) {
+                            category.fields = category.fields.map((field: any) => ({
+                                key: field.name,
+                                label: field.label,
+                                required: field.required,
+                                order: field.order || 1,
+                                controlType: this.mapFieldType(field.field_type, field.choices),
+                                type: field.field_type,
+                                options: field.choices ? field.choices.map((c: any) => ({
+                                    key: c.label,
+                                    value: c.value
+                                })) : [],
+                                category: category.title
+                            }));
+                        }
+                    });
+                    return response.structure;
+                }
+                return [];
+            }),
+            switchMap(formData => this.formModelService.processFormStructure(formData)),
         );
-      }
+    }
+      
+    // Fixed mapFieldType to include choices parameter
+    private mapFieldType(fieldType: string, choices?: any[]): string {
+        switch(fieldType) {
+            case 'select':
+                return 'dropdown';
+            case 'textarea':
+                return 'textarea';
+            case 'checkbox':
+                return 'checkbox';
+            case 'datetime':
+                return 'datetime';
+            case 'number':
+                if (choices && choices.length) {
+                    return 'dropdown';
+                }
+                return 'textbox';
+            default:
+                return 'textbox';
+        }
+    }
+
+    getFormMetadata(): Observable<any> {
+        return this.formMetadata$.asObservable();
+    }
 
     private structureFormData(
         questions: QuestionBase<any>[],
@@ -84,7 +124,6 @@ export class FormOrchestrationService {
                 fields: uncategorizedQuestions
             } as FormGroupBase<any>);
         }
-
         return of(formStructure);
     }
 
@@ -112,11 +151,9 @@ export class FormOrchestrationService {
         return this.loading$.asObservable();
     }
 
-
     getError(): Observable<string | null> {
         return this.error$.asObservable();
     }
-
 
     resetForm(): void {
         const currentForm = this.currentForm$.getValue();

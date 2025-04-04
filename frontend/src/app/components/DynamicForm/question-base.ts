@@ -6,7 +6,7 @@ export interface AjaxConfig {
   triggerEvents?: ('init' | 'change' | 'blur')[];
   paramMap?: Record<string, string>;
   debounceTime?: number;
-  targetKey?: string; // Add this
+  targetKey?: string;
   onSuccess?: (context: {
     response: any;
     form: FormGroup;

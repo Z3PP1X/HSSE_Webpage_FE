@@ -150,4 +150,43 @@ export class FormComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  ngOnChanges() {
+    if (this.form && !this.questions) {
+      this.questions = this.extractQuestionsFromForm();
+    }
+  }
+
+  getQuestionForKey(fullKey: string): QuestionBase<string> | undefined {
+    return this.questions?.find(q => q.key === fullKey || 
+      // Handle both nested and flat key structures
+      (q.category && q.key && (q.category + '.' + q.key) === fullKey));
+  }
+
+  getControlKeys(category: string): string[] {
+    const controls = (this.form?.get(category) as FormGroup)?.controls;
+    return controls ? Object.keys(controls) : [];
+  }
+  
+  extractQuestionsFromForm(): QuestionBase<string>[] {
+    const questions: QuestionBase<string>[] = [];
+    
+    for (const categoryKey of this.formCategories()) {
+      const categoryGroup = this.form.get(categoryKey) as FormGroup;
+      
+      for (const controlKey of Object.keys(categoryGroup.controls)) {
+        questions.push({
+          key: controlKey,
+          label: controlKey, // You might need better labels
+          controlType: 'textbox', // Default type
+          type: 'text',
+          category: categoryKey,
+          required: false // Without metadata, we can't know
+        } as QuestionBase<string>);
+      }
+    }
+    
+    return questions;
+  }
+
 }

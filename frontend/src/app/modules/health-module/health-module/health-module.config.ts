@@ -12,7 +12,7 @@ export const HealthModuleConfig: ModuleConfigurationItem = {
         { title: 'Reports', route: '/health/reports', icon: 'reports' }
       ],
       forms: [
-        { name: 'Unfallbericht', path: 'forms/unfallbericht' },
+        { name: 'Unfallbericht', path: 'digitalfirstaid/meta/?format=json' },
         { name: 'Gesundheitscheck', path: 'forms/gesundheitscheck' },
         { name: 'Risikobewertung', path: 'forms/risikobewertung' }
       ]
