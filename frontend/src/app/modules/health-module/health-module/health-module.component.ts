@@ -10,18 +10,19 @@ import { FormGroup } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
 import { tap } from 'rxjs/operators';
+import { FormFrameComponent } from '../../../components/DynamicForm/form-frame/form-frame.component';
 
 @Component({
   selector: 'app-health-module',
   standalone: true,
-  imports: [ModuleNavigationComponent, CommonModule, FormComponent],
+  imports: [ModuleNavigationComponent, CommonModule, FormComponent, FormFrameComponent],
   providers: [],
   templateUrl: './health-module.component.html',
   styleUrl: './health-module.component.css'
 })
 export class HealthModuleComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+  showForm = true; // Set to true initially if you want the form to show on page load
   moduleConfig = [HealthModuleConfig];
   iconPath = "ehs-icons/health-white.svg";
 
@@ -29,6 +30,10 @@ export class HealthModuleComponent implements OnInit, OnDestroy {
   form$: Observable<FormGroup> | null = null;
   isLoading = false;
   error: string | null = null;
+
+  getObjectKeys(obj: object): string[] {
+    return Object.keys(obj || {});
+  }
 
   constructor(
     private formOrchestrationService: FormOrchestrationService,

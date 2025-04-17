@@ -1,0 +1,12 @@
+<!-- form-frame.component.html -->
+<div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+  <mat-card class="w-full max-w-2xl mx-4 my-4 relative">
+    <button mat-icon-button class="close-button" (click)="closeForm()" aria-label="Close form">
+      <mat-icon>close</mat-icon>
+    </button>
+    
+    <mat-card-content class="p-6">
+      <ng-content></ng-content>
+    </mat-card-content>
+  </mat-card>
+</div>

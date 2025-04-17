@@ -3,17 +3,29 @@
     <app-module-navigation [configurationItem]="moduleConfig" [iconPath]="iconPath"></app-module-navigation>
   </div>
   
-  <div class="flex w-screen justify-center col-span-3">
-    <ng-container *ngIf="form$ | async as formData">
-      <app-form 
-        [formTitle]="formTitle"
-        [form]="formData"
-        (formSubmit)="onFormSubmit($event)"
-        class="w-2/5">
-      </app-form>
-    </ng-container>
-    
-    <div *ngIf="isLoading" class="loading">Loading form...</div>
-    <div *ngIf="error" class="error">{{ error }}</div>
+  <div class="col-span-3">
+    <button (click)="showForm = true" class="btn btn-primary">Open Form</button>
   </div>
 </div>
+
+<!-- Show form frame conditionally -->
+<app-form-frame *ngIf="showForm">
+  <ng-container *ngIf="form$ | async as formData">
+    <!-- Only show form when it's fully loaded (has content) -->
+    <app-form 
+  *ngIf="formData && formData.controls && getObjectKeys(formData.controls).length > 0"
+  [formTitle]="formTitle"
+  [form]="formData"
+  (formSubmit)="onFormSubmit($event)">
+</app-form>
+    
+    <!-- Show loading when form data is empty or incomplete -->
+    <div *ngIf="!(formData && formData.controls && getObjectKeys(formData.controls).length > 0)" class="loading">
+      Loading form data...
+    </div>
+  </ng-container>
+  
+  <!-- Regular loading state before form$ emits anything -->
+  <div *ngIf="(form$ | async) === null && isLoading" class="loading">Loading form...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</app-form-frame>

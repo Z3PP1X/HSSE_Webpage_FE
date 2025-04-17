@@ -1,0 +1,28 @@
+/* In form.component.css */
+.mat-horizontal-stepper-wrapper {
+  display: block;
+  width: 100%;
+}
+
+.step-content {
+  min-height: 200px;
+  padding: 20px 0;
+}
+
+.form-field {
+  margin-bottom: 16px;
+  display: block;
+  width: 100%;
+}
+
+/* Style for the stepper header */
+::ng-deep .mat-step-header {
+  padding: 12px !important;
+}
+
+::ng-deep .mat-step-label {
+  white-space: normal !important;
+}
+
+/* Debug styles removal */
+/* You can remove or comment out the debugging divs in your form.component.html */

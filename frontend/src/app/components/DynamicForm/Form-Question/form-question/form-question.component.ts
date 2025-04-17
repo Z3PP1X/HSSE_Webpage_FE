@@ -1,16 +1,40 @@
-import { Component, Input, OnDestroy, OnInit, signal } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuestionBase } from '../../question-base';
 import { ApiService } from '../../../../global-services/ajax-service/ajax.service';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, Observable, startWith, map } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+
+
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-form-question',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatAutocompleteModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatProgressSpinnerModule, 
+    MatCheckboxModule
+  ],
   templateUrl: './form-question.component.html',
-  styleUrls: ['./form-question.component.css'] // Corrected to styleUrls
+  styleUrls: ['./form-question.component.css']
 })
 export class FormQuestionComponent implements OnInit, OnDestroy {
   @Input() question!: QuestionBase<string>;
@@ -21,6 +45,8 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
 
+  filteredOptions: Observable<{key: string, value: string | number}[]> | undefined;
+  
   constructor(private apiService: ApiService) {}
 
   ngOnInit() {
@@ -44,9 +70,37 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
           });
       }
     }
+    
+    
+    if (this.question.controlType === 'autocomplete') {
+      this.setupAutocomplete();
+    }
+  }
+  
+  private setupAutocomplete() {
+    
+    this.question.options = [
+      { key: 'option1', value: 1 },
+      { key: 'option2', value: 2 },
+      { key: 'option3', value: 3 }
+    ];
+    
+    const control = this.form.get(this.question.key) as FormControl;
+    
+    this.filteredOptions = control.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || ''))
+    );
+  }
+  
+  private _filter(value: string): {key: string, value: string | number}[] {
+    const filterValue = value.toLowerCase();
+    return this.question.options.filter(option => 
+      option.value.toString().toLowerCase().includes(filterValue));
   }
 
   private loadOptions() {
+   
     this.loading = true;
     this.error = null;
 
@@ -65,6 +119,7 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
   }
 
   private handleInputChange(value: string) {
+    
     if (!this.question.ajaxConfig?.endpoint) return;
 
     this.loading = true;
@@ -93,6 +148,7 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
   }
 
   private getTargetQuestion(): QuestionBase<string> | null {
+    
     if (this.question.ajaxConfig?.targetKey) {
       const control = this.form.get(this.question.ajaxConfig.targetKey);
       return control ? (control as any)._question : null;
@@ -101,8 +157,10 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
   }
 
   private handleResponse(response: any) {
+    
     switch (this.question.controlType) {
       case 'dropdown':
+      case 'autocomplete':
         this.question.options = response.map((item: any) => ({
           key: item.value,
           value: item.label
@@ -115,8 +173,37 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
     }
   }
 
+  getControlName(): string {
+    // Extract just the control name part from the full path
+    // Example: convert "category.controlName" to just "controlName"
+    const parts = this.question.key.split('.');
+    return parts[parts.length - 1];
+  }
+
+  // Add this method to form-question.component.ts
+getFormGroup(): FormGroup {
+  const parts = this.question.key.split('.');
+  if (parts.length > 1) {
+    const categoryName = parts[0];
+    const categoryGroup = this.form.get(categoryName) as FormGroup;
+    return categoryGroup || this.form;
+  }
+  return this.form;
+}
+
   get isValid() {
-    return this.form.controls[this.question.key].valid;
+    const parts = this.question.key.split('.');
+    const controlName = parts[parts.length - 1];
+    const categoryName = parts.length > 1 ? parts[0] : null;
+    
+    let control;
+    if (categoryName && this.form.get(categoryName)) {
+      control = (this.form.get(categoryName) as FormGroup).get(controlName);
+    } else {
+      control = this.form.get(controlName);
+    }
+    
+    return control ? control.valid : true;
   }
 
   ngOnDestroy() {

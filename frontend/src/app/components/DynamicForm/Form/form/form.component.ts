@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { QuestionBase } from '../../question-base';
 import { FormQuestionComponent } from '../../Form-Question/form-question/form-question.component';
 import { ApiService } from '../../../../global-services/ajax-service/ajax.service';
@@ -8,94 +8,95 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
 
+// Material-Imports
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+
 @Component({
   selector: 'app-form',
   standalone: true,
-  providers: [FormQuestionComponent, CommonModule],
-  imports: [ReactiveFormsModule, FormQuestionComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule, 
+    FormQuestionComponent, 
+    MatStepperModule, 
+    MatButtonModule, 
+    MatCardModule, 
+    MatDividerModule,
+    MatIconModule, 
+    MatFormFieldModule,
+    MatInputModule
+  ],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit, OnDestroy {
+  payLoad: string = ''; 
   private destroy$ = new Subject<void>();
   
   formTitle = input.required<string>();
-  @Input() questions: QuestionBase<string>[] | null = [];
   @Input() form!: FormGroup;
-  @Input() isLoading = false;
-  @Output() formSubmitted = new EventEmitter<any>();
+  @Input() questions: QuestionBase<string>[] = []; // Initialize with empty array
+  @Input() metadata: any = null;
+  @Output() formSubmit = new EventEmitter<any>();
   
-  payLoad = '';
-  selectedCategory: string = '';
-
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     if (this.form) {
+      console.log("Form structure:", this.form);
+      console.log("Form categories:", this.formCategories());
+      console.log("Questions:", this.questions);
+      
       this.setupAjaxHandlers();
     }
+  }
+
+  // Debug-Hilfsfunktion
+  getQuestionDebugInfo(category: string, controlName: string): string {
+    const fullKey = `${category}.${controlName}`;
+    const matchingQuestion = this.getQuestionForKey(fullKey);
     
-    if (this.formCategories().length > 0) {
-      this.selectedCategory = this.formCategories()[0];
-    }
+    return `Form control: ${fullKey}, Question found: ${matchingQuestion ? 'Yes' : 'No'}`;
   }
-
-  selectCategory(category: string) {
-    this.selectedCategory = category;
-  }
-
+  
   formCategories(): string[] {
     if (!this.form) return [];
     return Object.keys(this.form.controls)
       .filter(key => this.form.get(key) instanceof FormGroup);
   }
-
-  getQuestionsByCategory(category: string) {
-    return this.questions?.filter(question => question.category === category) || [];
-  }
-
-  isCategorySelected(category: string): boolean {
-    return this.selectedCategory === category;
-  }
-
-  isCategoryComplete(category: string): boolean {
-    if (!this.form) return false;
-    
-    const questionsInCategory = this.getQuestionsByCategory(category);
-    if (questionsInCategory.length === 0) {
-      return false;
-    }
-    
-    return questionsInCategory.every(question => {
-      const control = this.form.get(question.key);
-      return control && control.valid && control.value;
-    });
-  }
   
-  onSubmit() {
-    if (!this.form || !this.form.valid) {
-      console.error('Form is invalid or not available');
-      return;
-    }
+  getQuestionForKey(fullKey: string): QuestionBase<string> | undefined {
+    if (!this.questions) return undefined;
     
-    const formData = this.form.getRawValue();
-    this.payLoad = JSON.stringify(formData);
-    console.log('Form submitted:', this.payLoad);
-    this.formSubmitted.emit(formData);
+    return this.questions.find(q => 
+      q.key === fullKey || 
+      (q.category && q.key && `${q.category}.${q.key}` === fullKey)
+    );
+  }
+
+  getControlKeys(category: string): string[] {
+    const controls = (this.form?.get(category) as FormGroup)?.controls;
+    return controls ? Object.keys(controls) : [];
   }
 
   private setupAjaxHandlers() {
-    if (!this.form || !this.questions) return;
+    if (!this.form || !this.questions?.length) return;
     
     this.questions.forEach(question => {
       const control = this.form.get(question.key);
       const config = question.ajaxConfig;
-
+      
       if (control && config) {
         if (config.triggerEvents?.includes('init')) {
           this.handleAjaxCall(question, control.value);
         }
-
+        
         if (config.triggerEvents?.includes('change')) {
           control.valueChanges.pipe(
             debounceTime(config.debounceTime || 300),
@@ -114,7 +115,7 @@ export class FormComponent implements OnInit, OnDestroy {
     if (!config?.endpoint) return;
 
     const params = this.buildParams(config.paramMap || {}, value);
-
+    
     const request$ = config.method === 'POST'
       ? this.apiService.post(config.endpoint, params)
       : this.apiService.get(config.endpoint, { params });
@@ -151,42 +152,33 @@ export class FormComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  ngOnChanges() {
-    if (this.form && !this.questions) {
-      this.questions = this.extractQuestionsFromForm();
-    }
-  }
-
-  getQuestionForKey(fullKey: string): QuestionBase<string> | undefined {
-    return this.questions?.find(q => q.key === fullKey || 
-      // Handle both nested and flat key structures
-      (q.category && q.key && (q.category + '.' + q.key) === fullKey));
-  }
-
-  getControlKeys(category: string): string[] {
-    const controls = (this.form?.get(category) as FormGroup)?.controls;
-    return controls ? Object.keys(controls) : [];
-  }
-  
-  extractQuestionsFromForm(): QuestionBase<string>[] {
-    const questions: QuestionBase<string>[] = [];
-    
-    for (const categoryKey of this.formCategories()) {
-      const categoryGroup = this.form.get(categoryKey) as FormGroup;
-      
-      for (const controlKey of Object.keys(categoryGroup.controls)) {
-        questions.push({
-          key: controlKey,
-          label: controlKey, // You might need better labels
-          controlType: 'textbox', // Default type
-          type: 'text',
-          category: categoryKey,
-          required: false // Without metadata, we can't know
-        } as QuestionBase<string>);
-      }
+  onSubmit() {
+    if (!this.form || !this.form.valid) {
+      console.error('Form is invalid or not available');
+      return;
     }
     
-    return questions;
+    const formData = this.form.getRawValue();
+    this.payLoad = JSON.stringify(formData);
+    console.log('Form submitted:', this.payLoad);
+    this.formSubmit.emit(formData);
   }
 
+  getQuestionsByCategory(category: string) {
+    return this.questions?.filter(question => question.category === category) || [];
+  }
+
+  isCategoryComplete(category: string): boolean {
+    if (!this.form) return false;
+    
+    const questionsInCategory = this.getQuestionsByCategory(category);
+    if (questionsInCategory.length === 0) {
+      return false;
+    }
+    
+    return questionsInCategory.every(question => {
+      const control = this.form.get(question.key);
+      return control && control.valid && control.value;
+    });
+  }
 }

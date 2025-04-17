@@ -1,118 +1,124 @@
-<!-- form-question.component.html -->
-<div class="m-4 flex-auto" [formGroup]="form">
+<div class="question-container" [formGroup]="form">
+  <!-- Loading indicator -->
   @if (loading) {
-    <div class="loading-indicator">Loading {{ question.label }}...</div>
+    <div class="loading-container">
+      <mat-spinner diameter="20"></mat-spinner>
+      <span>Loading {{ question.label }}...</span>
+    </div>
   }
+  
+  <!-- Error message -->
   @if (error) {
-    <div class="error-message">{{ error }}</div>
+    <div class="error-container">
+      <mat-error>{{ error }}</mat-error>
+    </div>
   }
-
-  @switch (question.controlType) {
-    @case ('textbox') {
-      <input 
-        class="w-full leading-10 border rounded-lg px-4 focus:outline-none placeholder-gray-500" 
-        [ngClass]="{
-          'border-green-500': form.controls[question.key].valid,
-          'border-red-500': form.controls[question.key].invalid && form.controls[question.key].touched
-        }"
-        [formControlName]="question.key" 
-        [id]="question.key" 
-        [type]="question.type"
-        [placeholder]="question.label"
-        required>
-    }
-    @case ('adressdata') {
-
-      @if (question.key === "ZIP Code" || question.key === "Street" || question.key === "House Number" || question.key === "City") {
-        <div class="flex space-x-4 mb-2">
-          <input 
-            class="w-full leading-10 border rounded-lg px-4 focus:outline-none placeholder-gray-500" 
-            [ngClass]="{
-              'border-green-500': form.controls[question.key].valid,
-              'border-red-500': form.controls[question.key].invalid && form.controls[question.key].touched
-            }"
-            [formControlName]="question.key"
-            [id]="question.key" 
-            type="text"
-            [placeholder]="question.label"
-            required>
-        </div>
+  
+  <div [formGroup]="getFormGroup()">
+    <!-- Verwendet fill statt outline für alle Formularfelder -->
+    @switch (question.controlType) {
+      @case ('textbox') {
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" [type]="question.type">
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
       }
-      @else {
-        <h3 class="text-lg font-semibold mb-2">{{question.title}}</h3>
-      <div class="flex space-x-4 mb-2">
-        <input 
-          class="w-full leading-10 border rounded-lg px-4 focus:outline-none placeholder-gray-500" 
-          [ngClass]="{
-            'border-green-500': form.controls[question.key].valid,
-            'border-red-500': form.controls[question.key].invalid && form.controls[question.key].touched
-          }"
-          [formControlName]="question.key"
-          [id]="question.key" 
-          type="text"
-          [placeholder]="question.label"
-          required>
-      </div>
-      }
-      
-      
+    
+    @case ('textarea') {
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ question.label }}</mat-label>
+        <textarea matInput [formControlName]="getControlName()" [id]="question.key" rows="4"></textarea>
+        <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+      </mat-form-field>
     }
-    @case ('contactdata') {
-      <h3 class="text-lg font-semibold mb-2">{{ question.label }}</h3>
-      <div class="flex space-x-4">
-        <input 
-          class="w-full leading-10 border rounded-lg px-4 focus:outline-none placeholder-gray-500" 
-          [ngClass]="{
-            'border-green-500': form.controls[question.key].valid,
-            'border-red-500': form.controls[question.key].invalid && form.controls[question.key].touched
-          }"
-          [formControlName]="question.key"
-          [id]="question.key" 
-          type="text"
-          placeholder="Name"
-          required>
-        <input 
-          class="w-full leading-10 border rounded-lg px-4 focus:outline-none placeholder-gray-500" 
-          [ngClass]="{
-            'border-green-500': form.controls[question.key].valid,
-            'border-red-500': form.controls[question.key].invalid && form.controls[question.key].touched
-          }"
-          [formControlName]="question.key"
-          [id]="question.key" 
-          type="text"
-          placeholder="Telephone Number"
-          required>
+    
+    @case ('checkbox') {
+      <div class="checkbox-field">
+        <mat-checkbox [formControlName]="getControlName()" [id]="question.key">
+          {{ question.label }}
+        </mat-checkbox>
       </div>
     }
+    
     @case ('dropdown') {
-      <select 
-        class="w-full leading-10 border rounded-lg px-4 focus:outline-none"
-        [ngClass]="{
-          'border-green-500': form.controls[question.key].valid,
-          'border-red-500': form.controls[question.key].invalid && form.controls[question.key].touched
-        }"
-        [formControlName]="question.key">
-        <option value="" disabled selected>Select {{ question.label }}</option>
-        @for (opt of question.options; track opt.key) {
-          <option [value]="opt.key">{{ opt.value }}</option>
-        }
-      </select>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ question.label }}</mat-label>
+        <mat-select [formControlName]="getControlName()">
+          <mat-option [value]="''">Select {{ question.label }}</mat-option>
+          @for (opt of question.options; track opt.key) {
+            <mat-option [value]="opt.key">
+              {{ opt.value }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+      </mat-form-field>
     }
+    
     @case ('datetime') {
-      <input 
-        class="w-full leading-10 border rounded-lg px-4 focus:outline-none placeholder-gray-500" 
-        [ngClass]="{
-          'border-green-500': form.controls[question.key].valid,
-          'border-red-500': form.controls[question.key].invalid && form.controls[question.key].touched
-        }"
-        [formControlName]="question.key" 
-        [id]="question.key" 
-        [type]="question.type"
-        [placeholder]="question.label">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ question.label }}</mat-label>
+        <input matInput [formControlName]="getControlName()" [id]="question.key" 
+               [matDatepicker]="picker" placeholder="MM/DD/YYYY">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+      </mat-form-field>
+    }
+    
+    @case ('autocomplete') {
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ question.label }}</mat-label>
+        <input type="text" matInput [formControlName]="getControlName()" [id]="question.key"
+               [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete">
+          @if (filteredOptions) {
+            @for (option of filteredOptions | async; track option.key) {
+              <mat-option [value]="option.key">{{ option.value }}</mat-option>
+            }
+          }
+        </mat-autocomplete>
+        <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+      </mat-form-field>
+    }
+    
+    @case ('contactdata') {
+      <div class="contact-fields">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key">
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      </div>
+    }
+    
+    @case ('location') {
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ question.label }}</mat-label>
+        <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+        <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+      </mat-form-field>
+    }
+    
+    @case ('adressdata') {
+      <div class="address-container">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      </div>
+    }
+    
+    @default {
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ question.label }}</mat-label>
+        <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+        <mat-hint>Unknown control type: {{ question.controlType }}</mat-hint>
+        <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+      </mat-form-field>
     }
   }
-
-  @if (!isValid) {
-    <div class="errorMessage text-red-700">{{ question.label }} ist erforderlich</div>
-  }
+  </div>
 </div>

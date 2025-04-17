@@ -1,76 +1,63 @@
-<div class="bg-gray-50 mt-5 rounded-md drop-shadow-sm shadow-sm">
-  <div class="flex flex-row relative mb-4 justify-center text-center">
-    <h1 class="text-2xl font-bold mt-2">{{formTitle()}}</h1>
-    <div class="w-20 object-contain absolute right-2 top-2">
-      <img src="branding/SIXT_Logo_Pos.svg" alt="Sixt-Logo" class="">
-    </div>
-  </div>
-  <div class="w-full h-[1px] bg-black"></div>
-  <div class="flex">
-    <form (ngSubmit)="onSubmit()" [formGroup]="form" class="w-full">
-      <div class="flex flex-row justify-between ml-8 mr-8 mt-8 mb-8 relative">
-        @for (category of formCategories(); track category) {
-        <div class="flex flex-col items-center">
-          <button type="button" (click)="selectCategory(category)"
-            class="w-6 h-6 rounded-full relative z-10 flex items-center justify-center"
-            [class.bg-orange-500]="isCategorySelected(category) && !isCategoryComplete(category)"
-            [class.bg-green-500]="isCategoryComplete(category)"
-            [class.bg-black]="!isCategorySelected(category) && !isCategoryComplete(category)">
-            @if(isCategoryComplete(category)) {
-            <span class="text-white text-xs">✓</span>
+<!-- form.component.html -->
+<form (ngSubmit)="onSubmit()" [formGroup]="form" class="form-container">
+  <!-- Form title -->
+  <h2 class="form-title">{{formTitle()}}</h2>
+
+  <!-- Horizontal stepper navigation -->
+  <mat-horizontal-stepper linear #stepper class="clean-stepper">
+    @for (category of formCategories(); track category) {
+      <mat-step [label]="category" [completed]="isCategoryComplete(category)">
+        <ng-template matStepLabel>{{ category }}</ng-template>
+        <div class="step-content">
+          <h3 class="category-title">{{category}}</h3>
+          
+          @if (form && form.get(category)) {
+            @for (controlName of getControlKeys(category); track controlName) {
+              <div class="form-field">
+                @if (getQuestionForKey(category + '.' + controlName)) {
+                  <app-form-question 
+                    [question]="getQuestionForKey(category + '.' + controlName)!" 
+                    [form]="form">
+                  </app-form-question>
+                } @else {
+                  <div class="fallback-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{controlName}}</mat-label>
+                      <input matInput [formControlName]="controlName" [id]="controlName">
+                    </mat-form-field>
+                  </div>
+                }
+              </div>
             }
-          </button>
-          <span class="text-sm">{{category}}</span>
-        </div>
-        }
-      </div>
-
-      @for (category of formCategories(); track category) {
-      @if (isCategorySelected(category)) {
-      <div class="category-section mb-8 border border-black m-2" [id]="category">
-        <h2 class="text-xl font-semibold mb-4 ml-4">{{category}}</h2>
-
-        <!-- Use the helper method instead of Object.keys() -->
-        @if (form && form.get(category)) {
-        @for (controlName of getControlKeys(category); track controlName) {
-        <div>
-          <!-- Find the question definition for this control if available -->
-          @if (questions && getQuestionForKey(category + '.' + controlName) !== undefined) {
-          <app-form-question [question]="getQuestionForKey(category + '.' + controlName)!" [form]="form">
-          </app-form-question>
-          } @else {
-          <!-- Fallback if question definition not found -->
-          <div class="p-4">
-            <label [for]="controlName" class="block mb-2">{{controlName}}</label>
-            <input [formControlName]="controlName" [id]="controlName" class="w-full p-2 border rounded">
-          </div>
           }
+          
+          <!-- Step navigation buttons -->
+          <div class="step-actions">
+            <button 
+              mat-button 
+              *ngIf="stepper.selectedIndex !== 0" 
+              (click)="stepper.previous()"
+              color="primary">
+              Previous
+            </button>
+            <button 
+              mat-raised-button 
+              *ngIf="stepper.selectedIndex !== formCategories().length - 1" 
+              (click)="stepper.next()"
+              color="primary">
+              Next
+            </button>
+            <button 
+              mat-raised-button 
+              *ngIf="stepper.selectedIndex === formCategories().length - 1" 
+              type="submit"
+              color="primary">
+              Submit
+            </button>
+          </div>
         </div>
-        }
-        }
-      </div>
-      }
-      }
+      </mat-step>
+    }
+  </mat-horizontal-stepper>
+</form>
 
-      <div class="flex justify-between px-4 mt-4">
-        @if (selectedCategory !== formCategories()[0]) {
-        <button type="button" (click)="selectCategory(formCategories()[formCategories().indexOf(selectedCategory) - 1])"
-          class="px-4 py-2 bg-gray-300 rounded">
-          Previous
-        </button>
-        }
-        @if (selectedCategory !== formCategories()[formCategories().length - 1]) {
-        <button type="button" (click)="selectCategory(formCategories()[formCategories().indexOf(selectedCategory) + 1])"
-          class="px-4 py-2 bg-orange-500 text-white rounded">
-          Next
-        </button>
-        }
-        @if (selectedCategory === formCategories()[formCategories().length - 1]) {
-        <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded">
-          Submit
-        </button>
-        }
-      </div>
-    </form>
-  </div>
-</div>
