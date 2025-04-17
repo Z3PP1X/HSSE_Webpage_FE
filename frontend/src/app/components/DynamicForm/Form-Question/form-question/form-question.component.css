@@ -1,56 +1,14 @@
-/* form-question.component.css */
-/* Container für die gesamte Frage */
-.question-container {
-  width: 100%;
-  margin-bottom: 24px;  /* Abstand zwischen den Fragen */
-}
-
-/* Macht mat-form-field volle Breite, ohne in das interne Styling einzugreifen */
-.full-width {
-  width: 100%;
-  display: block;
-}
-
-/* Styling für Checkbox-Felder, die sich anders verhalten als andere Inputs */
-.checkbox-field {
-  padding: 8px 0;
-  margin-bottom: 16px;
-}
-
-/* Styling für den Ladeindikator */
-.loading-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  color: #666;
-}
-
-/* Styling für Fehlermeldungen */
-.error-container {
-  margin-bottom: 8px;
-}
-
-/* Überschriften innerhalb der Komponente */
-.subheading {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 16px;
-  color: rgba(0, 0, 0, 0.87);
-}
-
-/* Container für Kontaktdaten und Adressfelder */
-.contact-fields, .address-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.form-field-full-width {
   width: 100%;
 }
 
-/* Responsive Layout für größere Bildschirme */
 @media (min-width: 768px) {
   .contact-fields {
-    flex-direction: row;
     gap: 16px;
   }
+}
+
+.question-container {
+  width: 100%;
+  margin-bottom: 16px;
 }

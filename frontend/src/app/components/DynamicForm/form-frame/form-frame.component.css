@@ -1,24 +1,34 @@
-/* form-frame.component.css */
 .close-button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background-color: #e0e0e0;
-    border-radius: 50%;
-    z-index: 10;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .close-button:hover {
-    background-color: #d0d0d0;
-  }
-  
-  mat-card {
-    padding: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-    border-radius: 8px;
-  }
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background-color: #d0d0d0;
+}
+
+
+:host .mat-mdc-card {
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 640px;
+  margin: 20px;
+}
+
+
+:host .mat-mdc-card-content {
+  padding: 24px;
+  display: block;
+  width: 100%;
+}

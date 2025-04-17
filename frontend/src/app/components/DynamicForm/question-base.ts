@@ -46,7 +46,7 @@ export class QuestionBase<T>{
       apiEndpoint?: string;
       options?: {key: string; value: number}[];
       ajaxConfig?: AjaxConfig;
-      category?: string; // Added to constructor options
+      category?: string;
     } = {}
   ){
     this.value = options.value;
@@ -61,6 +61,6 @@ export class QuestionBase<T>{
     this.apiEndpoint = options.apiEndpoint || '';
     this.options = options.options || [];
     this.ajaxConfig = options.ajaxConfig;
-    this.category = options.category; // Initialize the category property
+    this.category = options.category;
   }
 }

@@ -1,3 +1,4 @@
+import { namedReferences } from './../../../../../node_modules/html-entities/src/named-references';
 import { Injectable } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { Observable, BehaviorSubject, of, throwError } from "rxjs";
@@ -5,7 +6,6 @@ import { catchError, map, switchMap, tap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
 import { FormModelService } from "./FormModelService";
-import { FormBuilderService } from "./FormBuilderService";
 import { QuestionBase } from "../question-base";
 import { FormGroupBase } from "../Form/form/form-group-base";
 
@@ -26,10 +26,12 @@ export class FormOrchestrationService {
     generateForm(apiEndpoint: string, formName: string = 'dynamicForm'): Observable<FormGroup> {
         this.loading$.next(true);
         this.error$.next(null);
-      
+
         return this.httpclient.get<any>(apiEndpoint).pipe(
             tap(response => {
-                // Store the metadata
+
+              console.log("Response: ",response)
+
                 this.formMetadata$.next({
                     form_id: response.form_id,
                     form_title: response.form_title,
@@ -37,23 +39,25 @@ export class FormOrchestrationService {
                 });
             }),
             map(response => {
-                // Transform the structure fields to match expected format
                 if (response.structure) {
                     response.structure.forEach((category: any) => {
                         if (category.fields) {
-                            category.fields = category.fields.map((field: any) => ({
-                                key: field.name,
-                                label: field.label,
-                                required: field.required,
-                                order: field.order || 1,
-                                controlType: this.mapFieldType(field.field_type, field.choices),
-                                type: field.field_type,
-                                options: field.choices ? field.choices.map((c: any) => ({
-                                    key: c.label,
-                                    value: c.value
-                                })) : [],
-                                category: category.title
-                            }));
+                            category.fields = category.fields.map((field: any) => {
+
+                                return {
+                                    key: field.name,
+                                    label: field.label,
+                                    required: field.required,
+                                    order: field.order || 1,
+                                    controlType: this.mapFieldType(field.field_type, field.choices),
+                                    type: field.field_type,
+                                    options: field.choices ? field.choices.map((c: any) => ({
+                                        key: c.label,
+                                        value: c.value
+                                    })) : [],
+                                    category: category.key
+                                };
+                            });
                         }
                     });
                     return response.structure;
@@ -63,8 +67,7 @@ export class FormOrchestrationService {
             switchMap(formData => this.formModelService.processFormStructure(formData)),
         );
     }
-      
-    // Fixed mapFieldType to include choices parameter
+
     private mapFieldType(fieldType: string, choices?: any[]): string {
         switch(fieldType) {
             case 'select':

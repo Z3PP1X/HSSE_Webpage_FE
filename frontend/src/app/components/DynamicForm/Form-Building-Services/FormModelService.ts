@@ -26,47 +26,46 @@ export class FormModelService {
         this.buildFormHierarchy(data);
         this.formStructure$.next(this.formStructure);
 
-        console.log('Final form structure:', this.formStructure);
         return this.formStructure$.asObservable();
     }
 
 
     private buildFormHierarchy(data: FormGroupBase<any>[] | QuestionBase<any>[], parentCategory?: string) {
         let currentCategory = parentCategory || '';
-      
+
         data.forEach(element => {
           if (this.isFormGroup(element)) {
             if (element.isCategory) {
               const categoryForm = this.addCategory(element.key);
               currentCategory = element.key;
-      
+
               if (element.fields && element.fields.length > 0) {
                 this.buildFormHierarchy(element.fields, currentCategory);
               }
             } else if (element.isArray) {
               // Handle form arrays
               const formArray = this.formBuilderService.createFormArray();
-              
+
               // Add the form array to the appropriate container
-              const targetContainer = currentCategory && this.categoryMap.has(currentCategory) 
-                ? this.categoryMap.get(currentCategory)! 
+              const targetContainer = currentCategory && this.categoryMap.has(currentCategory)
+                ? this.categoryMap.get(currentCategory)!
                 : this.formStructure;
-                
+
               targetContainer.addControl(element.key, formArray);
-              
+
               // Add initial item if fields are provided
               if (element.fields && element.fields.length > 0) {
-                const questionFields = element.fields.filter(field => 
+                const questionFields = element.fields.filter(field =>
                   !this.isFormGroup(field)) as QuestionBase<any>[];
-                
+
                 if (questionFields.length > 0) {
                   this.formBuilderService.addItemToFormArray(formArray, questionFields).subscribe();
                 }
-                
+
                 // Handle nested form groups within array items
-                const nestedGroups = element.fields.filter(field => 
+                const nestedGroups = element.fields.filter(field =>
                   this.isFormGroup(field)) as FormGroupBase<any>[];
-                  
+
                 if (nestedGroups.length > 0) {
                   // Process nested groups
                   this.buildFormHierarchy(nestedGroups, currentCategory);
@@ -98,7 +97,7 @@ export class FormModelService {
           }
         });
       }
-      
+
 
 
     addCategory(key: string): FormGroup {
