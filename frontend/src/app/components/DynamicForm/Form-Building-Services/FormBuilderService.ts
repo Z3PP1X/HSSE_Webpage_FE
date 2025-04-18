@@ -21,6 +21,9 @@ export class FormBuilderService {
         return new FormGroup({ [groupName]: new FormGroup({}) });
     }
 
+    /**
+     * Creates form controls from question definitions
+     */
     toFormGroup(questions: QuestionBase<string>[]): FormGroup {
         const group: Record<string, FormControl> = {};
 
@@ -54,6 +57,9 @@ export class FormBuilderService {
         return new FormGroup(group);
     }
 
+    /**
+     * Transforms raw data into typed question objects
+     */
     formQuestions(data: any[]): Observable<QuestionBase<any>[]> {
         const questions: QuestionBase<any>[] = [];
 
@@ -103,6 +109,16 @@ export class FormBuilderService {
         return of(questions.sort((a, b) => a.order - b.order));
     }
 
+    /**
+     * Creates an empty form array
+     */
+    createFormArray(): FormArray<any> {
+        return new FormArray<any>([]);
+    }
+
+    /**
+     * Adds questions to a form group
+     */
     addQuestionToGroup(group: FormGroup, questions: QuestionBase<string>[]): Observable<FormGroup> {
         return this.formQuestions(questions).pipe(
             map(processedQuestions => {
@@ -115,19 +131,9 @@ export class FormBuilderService {
         );
     }
 
-    createForm(formName: string, questions: any[]): Observable<FormGroup> {
-        const formGroup = this.setFormGroup(formName);
-        const nestedGroup = formGroup.get(formName) as FormGroup;
-
-        return this.addQuestionToGroup(nestedGroup, questions).pipe(
-            map(() => formGroup)
-        );
-    }
-
-    createFormArray(): FormArray<any> {
-        return new FormArray<any>([]);
-    }
-
+    /**
+     * Adds items to a form array
+     */
     addItemToFormArray(formArray: FormArray, questions: QuestionBase<string>[]): Observable<FormArray> {
         return this.formQuestions(questions).pipe(
             map(processedQuestions => {
@@ -138,9 +144,21 @@ export class FormBuilderService {
         );
     }
 
+    /**
+     * Removes an item from a form array
+     */
     removeItemFromFormArray(formArray: FormArray, index: number): void {
         if (index >= 0 && index < formArray.length) {
             formArray.removeAt(index);
         }
+    }
+
+    createForm(formName: string, questions: any[]): Observable<FormGroup> {
+        const formGroup = this.setFormGroup(formName);
+        const nestedGroup = formGroup.get(formName) as FormGroup;
+
+        return this.addQuestionToGroup(nestedGroup, questions).pipe(
+            map(() => formGroup)
+        );
     }
 }

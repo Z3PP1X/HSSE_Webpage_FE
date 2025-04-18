@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { FormGroup } from "@angular/forms";
+import { FormGroup, FormArray } from "@angular/forms";
 import { BehaviorSubject, Observable } from "rxjs";
 import { QuestionBase } from "../question-base";
 import { FormGroupBase } from "../Form/form/form-group-base";
@@ -17,6 +17,85 @@ export class FormModelService {
 
     constructor(private formBuilderService: FormBuilderService) {}
 
+    /**
+     * Initialize a new form structure
+     */
+    initFormStructure(): void {
+        this.formStructure = new FormGroup({});
+        this.categories = [];
+        this.categoryMap.clear();
+        this.formStructure$.next(this.formStructure);
+    }
+
+    /**
+     * Get the current form structure as an Observable
+     */
+    getFormStructure(): Observable<FormGroup> {
+        return this.formStructure$.asObservable();
+    }
+
+    /**
+     * Get the current form structure directly
+     */
+    getCurrentFormStructure(): FormGroup {
+        return this.formStructure;
+    }
+
+    /**
+     * Add a form control to the structure
+     */
+    addControl(key: string, control: any, parentCategory?: string): void {
+        const targetContainer = parentCategory && this.categoryMap.has(parentCategory)
+            ? this.categoryMap.get(parentCategory)!
+            : this.formStructure;
+
+        targetContainer.addControl(key, control);
+    }
+
+    /**
+     * Create or get a category form group
+     */
+    addCategory(key: string): FormGroup {
+        if (!this.categoryMap.has(key)) {
+            const categoryForm = new FormGroup({});
+            this.formStructure.addControl(key, categoryForm);
+            this.categoryMap.set(key, categoryForm);
+
+            if (!this.categories.includes(key)) {
+                this.categories.push(key);
+            }
+        }
+
+        return this.categoryMap.get(key) as FormGroup;
+    }
+
+    /**
+     * Get a specific category
+     */
+    getCategory(key: string): FormGroup | null {
+        return this.categoryMap.get(key) || null;
+    }
+
+    /**
+     * Get all available categories
+     */
+    getCategories(): string[] {
+        return [...this.categories];
+    }
+
+    /**
+     * Type guard to check if an item is a form group
+     */
+    isFormGroup<T>(item: QuestionBase<T> | FormGroupBase<T>): item is FormGroupBase<T> {
+        return (item as FormGroupBase<T>).fields !== undefined;
+    }
+
+    /**
+     * Update the BehaviorSubject with the current form structure
+     */
+    emitCurrentFormStructure(): void {
+        this.formStructure$.next(this.formStructure);
+    }
 
     processFormStructure(data: FormGroupBase<any>[] | QuestionBase<any>[]): Observable<FormGroup> {
         this.formStructure = new FormGroup({});
@@ -28,7 +107,6 @@ export class FormModelService {
 
         return this.formStructure$.asObservable();
     }
-
 
     private buildFormHierarchy(data: FormGroupBase<any>[] | QuestionBase<any>[], parentCategory?: string) {
         let currentCategory = parentCategory || '';
@@ -98,23 +176,6 @@ export class FormModelService {
         });
       }
 
-
-
-    addCategory(key: string): FormGroup {
-        if (!this.categoryMap.has(key)) {
-            const categoryForm = new FormGroup({});
-            this.formStructure.addControl(key, categoryForm);
-            this.categoryMap.set(key, categoryForm);
-
-            if (!this.categories.includes(key)) {
-                this.categories.push(key);
-            }
-        }
-
-        return this.categoryMap.get(key) as FormGroup;
-    }
-
-
     addItemToCategory(categoryKey: string, questions: QuestionBase<any>[] = []): Observable<FormGroup> {
         const categoryGroup = this.addCategory(categoryKey);
 
@@ -123,20 +184,5 @@ export class FormModelService {
         }
 
         return new BehaviorSubject<FormGroup>(categoryGroup).asObservable();
-    }
-
-
-    getFormStructure(): Observable<FormGroup> {
-        return this.formStructure$.asObservable();
-    }
-
-
-    getCategory(key: string): FormGroup | null {
-        return this.categoryMap.get(key) || null;
-    }
-
-
-    private isFormGroup<T>(item: QuestionBase<T> | FormGroupBase<T>): item is FormGroupBase<T> {
-        return (item as FormGroupBase<T>).fields !== undefined;
     }
 }
