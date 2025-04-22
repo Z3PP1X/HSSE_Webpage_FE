@@ -50,31 +50,7 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
   constructor(private apiService: ApiService) {}
 
   ngOnInit() {
-    if (this.question.fetchOptions && this.question.apiEndpoint) {
-      this.loadOptions();
-    }
-
-    if (this.question.controlType === 'textbox' && this.question.ajaxConfig) {
-      const control = this.form.get(this.question.key);
-      if (control) {
-        control.valueChanges
-          .pipe(
-            debounceTime(500),
-            distinctUntilChanged(),
-            takeUntil(this.destroy$)
-          )
-          .subscribe((value) => {
-            if (value) {
-              this.handleInputChange(value);
-            }
-          });
-      }
-    }
-    
-    
-    if (this.question.controlType === 'autocomplete') {
-      this.setupAutocomplete();
-    }
+   
   }
   
   private setupAutocomplete() {
@@ -104,7 +80,7 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    this.apiService.get<any[]>(this.question.apiEndpoint!)
+    this.apiService.get<any[]>("test")
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -120,45 +96,18 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
 
   private handleInputChange(value: string) {
     
-    if (!this.question.ajaxConfig?.endpoint) return;
-
-    this.loading = true;
-    this.error = null;
-
-    const params = { query: value };
-
-    this.apiService.get<any[]>(this.question.ajaxConfig.endpoint, { params })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          const targetQuestion = this.getTargetQuestion();
-          if (targetQuestion) {
-            targetQuestion.options = response.map((item: any) => ({
-              key: item.value,
-              value: item.label
-            }));
-          }
-          this.loading = false;
-        },
-        error: (err) => {
-          this.error = 'Failed to load options';
-          this.loading = false;
-        }
-      });
+    
   }
 
   private getTargetQuestion(): QuestionBase<string> | null {
     
-    if (this.question.ajaxConfig?.targetKey) {
-      const control = this.form.get(this.question.ajaxConfig.targetKey);
-      return control ? (control as any)._question : null;
-    }
+    
     return null;
   }
 
   private handleResponse(response: any) {
     
-    switch (this.question.controlType) {
+    switch (this.question.type) {
       case 'dropdown':
       case 'autocomplete':
         this.question.options = response.map((item: any) => ({
@@ -168,14 +117,13 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
         break;
 
       default:
-        console.warn(`Unhandled controlType: ${this.question.controlType}`);
+        console.warn(`Unhandled controlType: ${this.question.type}`);
         break;
     }
   }
 
   getControlName(): string {
-    // Extract just the control name part from the full path
-    // Example: convert "category.controlName" to just "controlName"
+    
     const parts = this.question.key.split('.');
     return parts[parts.length - 1];
   }

@@ -64,7 +64,7 @@ export class FormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.form) {
-      this.setupAjaxHandlers();
+      
     }
   }
 
@@ -99,59 +99,8 @@ export class FormComponent implements OnInit, OnDestroy {
     return controls ? Object.keys(controls) : [];
   }
 
-  private setupAjaxHandlers() {
-    if (!this.form || !this.questions?.length) return;
-
-    this.questions.forEach((question) => {
-      const control = this.form.get(question.key);
-      const config = question.ajaxConfig;
-
-      if (control && config) {
-        if (config.triggerEvents?.includes('init')) {
-          this.handleAjaxCall(question, control.value);
-        }
-
-        if (config.triggerEvents?.includes('change')) {
-          control.valueChanges
-            .pipe(
-              debounceTime(config.debounceTime || 300),
-              distinctUntilChanged(),
-              takeUntil(this.destroy$)
-            )
-            .subscribe((value) => {
-              this.handleAjaxCall(question, value);
-            });
-        }
-      }
-    });
-  }
-
-  private handleAjaxCall(question: QuestionBase<string>, value: any) {
-    const config = question.ajaxConfig;
-    if (!config?.endpoint) return;
-
-    const params = this.buildParams(config.paramMap || {}, value);
-
-    const request$ =
-      config.method === 'POST'
-        ? this.apiService.post(config.endpoint, params)
-        : this.apiService.get(config.endpoint, { params });
-
-    request$.subscribe({
-      next: (response) => {
-        config.onSuccess?.({
-          response,
-          form: this.form,
-          question,
-          value,
-        });
-      },
-      error: (err) => {
-        config.onError?.(err);
-        console.error(`AJAX failed for ${question.key}:`, err);
-      },
-    });
-  }
+  
+  
 
   private buildParams(
     paramMap: Record<string, string>,

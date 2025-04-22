@@ -19,48 +19,40 @@ export interface AjaxConfig {
 
 export class QuestionBase<T>{
   value: T | undefined;
-  title: string;
   key: string;
   label: string;
+  helpText: string; 
   required: boolean;
   order: number;
-  controlType: string;
   type: string;
   fetchOptions: boolean;
-  apiEndpoint: string;
   options: {key: string, value: number}[];
-  ajaxConfig?: AjaxConfig;
-  category?: string; // Added missing property
+  category?: string; 
 
   constructor(
     options: {
       value?: T;
-      title?: string;
       key?: string;
       label?: string;
+      helptText?: string; 
       required?: boolean;
       order?: number;
-      controlType?: string;
       type?: string;
       fetchOptions?: boolean;
-      apiEndpoint?: string;
       options?: {key: string; value: number}[];
-      ajaxConfig?: AjaxConfig;
       category?: string;
     } = {}
+    
   ){
     this.value = options.value;
-    this.title = options.title || '';
     this.key = options.key || '';
     this.label = options.label || '';
+    this.helpText = options.helptText || '';
     this.required = !!options.required;
     this.order = options.order === undefined ? 1 : options.order;
-    this.controlType = options.controlType || '';
     this.type = options.type || '';
     this.fetchOptions = options.fetchOptions || false;
-    this.apiEndpoint = options.apiEndpoint || '';
     this.options = options.options || [];
-    this.ajaxConfig = options.ajaxConfig;
     this.category = options.category;
   }
 }

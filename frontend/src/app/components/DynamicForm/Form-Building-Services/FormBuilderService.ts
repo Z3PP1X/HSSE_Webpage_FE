@@ -21,9 +21,7 @@ export class FormBuilderService {
         return new FormGroup({ [groupName]: new FormGroup({}) });
     }
 
-    /**
-     * Creates form controls from question definitions
-     */
+   
     toFormGroup(questions: QuestionBase<string>[]): FormGroup {
         const group: Record<string, FormControl> = {};
 
@@ -35,11 +33,10 @@ export class FormBuilderService {
                     validators.push(Validators.required);
                 }
 
-                // Add more validators based on question properties
                 if (question.type === 'email') {
                     validators.push(Validators.email);
                 }
-                if (question.type === 'number' || question.controlType === 'integer') {
+                if (question.type === 'number' || question.type === 'integer') {
                     validators.push(Validators.pattern('^[0-9]*$'));
                 }
 
@@ -57,9 +54,7 @@ export class FormBuilderService {
         return new FormGroup(group);
     }
 
-    /**
-     * Transforms raw data into typed question objects
-     */
+    
     formQuestions(data: any[]): Observable<QuestionBase<any>[]> {
         const questions: QuestionBase<any>[] = [];
 
@@ -68,20 +63,18 @@ export class FormBuilderService {
                 title: element.title,
                 key: element.key,
                 label: element.label,
-                type: element.type,
+                field_type: element.type,
                 required: element.required,
                 order: element.order || 0,
                 fetchOptions: element.fetchOptions,
-                apiEndpoint: element.apiEndpoint,
-                ajaxConfig: element.ajaxConfig,
+                helpText: element.helpText,
                 value: element.value,
                 controlType: element.controlType,
                 options: element.options,
-                maxContacts: element.maxContacts,
-                category: element.category
+                category: element.category, 
             };
 
-            switch (element.controlType) {
+            switch (element.field_type) {
                 case "textbox":
                     questions.push(new TextboxQuestion({ ...baseConfig }));
                     break;
@@ -109,16 +102,12 @@ export class FormBuilderService {
         return of(questions.sort((a, b) => a.order - b.order));
     }
 
-    /**
-     * Creates an empty form array
-     */
+    
     createFormArray(): FormArray<any> {
         return new FormArray<any>([]);
     }
 
-    /**
-     * Adds questions to a form group
-     */
+    
     addQuestionToGroup(group: FormGroup, questions: QuestionBase<string>[]): Observable<FormGroup> {
         return this.formQuestions(questions).pipe(
             map(processedQuestions => {
@@ -131,9 +120,7 @@ export class FormBuilderService {
         );
     }
 
-    /**
-     * Adds items to a form array
-     */
+    
     addItemToFormArray(formArray: FormArray, questions: QuestionBase<string>[]): Observable<FormArray> {
         return this.formQuestions(questions).pipe(
             map(processedQuestions => {
@@ -144,9 +131,7 @@ export class FormBuilderService {
         );
     }
 
-    /**
-     * Removes an item from a form array
-     */
+   
     removeItemFromFormArray(formArray: FormArray, index: number): void {
         if (index >= 0 && index < formArray.length) {
             formArray.removeAt(index);
@@ -162,3 +147,5 @@ export class FormBuilderService {
         );
     }
 }
+
+
