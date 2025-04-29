@@ -16,7 +16,9 @@
   *ngIf="formData && formData.controls && getObjectKeys(formData.controls).length > 0"
   [formTitle]="formTitle"
   [form]="formData"
-  (formSubmit)="onFormSubmit($event)">
+  (formSubmit)="onFormSubmit($event)"
+  [formStructure]="(questions$ | async ) || []">
+  
 </app-form>
     
     <!-- Show loading when form data is empty or incomplete -->

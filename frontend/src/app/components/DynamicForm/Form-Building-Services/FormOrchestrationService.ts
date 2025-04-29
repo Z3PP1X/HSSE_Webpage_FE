@@ -17,11 +17,12 @@ export class FormOrchestrationService {
     private loading$ = new BehaviorSubject<boolean>(false);
     private error$ = new BehaviorSubject<string | null>(null);
     private formMetadata$ = new BehaviorSubject<any>(null);
+    private formQuestions$ = new BehaviorSubject<FormGroupBase<any>[] | QuestionBase<any>[]>([]);
 
     constructor(
         private httpclient: HttpClient,
         private formModelService: FormModelService,
-        private formBuilderService: FormBuilderService
+        
     ) {}
 
 
@@ -31,7 +32,6 @@ export class FormOrchestrationService {
 
         return this.httpclient.get<any>(apiEndpoint).pipe(
             tap(response => {
-                
                 this.formMetadata$.next({
                     form_id: response.form_id,
                     form_title: response.form_title,
@@ -41,8 +41,12 @@ export class FormOrchestrationService {
             map(response => {
                 if (response.structure) {
                     
-                    return this.mapApiToFormDefinition(response.structure);
+                    const _transformedForm = this.mapApiToFormDefinition(response.structure)
+                    this.formQuestions$.next(_transformedForm);
+                    
+                    return _transformedForm;
                 }
+                ;
                 return [];
             }),
             switchMap(formData => this.initFormBuild(formData)),
@@ -59,7 +63,7 @@ export class FormOrchestrationService {
     }
 
     private initFormBuild(data: FormGroupBase<any>[] | QuestionBase<any>[]): Observable<FormGroup> {
-
+        
         this.formModelService.processFormStructure(data);
 
         this.formModelService.emitCurrentFormStructure();
@@ -113,6 +117,11 @@ export class FormOrchestrationService {
             })
         );
     }
+
+    getFormQuestions(): Observable<FormGroupBase<any>[] | QuestionBase<any>[]> {
+        return this.formQuestions$.asObservable();
+    }
+
     getCurrentForm(): Observable<FormGroup> {
         return this.currentForm$.asObservable();
     }

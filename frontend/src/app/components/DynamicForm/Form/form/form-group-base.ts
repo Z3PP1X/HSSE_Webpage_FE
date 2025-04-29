@@ -24,3 +24,16 @@ export class FormGroupBase<T>{
         this.isArray = options.isArray || false;
     }
 };
+
+
+export function isFormGroupBase(obj: any): obj is FormGroupBase<any> {
+    return (
+        obj !== null &&
+        typeof obj === 'object' &&
+        typeof obj.key === 'string' &&
+        typeof obj.title === 'string' &&
+        Array.isArray(obj.fields) &&
+        (obj.isCategory === undefined || typeof obj.isCategory === 'boolean') &&
+        (obj.isArray === undefined || typeof obj.isArray === 'boolean')
+      );
+}

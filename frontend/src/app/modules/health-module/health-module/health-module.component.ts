@@ -11,6 +11,8 @@ import { environment } from '../../../../environments/environment';
 import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
 import { tap } from 'rxjs/operators';
 import { FormFrameComponent } from '../../../components/DynamicForm/form-frame/form-frame.component';
+import { QuestionBase } from '../../../components/DynamicForm/question-base';
+import { FormGroupBase } from '../../../components/DynamicForm/Form/form/form-group-base';
 
 @Component({
   selector: 'app-health-module',
@@ -22,14 +24,16 @@ import { FormFrameComponent } from '../../../components/DynamicForm/form-frame/f
 })
 export class HealthModuleComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  showForm = true; // Set to true initially if you want the form to show on page load
+  showForm = true;
   moduleConfig = [HealthModuleConfig];
   iconPath = "ehs-icons/health-white.svg";
 
   formTitle = "Unfallbericht";
+  questions$: Observable<FormGroupBase<any>[] | QuestionBase<any>[]> |  null = null;
   form$: Observable<FormGroup> | null = null;
   isLoading = false;
   error: string | null = null;
+
 
   getObjectKeys(obj: object): string[] {
     return Object.keys(obj || {});
@@ -50,16 +54,21 @@ export class HealthModuleComponent implements OnInit, OnDestroy {
       
       this.form$ = this.formOrchestrationService.generateForm(formEndpoint).pipe(
         tap(form => {
-          // Try to update form title if available in the metadata
+          
           this.formOrchestrationService.getFormMetadata()
             .pipe(takeUntil(this.destroy$))
             .subscribe(metadata => {
+             
               if (metadata?.form_title) {
                 this.formTitle = metadata.form_title;
               }
             });
         })
+        
       );
+
+      this.questions$ = this.formOrchestrationService.getFormQuestions()
+        .pipe(takeUntil(this.destroy$));
       
       
       this.formOrchestrationService.isLoading()

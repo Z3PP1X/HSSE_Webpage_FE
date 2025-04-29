@@ -1,86 +1,98 @@
-<form (ngSubmit)="onSubmit()" [formGroup]="form" class="form-container">
+@if (!formReadyFlag()) {
   
-  <div class="h-[100px] flex flex-col text-center align-middle justify-center" >
-    <h2 class="font-bold text-[32px]">{{formTitle()}}</h2>
-  </div>
-  
-
-
-
-  <!-- Progress Navigation -->
-  <div class="progress-navigation">
-    <mat-progress-bar
-      mode="determinate"
-      [value]="getProgressValue()"
-      class="form-progress"
-    ></mat-progress-bar>
-
-    <div class="category-labels">
-      @for (category of formCategories(); track category; let i = $index) {
-        <div
-          class="category-label"
-          [class.active]="i === currentCategoryIndex"
-          (click)="selectCategory(i)">
-          {{ humanizeCategory(category) }}
-        </div>
-      }
+    <div class="flex flex-col items-center justify-center w-full h-64 my-8">
+      <mat-spinner
+        [diameter]="50"
+        [strokeWidth]="5"
+        color="primary">
+      </mat-spinner>
+      <h2 class="text-center text-2xl font-bold mt-4">Loading...</h2>
     </div>
-  </div>
+  
 
-  <!-- Current Category Content -->
-  <div class="step-content">
-    <h3 class="font-bold text-2xl mb-4">{{ humanizeCategory(getCurrentCategory()) }}</h3>
-
-    <div [formGroupName]="getCurrentCategory()" class="">
-      @if (form && form.get(getCurrentCategory())) {
-        @for (controlName of getControlKeys(getCurrentCategory()); track controlName) {
-          <div class="w-full">
-            @if (getQuestionForKey(getCurrentCategory() + '.' + controlName)) {
-              <app-form-question
-                [question]="getQuestionForKey(getCurrentCategory() + '.' + controlName)!"
-                [form]="form">
-              </app-form-question>
-            } @else {
-              <div class="fallback-field">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>{{controlName}}</mat-label>
-                  <input matInput [formControlName]="controlName" [id]="controlName">
-                </mat-form-field>
-              </div>
-            }
+}
+@else {
+  <form (ngSubmit)="onSubmit()" [formGroup]="form" class="form-container">
+    <div class="h-[100px] flex flex-col text-center align-middle justify-center" >
+      <h2 class="font-bold text-[32px]">{{formTitle()}}</h2>
+    </div>
+    
+    <!-- Progress Navigation -->
+    <div class="progress-navigation">
+      <mat-progress-bar
+        mode="determinate"
+        [value]="getProgressValue()"
+        class="form-progress"
+      ></mat-progress-bar>
+  
+      <div class="category-labels">
+        @for (category of formCategories(); track category; let i = $index) {
+          <div
+            class="category-label"
+            [class.active]="i === currentCategoryIndex"
+            (click)="selectCategory(i)">
+            {{ humanizeCategory(category) }}
           </div>
         }
-      }
+      </div>
     </div>
-
-    <!-- Navigation Buttons -->
-    <div class="navigation-buttons">
-      <button
-        mat-button
-        *ngIf="currentCategoryIndex !== 0"
-        (click)="previousCategory()"
-        color="primary">
-        Previous
-      </button>
-
-      <button
-        mat-raised-button
-        *ngIf="currentCategoryIndex !== formCategories().length - 1"
-        (click)="nextCategory()"
-        color="primary">
-        Next
-      </button>
-
-      <button
-        mat-raised-button
-        *ngIf="currentCategoryIndex === formCategories().length - 1"
-        type="submit"
-        color="primary">
-        Submit
-      </button>
+  
+    <!-- Current Category Content -->
+    <div class="step-content">
+      <h3 class="font-bold text-2xl mb-4">{{ humanizeCategory(getCurrentCategory()) }}</h3>
+  
+      <div [formGroupName]="getCurrentCategory()" class="">
+        @if (form && form.get(getCurrentCategory())) {
+          @for (controlName of getControlKeys(getCurrentCategory()); track controlName) {
+            <div class="w-full">
+              @if (getQuestionForKey(controlName)) {
+                <app-form-question
+                  [question]="getQuestionForKey(controlName)!"
+                  [form]="form">
+                </app-form-question>
+              } @else {
+                <div class="fallback-field">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{controlName}}</mat-label>
+                    <input matInput [formControlName]="controlName" [id]="controlName">
+                  </mat-form-field>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+  
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons">
+        <button
+          mat-button
+          *ngIf="currentCategoryIndex !== 0"
+          (click)="previousCategory()"
+          color="primary">
+          Previous
+        </button>
+  
+        <button
+          mat-raised-button
+          *ngIf="currentCategoryIndex !== formCategories().length - 1"
+          (click)="nextCategory()"
+          color="primary">
+          Next
+        </button>
+  
+        <button
+          mat-raised-button
+          *ngIf="currentCategoryIndex === formCategories().length - 1"
+          type="submit"
+          color="primary">
+          Submit
+        </button>
+      </div>
     </div>
-  </div>
-</form>
-
-
-
+  </form>
+  
+  
+  
+  
+}

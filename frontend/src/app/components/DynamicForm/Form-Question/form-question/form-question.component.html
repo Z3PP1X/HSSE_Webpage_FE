@@ -16,11 +16,11 @@
 
   <div [formGroup]="getFormGroup()">
 
-    @switch (question.type) {
+    @switch (question.field_type) {
       @case ('textbox') {
         <mat-form-field appearance="fill" class="form-field-full-width">
           <mat-label>{{ question.label }}</mat-label>
-          <input matInput [formControlName]="getControlName()" [id]="question.key" [type]="question.type">
+          <input matInput [formControlName]="getControlName()" [id]="question.key" [type]="question.field_type">
           <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
         </mat-form-field>
       }
@@ -115,7 +115,7 @@
       <mat-form-field appearance="fill" class="form-field-full-width">
         <mat-label>{{ question.label }}</mat-label>
         <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
-        <mat-hint>Unknown control type: {{ question.type }}</mat-hint>
+        <mat-hint>Unknown control type: {{ question.field_type }}</mat-hint>
         <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
       </mat-form-field>
     }

@@ -1,5 +1,5 @@
 import { QuestionBase } from "../question-base";
 
 export class LocationQuestion extends QuestionBase<string>{
-  override type ='location';
+  override field_type ='location';
 }

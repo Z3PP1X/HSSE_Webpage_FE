@@ -24,7 +24,7 @@ export class QuestionBase<T>{
   helpText: string; 
   required: boolean;
   order: number;
-  type: string;
+  field_type: string;
   fetchOptions: boolean;
   options: {key: string, value: number}[];
   category?: string; 
@@ -37,9 +37,9 @@ export class QuestionBase<T>{
       helptText?: string; 
       required?: boolean;
       order?: number;
-      type?: string;
+      field_type?: string;
       fetchOptions?: boolean;
-      options?: {key: string; value: number}[];
+      choices?: {key: string; value: number}[];
       category?: string;
     } = {}
     
@@ -50,9 +50,26 @@ export class QuestionBase<T>{
     this.helpText = options.helptText || '';
     this.required = !!options.required;
     this.order = options.order === undefined ? 1 : options.order;
-    this.type = options.type || '';
+    this.field_type = options.field_type || '';
     this.fetchOptions = options.fetchOptions || false;
-    this.options = options.options || [];
+    this.options = options.choices || [];
     this.category = options.category;
   }
 }
+
+export function isQuestionBase(obj: any): obj is QuestionBase<any> {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    typeof obj.key === 'string' &&
+    (!('label' in obj) || typeof obj.label === 'string') &&
+    (!('helpText' in obj) || typeof obj.helpText === 'string') &&
+    typeof obj.required === 'boolean' &&
+    (!('order' in obj) || typeof obj.order === 'number') &&
+    (!('field_type' in obj) || typeof obj.field_type === 'string') &&
+    (!('fetchOptions' in obj) || typeof obj.fetchOptions === 'boolean') &&
+    (!('choices' in obj) || Array.isArray(obj.choices) || obj.choices === null) &&
+    (!('category' in obj) || typeof obj.category === 'string' || obj.category === undefined)
+  );
+}
+

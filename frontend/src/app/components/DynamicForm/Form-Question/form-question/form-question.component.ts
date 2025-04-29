@@ -107,7 +107,7 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
 
   private handleResponse(response: any) {
     
-    switch (this.question.type) {
+    switch (this.question.field_type) {
       case 'dropdown':
       case 'autocomplete':
         this.question.options = response.map((item: any) => ({
@@ -117,7 +117,7 @@ export class FormQuestionComponent implements OnInit, OnDestroy {
         break;
 
       default:
-        console.warn(`Unhandled controlType: ${this.question.type}`);
+        console.warn(`Unhandled controlType: ${this.question.field_type}`);
         break;
     }
   }

@@ -7,12 +7,15 @@ import { FormBuilderService } from "./FormBuilderService";
 import { of } from "rxjs";
 
 
+
+
 @Injectable({
     providedIn: 'root'
 })
 export class FormModelService {
     private formStructure: FormGroup = new FormGroup({});
     private formStructure$ = new BehaviorSubject<FormGroup>(this.formStructure);
+    private questions: any = [];
 
     private categories: string[] = [];
     private categoryMap = new Map<string, FormGroup>();
@@ -31,8 +34,6 @@ export class FormModelService {
 
     private buildFormHierarchy(data: FormGroupBase<any>[] | QuestionBase<any>[], parentCategory?: string) {
         let currentCategory = parentCategory || '';
-
-    
 
         data.forEach(element => {
           if (this.isFormGroup(element)) {
@@ -85,7 +86,6 @@ export class FormModelService {
               }
             }
           } else {
-            
             const targetCategory = currentCategory;
             if (targetCategory && this.categoryMap.has(targetCategory)) {
               const categoryGroup = this.categoryMap.get(targetCategory);

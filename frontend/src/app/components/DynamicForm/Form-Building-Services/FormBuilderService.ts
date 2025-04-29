@@ -33,10 +33,10 @@ export class FormBuilderService {
                     validators.push(Validators.required);
                 }
 
-                if (question.type === 'email') {
+                if (question.field_type === 'email') {
                     validators.push(Validators.email);
                 }
-                if (question.type === 'number' || question.type === 'integer') {
+                if (question.field_type === 'number' || question.field_type === 'integer') {
                     validators.push(Validators.pattern('^[0-9]*$'));
                 }
 
@@ -69,7 +69,6 @@ export class FormBuilderService {
                 fetchOptions: element.fetchOptions,
                 helpText: element.helpText,
                 value: element.value,
-                controlType: element.controlType,
                 options: element.options,
                 category: element.category, 
             };
@@ -91,7 +90,7 @@ export class FormBuilderService {
                     questions.push(new DateTimeQuestion({ ...baseConfig }));
                     break;
                 case "dropdown":
-                    questions.push(new DropdownQuestion({ ...baseConfig, options: element.options || [] }));
+                    questions.push(new DropdownQuestion({ ...baseConfig, choices: element.options || [] }));
                     break;
                 default:
                     console.warn('Unknown controlType: ', element.controlType);
