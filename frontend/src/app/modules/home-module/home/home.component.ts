@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ModuleManagementService } from '../../../global-services/module-management/module-management.service';
@@ -17,7 +17,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   availableModules: GlobalModuleConfig[] = [];
 
-  constructor(private moduleManagementService: ModuleManagementService) {}
+  constructor(
+    private moduleManagementService: ModuleManagementService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadAvailableModules();
@@ -34,6 +37,28 @@ export class HomeComponent implements OnInit, OnDestroy {
       .subscribe(modules => {
         this.availableModules = modules;
       });
+  }
+
+  /**
+   * Handle Get Started button click
+   */
+  getStarted(): void {
+    // Navigate to the first available module or show onboarding
+    if (this.availableModules.length > 0) {
+      const firstModule = this.availableModules[0];
+      this.router.navigate(['/', firstModule.route]);
+    } else {
+      // Navigate to support if no modules are available
+      this.router.navigate(['/support']);
+    }
+  }
+
+  /**
+   * Handle Learn More button click
+   */
+  learnMore(): void {
+    // Navigate to support/documentation
+    this.router.navigate(['/support']);
   }
 
   getModuleIcon(moduleId: string): string {
