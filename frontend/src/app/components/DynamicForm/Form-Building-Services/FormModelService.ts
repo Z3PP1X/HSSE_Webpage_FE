@@ -5,6 +5,7 @@ import { QuestionBase } from "../question-base";
 import { FormGroupBase } from "../Form/form/form-group-base";
 import { FormBuilderService } from "./FormBuilderService";
 import { of } from "rxjs";
+import { map } from "rxjs/operators";
 
 
 
@@ -16,6 +17,7 @@ export class FormModelService {
     private formStructure: FormGroup = new FormGroup({});
     private formStructure$ = new BehaviorSubject<FormGroup>(this.formStructure);
     private questions: any = [];
+    private categoryInstances = new Map<string, number>();
 
     private categories: string[] = [];
     private categoryMap = new Map<string, FormGroup>();
@@ -129,6 +131,84 @@ addCategory(key: string): FormGroup {
     }
 
     return this.categoryMap.get(key) as FormGroup;
+}
+
+// FormModelService.ts - Add these methods
+addInstanceToExpandableCategory(categoryKey: string, templateFields: QuestionBase<any>[]): Observable<void> {
+  const categoryGroup = this.getCategory(categoryKey);
+  if (!categoryGroup) {
+    throw new Error(`Category ${categoryKey} not found`);
+  }
+  
+  const currentInstance = this.incrementCategoryInstance(categoryKey);
+  
+  // Create new fields with indexed keys
+  const indexedFields = templateFields.map(field => ({
+    ...field,
+    key: field.key.replace('{index}', currentInstance.toString()),
+    label: field.key_template ? `${field.key_template} ${currentInstance}` : `${field.label} ${currentInstance}`
+  }));
+  
+  return this.formBuilderService.addQuestionToGroup(categoryGroup, indexedFields).pipe(
+    map(() => {}) // Convert FormGroup to void
+  );
+}
+
+removeInstanceFromExpandableCategory(categoryKey: string, instanceIndex: number): void {
+  const categoryGroup = this.getCategory(categoryKey);
+  if (!categoryGroup) return;
+  
+  // Remove controls for this instance
+  const fieldsToRemove = Object.keys(categoryGroup.controls)
+    .filter(key => key.endsWith(`_${instanceIndex}`));
+  
+  fieldsToRemove.forEach(fieldKey => {
+    categoryGroup.removeControl(fieldKey);
+  });
+  
+  this.decrementCategoryInstance(categoryKey);
+}
+
+// Check if category can add more instances
+canAddInstance(category: FormGroupBase<any>): boolean {
+  if (!category.expandable) return false;
+  
+  const currentCount = this.getCategoryInstanceCount(category.key);
+  const maxInstances = category.max_instances || Infinity;
+  
+  return currentCount < maxInstances;
+}
+
+// Check if category can remove instances
+canRemoveInstance(category: FormGroupBase<any>): boolean {
+  if (!category.expandable) return false;
+  
+  const currentCount = this.getCategoryInstanceCount(category.key);
+  const minInstances = category.min_instances || 0;
+  
+  return currentCount > minInstances;
+}
+
+incrementCategoryInstance(categoryKey: string): number {
+  const current = this.getCategoryInstanceCount(categoryKey);
+  const newCount = current + 1;
+  this.setCategoryInstanceCount(categoryKey, newCount);
+  return newCount;
+}
+
+decrementCategoryInstance(categoryKey: string): number {
+  const current = this.getCategoryInstanceCount(categoryKey);
+  const newCount = Math.max(0, current - 1);
+  this.setCategoryInstanceCount(categoryKey, newCount);
+  return newCount;
+}
+
+getCategoryInstanceCount(categoryKey: string): number {
+  return this.categoryInstances.get(categoryKey) || 0;
+}
+
+setCategoryInstanceCount(categoryKey: string, count: number): void {
+  this.categoryInstances.set(categoryKey, count);
 }
 
 getCategory(key: string): FormGroup | null {

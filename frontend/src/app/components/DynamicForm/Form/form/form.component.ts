@@ -8,6 +8,9 @@ import {
   EventEmitter,
   Signal,
   signal,
+  ChangeDetectorRef,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,8 +18,6 @@ import {
   ReactiveFormsModule,
   AbstractControl,
 } from '@angular/forms';
-
-import { ChangeDetectorRef } from '@angular/core';
 
 import { QuestionBase } from '../../question-base';
 import { FormGroupBase } from './form-group-base';
@@ -40,6 +41,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormModelService } from '../../Form-Building-Services/FormModelService';
 
 
 @Component({
@@ -62,13 +64,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css'],
 })
-export class FormComponent implements OnInit, OnDestroy {
+export class FormComponent implements OnInit, OnDestroy, OnChanges {
+
+  Array = Array;
   payLoad: string = '';
   private destroy$ = new Subject<void>();
 
   formTitle = input.required<string>();
   questions: QuestionBase<any>[] = [];
   formReadyFlag = signal<boolean>(false);
+  expandableCategories = signal<Map<string, FormGroupBase<any>>>(new Map());
 
   @Input() form!: FormGroup;
   @Input() formStructure: FormGroupBase<any>[] | QuestionBase<any>[] = [];
@@ -83,14 +88,189 @@ export class FormComponent implements OnInit, OnDestroy {
   formReady = signal(false);
   currentCategoryIndex: number = 0;
 
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log('FormComponent ngOnChanges called with:', changes);
+    
+    // Check if both form and formStructure are available
+    if (this.form && this.formStructure && this.formStructure.length > 0) {
+      console.log('Both form and structure available in ngOnChanges');
+      this.initializeFormWithStructure();
+    }
+  }
+
   constructor(
     private apiService: ApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private formModelService: FormModelService
   ) {}
 
   ngOnInit(): void {
-    this.prepareFormData();
+    console.log('FormComponent ngOnInit - Form provided:', !!this.form);
+    console.log('FormComponent ngOnInit - FormStructure length:', this.formStructure?.length || 0);
+    console.log('FormComponent ngOnInit - FormStructure:', this.formStructure);
+    
+    if (!this.form) {
+      console.log('No form provided - preparing form data');
+      this.prepareFormData();
+    } else {
+      console.log('Form provided by parent - setting ready immediately');
+      this.formReadyFlag.set(true);
+      this.isLoading.set(false);
+      
+      if (this.formStructure && this.formStructure.length > 0) {
+        console.log('Processing questions from structure');
+        this.provideQuestions(this.formStructure);
+        // Initialize expandable categories AFTER processing questions
+        this.initializeExpandableCategories();
+      }
+      
+      console.log('FormReadyFlag after setup:', this.formReadyFlag());
+    }
+    
+    // Don't call initializeExpandableCategories here if form is provided
+    // Only call it if no form is provided (handled in prepareFormData)
+    if (!this.form) {
+      this.initializeExpandableCategories();
+    }
   }
+
+  private initializeFormWithStructure(): void {
+    console.log('Initializing form with structure');
+    console.log('Form:', this.form);
+    console.log('Structure:', this.formStructure);
+    
+    // Set form as ready
+    this.formReadyFlag.set(true);
+    this.isLoading.set(false);
+    
+    // Process questions from structure
+    this.provideQuestions(this.formStructure);
+    
+    // Initialize expandable categories
+    this.initializeExpandableCategories();
+    
+    // Force change detection
+    this.cdr.detectChanges();
+    
+    console.log('Form initialization complete');
+  }
+
+  private initializeExpandableCategories(): void {
+    console.log('Initializing expandable categories with structure:', this.formStructure);
+    
+    if (!this.formStructure || !this.isFormGroupBaseArray(this.formStructure)) {
+      console.log('FormStructure is not a valid FormGroupBase array');
+      return;
+    }
+
+    const expandableMap = new Map<string, FormGroupBase<any>>();
+    
+    this.formStructure.forEach(category => {
+      console.log(`Checking category ${category.key}:`, {
+        expandable: category.expandable,
+        isCategory: category.isCategory,
+        fields: category.fields?.length || 0
+      });
+      
+      if (category.expandable && category.isCategory) {
+        expandableMap.set(category.key, category);
+        // Initialize instance count from current_instances or min_instances
+        const initialCount = category.current_instances || category.min_instances || 1;
+        this.formModelService.setCategoryInstanceCount(category.key, initialCount);
+        console.log(`Set ${category.key} instance count to ${initialCount}`);
+      }
+    });
+    
+    // Update the signal
+    this.expandableCategories.set(expandableMap);
+    console.log('Final expandable categories map:', expandableMap);
+    console.log('Expandable categories keys:', Array.from(expandableMap.keys()));
+    
+    // Force another change detection after setting expandable categories
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 0);
+  }
+
+  isCategoryExpandable(categoryKey: string): boolean {
+    const expandableMap = this.expandableCategories();
+    const isExpandable = expandableMap.has(categoryKey);
+    
+    if (!isExpandable) {
+      console.log(`Category ${categoryKey} is NOT expandable`);
+      console.log('Available expandable categories:', Array.from(expandableMap.keys()));
+      console.log('Current expandable map:', expandableMap);
+    } else {
+      console.log(`Category ${categoryKey} IS expandable`);
+    }
+    
+    return isExpandable;
+  }
+
+canAddInstance(categoryKey: string): boolean {
+  const category = this.expandableCategories().get(categoryKey);
+  if (!category) return false;
+  
+  const currentCount = this.getCurrentInstanceCount(categoryKey);
+  const maxInstances = category.max_instances || Infinity;
+  return currentCount < maxInstances;
+}
+
+addInstance(categoryKey: string): void {
+  console.log(`Adding instance to category: ${categoryKey}`);
+  const category = this.expandableCategories().get(categoryKey);
+  if (!category || !this.canAddInstance(categoryKey)) {
+    console.log('Cannot add instance - category not found or limit reached');
+    return;
+  }
+  
+  // Find template fields from the original structure (those containing {index})
+  // Since the API has already expanded them, we need to recreate the template
+  const existingFields = category.fields.filter(field => 
+    isQuestionBase(field) && field.key_template
+  ) as QuestionBase<any>[];
+  
+  // Create template fields
+  const templateFields = existingFields.map(field => ({
+    ...field,
+    key: `${field.key_template}_{index}`, // Recreate template format
+    label: field.key_template || field.label
+  }));
+  
+  console.log('Template fields for new instance:', templateFields);
+  
+  this.formModelService.addInstanceToExpandableCategory(categoryKey, templateFields)
+    .subscribe(() => {
+      console.log(`Successfully added instance to ${categoryKey}`);
+      this.cdr.detectChanges();
+    });
+}
+
+canRemoveInstance(categoryKey: string): boolean {
+  const category = this.expandableCategories().get(categoryKey);
+  return category ? this.formModelService.canRemoveInstance(category) : false;
+}
+
+getCurrentInstanceCount(categoryKey: string): number {
+  return this.formModelService.getCategoryInstanceCount(categoryKey);
+}
+
+getMaxInstances(categoryKey: string): number {
+  const category = this.expandableCategories().get(categoryKey);
+  return category?.max_instances || Infinity;
+}
+
+removeInstance(categoryKey: string): void {
+  if (!this.canRemoveInstance(categoryKey)) return;
+  
+  const currentCount = this.getCurrentInstanceCount(categoryKey);
+  this.formModelService.removeInstanceFromExpandableCategory(categoryKey, currentCount);
+  this.cdr.detectChanges();
+}
+
+isFormGroupBase(item: any): item is FormGroupBase<any> {
+  return item && typeof item === 'object' && 'fields' in item && Array.isArray(item.fields);
+}
 
   private async prepareFormData() {
     try {
@@ -194,14 +374,19 @@ export class FormComponent implements OnInit, OnDestroy {
   }
 
   getQuestionForKey(key: string): QuestionBase<any> | undefined {
-    // First try direct lookup from map
-    const question = this.questionMap().get(key);
-    if (question) {
-      return question;
+    if (!this.questions || this.questions.length === 0) {
+      return undefined;
     }
 
-    return undefined
+    // Try direct key match first
+    let question = this.questions.find(q => q.key === key);
+    if (question) return question;
 
+    // Try extracting key from category.key format
+    const keyPart = key.includes('.') ? key.split('.').pop() : key;
+    question = this.questions.find(q => q.key === keyPart);
+    
+    return question;
   }
 
   getControlKeys(category: string): string[] {

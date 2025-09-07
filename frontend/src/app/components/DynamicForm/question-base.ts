@@ -28,6 +28,10 @@ export class QuestionBase<T>{
   fetchOptions: boolean;
   options: {key: string, value: number}[];
   category?: string; 
+  key_template?: string; 
+  expandable?: boolean;
+  instance_key?: string; 
+  original_key?: string;
 
   constructor(
     options: {
@@ -41,6 +45,10 @@ export class QuestionBase<T>{
       fetchOptions?: boolean;
       choices?: {key: string; value: number}[];
       category?: string;
+      key_template?: string;
+      expandable?: boolean;
+      instance_key?: string;
+      original_key?: string;
     } = {}
     
   ){
@@ -54,6 +62,10 @@ export class QuestionBase<T>{
     this.fetchOptions = options.fetchOptions || false;
     this.options = options.choices || [];
     this.category = options.category;
+    this.key_template = options.key_template || '';
+    this.expandable = options.expandable || false;
+    this.instance_key = options.instance_key || '';
+    this.original_key = options.original_key || '';
   }
 }
 
@@ -69,7 +81,11 @@ export function isQuestionBase(obj: any): obj is QuestionBase<any> {
     (!('field_type' in obj) || typeof obj.field_type === 'string') &&
     (!('fetchOptions' in obj) || typeof obj.fetchOptions === 'boolean') &&
     (!('choices' in obj) || Array.isArray(obj.choices) || obj.choices === null) &&
-    (!('category' in obj) || typeof obj.category === 'string' || obj.category === undefined)
+    (!('category' in obj) || typeof obj.category === 'string' || obj.category === undefined)&&
+    typeof obj.key_template === 'string' &&
+    typeof obj.expandable === 'boolean' &&
+    typeof obj.instance_key === 'string' &&
+    typeof obj.original_key === 'string'
   );
 }
 
