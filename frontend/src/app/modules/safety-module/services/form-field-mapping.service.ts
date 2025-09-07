@@ -6,33 +6,11 @@ import { AlarmplanFields, FirstAider, AddedContact, NextHospital } from "../comp
   providedIn: 'root'
 })
 export class AlarmplanDataService {
-    private formDataSubject = new BehaviorSubject<AlarmplanFields>({
-        id: 0,
-        costCenter: '',
-        firstAiderDict: [],
-        assemblyPoint: '',
-        poisonEmergencyCall: '',
-        nextHospital: {
-            name: '',
-            zipcode: '',
-            city: '',
-            street: '',
-            houseNumber: ''
-        },
-        addedContact: []
-    } as AlarmplanFields); // Initialize with proper default values
-    
+    private formDataSubject = new BehaviorSubject<AlarmplanFields>({} as AlarmplanFields);
     public formData$ = this.formDataSubject.asObservable();
 
     updateFormData(data: any) {
         console.log('Raw form data received:', data);
-        console.log('Form data keys:', Object.keys(data));
-        
-        // Log specific field extraction
-        const firstAiders = this.extractFirstAiders(data);
-        const contacts = this.extractAllContacts(data);
-        console.log('Extracted first aiders:', firstAiders);
-        console.log('Extracted contacts:', contacts);
         
         const mappedData: AlarmplanFields = {
             id: this.generateId(),
@@ -43,15 +21,15 @@ export class AlarmplanDataService {
             poisonEmergencyCall: data.giftnotrufNummer || '19240',
             
             // Dynamic contact processing
-            firstAiderDict: firstAiders,
-            addedContact: contacts,
+            firstAiderDict: this.extractFirstAiders(data),
+            addedContact: this.extractAllContacts(data),
             nextHospital: this.extractHospitalData(data)
         };
         
-        console.log('Final mapped data:', mappedData);
+        console.log('Mapped alarmplan data:', mappedData);
         this.formDataSubject.next(mappedData);
     }
-
+    
     private extractFirstAiders(data: any): FirstAider[] {
         const firstAiders: FirstAider[] = [];
         let contactIndex = 1;
@@ -77,7 +55,7 @@ export class AlarmplanDataService {
         // Also check for direct first aider fields (fallback)
         if (data.ersthelferName) {
             if (Array.isArray(data.ersthelferName)) {
-                data.ersthelferName.forEach((item: any) => {
+                data.ersthelferName.forEach((item: any, index: number) => {
                     if (item && (item.name || typeof item === 'string')) {
                         firstAiders.push({
                             id: contactIndex++,
@@ -107,6 +85,7 @@ export class AlarmplanDataService {
             if (key.startsWith('contactperson_ContactPersonName')) {
                 const name = data[key];
                 const phoneKey = key.replace('ContactPersonName', 'ContactPersonPhoneNumber');
+                const emailKey = key.replace('ContactPersonName', 'ContactPersonEmail');
                 const typeKey = key.replace('ContactPersonName', 'ContactType');
 
                 if (name) {
@@ -178,13 +157,6 @@ export class AlarmplanDataService {
     }
 
     /**
-     * Generate a unique ID for the alarmplan
-     */
-    private generateId(): number {
-        return Date.now();
-    }
-
-    /**
      * Helper method to create contact objects with proper format
      */
     private createContact(id: number, contactData: any, contactClass: AddedContact['contactClass']): AddedContact {
@@ -217,6 +189,13 @@ export class AlarmplanDataService {
     }
 
     /**
+     * Generate a unique ID for the alarmplan
+     */
+    private generateId(): number {
+        return Date.now();
+    }
+
+    /**
      * Get current form data
      */
     getCurrentFormData(): AlarmplanFields {
@@ -227,21 +206,7 @@ export class AlarmplanDataService {
      * Reset form data
      */
     resetFormData(): void {
-        this.formDataSubject.next({
-            id: 0,
-            costCenter: '',
-            firstAiderDict: [],
-            assemblyPoint: '',
-            poisonEmergencyCall: '',
-            nextHospital: {
-                name: '',
-                zipcode: '',
-                city: '',
-                street: '',
-                houseNumber: ''
-            },
-            addedContact: []
-        } as AlarmplanFields);
+        this.formDataSubject.next({} as AlarmplanFields);
     }
 
     /**

@@ -1,3 +1,51 @@
+<!-- TEST SECTION: Dynamic Contact Rendering -->
+<div class="ml-2 mt-8 p-4 border-2 border-blue-500 bg-blue-50">
+  <h1 class="font-bold text-blue-600 text-lg mb-4">🧪 TEST: Dynamic Contact Section</h1>
+  
+  <!-- Debug Info -->
+  <div class="mb-4 text-xs text-gray-600">
+    <p>Total contacts: {{(config()?.addedContact || []).length}}</p>
+    <p>Unique types: {{getUniqueContactTypes().length}}</p>
+    <p>Has contacts: {{hasContacts()}}</p>
+  </div>
+
+  <!-- Dynamic Contact Rendering -->
+  @if (hasContacts()) {
+    @for (contactType of getUniqueContactTypes(); track contactType) {
+      <div class="mb-6 p-3 border border-gray-300 rounded">
+        <h2 class="font-bold text-black text-fs-subheading mb-2 bg-yellow-200 p-1">
+          {{getContactTypeLabel(contactType)}} ({{contactType}})
+        </h2>
+        <div class="grid grid-cols-2 text-fs-text gap-1">
+          @for (contact of getContactsByType(contactType); track contact.id) {
+            <div class="bg-green-100 p-1"><p>{{contact.name}}</p></div>
+            <div class="mr-2 text-right bg-blue-100 p-1"><p>{{contact.phoneNumber}}</p></div>
+          }
+        </div>
+        <!-- Show count for this type -->
+        <p class="text-xs text-gray-500 mt-1">
+          Count: {{getContactsByType(contactType).length}}
+        </p>
+      </div>
+    }
+  } @else {
+    <!-- Fallback when no contacts -->
+    <div class="p-4 bg-red-100 border border-red-300 rounded">
+      <p class="text-red-600 font-bold">⚠️ Keine Kontaktdaten verfügbar</p>
+      <p class="text-xs text-gray-600 mt-1">
+        Raw data check: {{config()?.addedContact ? 'exists' : 'missing'}}
+      </p>
+    </div>
+  }
+
+  <!-- Raw Data Display for Debugging -->
+  <details class="mt-4">
+    <summary class="cursor-pointer text-sm font-bold">🔍 Debug: Raw Contact Data</summary>
+    <pre class="text-xs bg-gray-100 p-2 mt-2 overflow-auto max-h-32">{{config()?.addedContact | json}}</pre>
+  </details>
+</div>
+<!-- END TEST SECTION -->
+
 
 <div class="bg-white h-full grid grid-rows-12 grid-cols-3" >
 

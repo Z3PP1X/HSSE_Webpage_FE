@@ -1,10 +1,8 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule, } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { AlarmplanFields } from './alarmplan.model.interface';
+import { AlarmplanFields, AddedContact } from './alarmplan.model.interface';
 import { AlarmplanDataService } from '../../services/alarmplan-data.service';
-
-
 
 @Component({
   selector: 'app-alarmplan',
@@ -32,8 +30,7 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription = new Subscription();
 
-
-  constructor(private alarmplanDataService: AlarmplanDataService,) {}
+  constructor(private alarmplanDataService: AlarmplanDataService) {}
 
   ngOnInit() {
     this.subscription = this.alarmplanDataService.formData$.subscribe(data => {
@@ -49,5 +46,40 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
   currentTime() {
     const dateTime = new Date().toLocaleDateString();
     return dateTime;
+  }
+
+  getUniqueContactTypes(): string[] {
+    const contacts = this.config()?.addedContact || []; // Added optional chaining
+    const types = contacts.map(c => c.contactClass);
+    return [...new Set(types)];
+  }
+
+  getContactsByType(contactType: string): AddedContact[] {
+    const contacts = this.config()?.addedContact || []; // Added optional chaining
+    return contacts.filter(contact => contact.contactClass === contactType);
+  }
+
+  getContactTypeLabel(contactType: string): string {
+    const labels: { [key: string]: string } = {
+        'BranchManager': 'Branch Manager',
+        'Management': 'Geschäftsleitung',
+        'SafetyAdvisor': 'Safety',
+        'EnvironmentalAdvisor': 'Beauftragte für Umweltschutz',
+        'CompanyDoctor': 'Betriebsarzt',
+        'QualityManagement': 'QM DE Operation'
+    };
+    
+    return labels[contactType] || contactType;
+  }
+
+  // Fixed: Check if data is available with proper null checks
+  hasFirstAiders(): boolean {
+    const firstAiders = this.config()?.firstAiderDict;
+    return Boolean(firstAiders && firstAiders.length > 0);
+  }
+
+  hasContacts(): boolean {
+    const contacts = this.config()?.addedContact;
+    return Boolean(contacts && contacts.length > 0);
   }
 }

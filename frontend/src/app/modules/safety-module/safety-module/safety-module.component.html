@@ -5,13 +5,18 @@
   
   <div class="col-span-3 flex justify-center">
     <div *ngIf="isLoading" class="loading">Loading form...</div>
-    <div *ngIf="error" class="error">{{ error }}</div>
+    <div *ngIf="error" class="error">
+      {{ error }}
+      <button (click)="retryLoadConfig()">Retry</button>
+    </div>
     
-    <ng-container *ngIf="form$ | async as formData">
+    <!-- Wait for both form data and structure to be ready -->
+    <ng-container *ngIf="formReady$ | async as data">
       <app-form 
         [formTitle]="formTitle"
-        [form]="formData"
-        (formSubmitted)="handleFormSubmit($event)" 
+        [form]="data.form"
+        [formStructure]="data.structure"
+        (formSubmit)="handleFormSubmit($event)" 
         class="w-1/2">
       </app-form>
     </ng-container>
@@ -19,3 +24,4 @@
   
   <app-pdf *ngIf="showPdfComponent"></app-pdf>
 </div>
+
