@@ -111,8 +111,15 @@ export class FormBuilderService {
         return this.formQuestions(questions).pipe(
             map(processedQuestions => {
                 const newControls = this.toFormGroup(processedQuestions);
-                Object.keys(newControls.controls).forEach(key => {
-                    group.addControl(key, newControls.get(key));
+                Object.keys(newControls.controls).forEach(fullKey => {
+                    const control = newControls.get(fullKey);
+                    if (!control) return;
+                    // Normalize: inside a category group we only want the leaf key
+                    const leafKey = fullKey.includes('.') ? fullKey.split('.').pop()! : fullKey;
+                    // Avoid overwriting existing different control accidentally
+                    if (!group.get(leafKey)) {
+                        group.addControl(leafKey, control);
+                    }
                 });
                 return group;
             })

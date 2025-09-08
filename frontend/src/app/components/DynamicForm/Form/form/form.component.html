@@ -52,10 +52,12 @@
           @if (form && form.get(getCurrentCategory())) {
             @for (controlName of getControlKeys(getCurrentCategory()); track controlName) {
               <div class="w-full">
-                @if (getQuestionForKey(controlName)) {
+                @let q = getQuestionForKey(controlName, getCurrentCategory());
+                @if (q) {
                   <app-form-question
-                    [question]="getQuestionForKey(controlName)!"
-                    [form]="form">
+                    [question]="q"
+                    [form]="form"
+                    [currentCategory]="getCurrentCategory()">
                   </app-form-question>
                 } @else {
                   <div class="fallback-field">
