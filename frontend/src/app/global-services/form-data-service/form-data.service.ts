@@ -169,16 +169,16 @@ export class FormDataService {
       addedContact.push({
         contactClass: 'BranchManager',
         name: n.important.branchManager.name || '',
-        phoneNumber: '',
-        email: n.important.branchManager.email
+        email: n.important.branchManager.email || ''
+        // phoneNumber bleibt weg
       });
     }
+
     if (n.important?.management?.name || n.important?.management?.email) {
       addedContact.push({
         contactClass: 'Management',
         name: n.important.management.name || '',
-        phoneNumber: '',
-        email: n.important.management.email
+        email: n.important.management.email || ''
       });
     }
 

@@ -16,59 +16,59 @@ export class PdfService {
         }
 
         try {
-            // Ensure all fonts and resources are loaded
             await document.fonts.ready;
 
-            // Clone the element to avoid modifying the original
-            const clonedElement = element.cloneNode(true) as HTMLElement;
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.top = '0';
-            tempContainer.appendChild(clonedElement);
-            document.body.appendChild(tempContainer);
+            const clone = element.cloneNode(true) as HTMLElement;
+            const temp = document.createElement('div');
+            temp.style.position = 'fixed';
+            temp.style.left = '-10000px';
+            temp.style.top = '0';
+            temp.appendChild(clone);
+            document.body.appendChild(temp);
 
-            // Process SVGs in the cloned element
-            await this.preprocessAllImages(clonedElement);
+            await this.preprocessAllImages(clone);
 
-            // Give extra time for rendering after preprocessing
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Höhere Auflösung
+            const scale = Math.min(4, window.devicePixelRatio * 2);
 
-            // Capture the processed element
-            const canvas = await html2canvas(clonedElement, {
-                scale: 3,
+            const canvas = await html2canvas(clone, {
+                scale,
                 useCORS: true,
-                allowTaint: true,
-                logging: true, // Enable logging to debug issues
-                backgroundColor: '#FFFFFF',
-                scrollX: 0,
-                scrollY: 0,
-                imageTimeout: 200,
-                windowWidth: clonedElement.scrollWidth,
-                windowHeight: clonedElement.scrollHeight,
-                foreignObjectRendering: false,
-                onclone: (clonedDoc, element) => {
-                    console.log('Element cloned by html2canvas');
-                }
+                allowTaint: false,
+                logging: false,
+                backgroundColor: '#FFFFFF'
             });
 
-            // Remove the temp container
-            document.body.removeChild(tempContainer);
+            document.body.removeChild(temp);
 
-            // Create PDF with proper dimensions
+            const imgData = canvas.toDataURL('image/png');
+
+            // Dynamische Orientierung
+            const isLandscape = canvas.width >= canvas.height;
             const pdf = new jsPDF({
-                orientation: 'landscape',
+                orientation: isLandscape ? 'landscape' : 'portrait',
                 unit: 'px',
                 format: [canvas.width, canvas.height],
-                compress: true
+                compress: false
             });
 
-            // Add the canvas to the PDF
-            const imgData = canvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), undefined, 'FAST');
+            // Bilddimensionen berechnen (Seite proportional füllen, ohne Stretch)
+            const pageW = pdf.internal.pageSize.getWidth();
+            const pageH = pdf.internal.pageSize.getHeight();
+
+            const imgW = canvas.width;
+            const imgH = canvas.height;
+            const ratio = Math.min(pageW / imgW, pageH / imgH);
+
+            const renderW = imgW * ratio;
+            const renderH = imgH * ratio;
+            const offsetX = (pageW - renderW) / 2;
+            const offsetY = (pageH - renderH) / 2;
+
+            pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderW, renderH, undefined, 'FAST');
             pdf.save(fileName);
-        } catch (error) {
-            console.error('PDF Generation Error:', error);
+        } catch (e) {
+            console.error('PDF Generation Error:', e);
         }
     }
 
@@ -120,47 +120,55 @@ export class PdfService {
     }
 
     private async rasterizeSvgImage(img: HTMLImageElement): Promise<void> {
-        // Guard to prevent loops
         if (img.dataset['rasterized'] === '1') return;
         img.dataset['rasterized'] = '1';
-
         try {
-            // Fetch original SVG (safer than relying on current onload event)
             const resp = await fetch(img.src, { cache: 'force-cache' });
-            if (!resp.ok) {
-                console.warn('Failed to fetch SVG:', img.src);
-                return;
-            }
-            const svgText = await resp.text();
+            if (!resp.ok) return;
 
-            // Create blob URL
+            const svgText = await resp.text();
             const blob = new Blob([svgText], { type: 'image/svg+xml' });
             const url = URL.createObjectURL(blob);
 
-            // Load into an Image for dimensions
-            const rasterImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const loaded = await new Promise<HTMLImageElement>((res, rej) => {
                 const i = new Image();
-                i.onload = () => resolve(i);
-                i.onerror = e => reject(e);
+                i.onload = () => res(i);
+                i.onerror = e => rej(e);
                 i.src = url;
             });
 
-            const width = rasterImg.naturalWidth || 200;
-            const height = rasterImg.naturalHeight || 200;
+            const displayRect = img.getBoundingClientRect();
 
+            // Zielgröße: bevorzugt sichtbare Größe, fallback natural, dann Default
+            const targetW = (displayRect.width && displayRect.width > 0) ? displayRect.width : (loaded.naturalWidth || 200);
+            const targetH = (displayRect.height && displayRect.height > 0) ? displayRect.height : (loaded.naturalHeight || 80);
+
+            // Upscale nur für Qualität im Canvas, nicht für Anzeige
+            const upscale = 3;
             const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
+            canvas.width = targetW * upscale;
+            canvas.height = targetH * upscale;
             const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                URL.revokeObjectURL(url);
-                return;
-            }
-            ctx.drawImage(rasterImg, 0, 0, width, height);
+            if (!ctx) return;
+            ctx.drawImage(loaded, 0, 0, canvas.width, canvas.height);
             URL.revokeObjectURL(url);
 
-            const dataUrl = canvas.toDataURL('image/png');
-            img.src = dataUrl; // This will fire load again, but we blocked recursion with dataset flags
+            const png = canvas.toDataURL('image/png');
+            img.src = png;
+
+            // Kleine Icons (≤ 96px) sollen weiter durch Tailwind-Klassen (w-6 h-6 / w-8 h-8 etc.) gesteuert werden:
+            if (targetW <= 96 && targetH <= 96) {
+                // Entferne evtl. alte Inline-Styles
+                img.style.removeProperty('width');
+                img.style.removeProperty('height');
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'contain';
+            } else {
+                // Größere (Logo / Header) behalten feste Breite, Höhe automatisch
+                img.style.width = `${targetW}px`;
+                img.style.height = 'auto';
+            }
         } catch (e) {
             console.warn('Rasterizing SVG failed:', img.src, e);
         }
