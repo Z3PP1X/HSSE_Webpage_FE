@@ -1,34 +1,38 @@
+/* Enhanced close button styling */
 .close-button {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: #e0e0e0;
-  border-radius: 50%;
-  z-index: 10;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: all 0.2s ease-in-out;
 }
 
 .close-button:hover {
-  background-color: #d0d0d0;
+  transform: scale(1.05);
 }
 
-
-:host .mat-mdc-card {
-  padding: 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  width: 100%;
-  max-width: 640px;
-  margin: 20px;
+/* Custom scrollbar for webkit browsers */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
 }
 
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
 
-:host .mat-mdc-card-content {
-  padding: 24px;
-  display: block;
-  width: 100%;
+.scrollbar-track-gray-100::-webkit-scrollbar-track {
+  background-color: #f3f4f6;
+}
+
+/* Animation for modal appearance */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-content {
+  animation: modalSlideIn 0.3s ease-out;
 }
