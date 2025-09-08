@@ -97,11 +97,20 @@
           </mat-form-field>
         </div>
       }
-      @default {
+      @case ('ajax_select') {
         <mat-form-field appearance="fill" class="form-field-full-width">
           <mat-label>{{ question.label }}</mat-label>
-          <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
-          <mat-hint>Unknown control type: {{ question.field_type }}</mat-hint>
+          <mat-select [formControlName]="getControlName()" (selectionChange)="onAjaxSelectChange($event)">
+            <mat-option [value]="''">Select {{ question.label }}</mat-option>
+            @for (opt of question.options; track opt.key || opt.value) {
+              <mat-option [value]="opt.value || opt.key">
+                {{ getOptionLabel(opt) }}
+              </mat-option>
+            }
+          </mat-select>
+          @if (loading) {
+            <mat-spinner diameter="20" matSuffix></mat-spinner>
+          }
           <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
         </mat-form-field>
       }

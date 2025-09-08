@@ -1,24 +1,6 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  OnDestroy,
-  input,
-  Output,
-  EventEmitter,
-  Signal,
-  signal,
-  ChangeDetectorRef,
-  OnChanges,
-  SimpleChanges
-} from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, input, Output, EventEmitter, Signal, signal, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormGroup,
-  ReactiveFormsModule,
-  AbstractControl,
-  FormControl,
-} from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, AbstractControl, FormControl } from '@angular/forms';
 
 import { QuestionBase } from '../../question-base';
 import { FormGroupBase } from './form-group-base';
@@ -26,7 +8,7 @@ import { isFormGroupBase } from './form-group-base';
 import { isQuestionBase } from '../../question-base';
 
 import { FormQuestionComponent } from '../../Form-Question/form-question/form-question.component';
-import { ApiService } from '../../../../global-services/ajax-service/ajax.service';
+import { ApiService } from '../../../../global-services/api-service/api-service'; // Update this import
 import { Subject, Observable, startWith, map } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
@@ -122,7 +104,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   constructor(
-    private apiService: ApiService,
+    private apiService: ApiService, // This should now work
     private cdr: ChangeDetectorRef,
     private formModelService: FormModelService
   ) {}

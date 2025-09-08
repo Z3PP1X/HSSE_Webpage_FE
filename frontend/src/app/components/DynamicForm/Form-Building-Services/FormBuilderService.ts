@@ -10,6 +10,7 @@ import { DateTimeQuestion } from "../questions/datetime";
 import { LocationQuestion } from "../questions/location";
 import { ContactDataQuestion } from "../questions/contact-data";
 import { AdressFieldQuestion } from "../questions/adressfield";
+import { AjaxSelectQuestion } from "../questions/ajaxselect";
 
 @Injectable({
     providedIn: 'root'
@@ -59,22 +60,50 @@ export class FormBuilderService {
         const questions: QuestionBase<any>[] = [];
 
         for (const element of data) {
+            console.log('Processing element in FormBuilderService:', element);
+            
+            // Properly map choices/options to have consistent structure
+            let mappedOptions = [];
+            if (element.choices && Array.isArray(element.choices)) {
+                mappedOptions = element.choices.map((choice: any) => ({
+                    key: choice.value || choice.key,
+                    value: choice.value || choice.key,
+                    label: choice.label || choice.value || choice.key
+                }));
+            }
+
             const baseConfig = {
                 title: element.title,
                 key: element.key,
                 label: element.label,
-                field_type: element.type,
+                field_type: element.field_type,
                 required: element.required,
                 order: element.order || 0,
                 fetchOptions: element.fetchOptions,
-                helpText: element.helpText,
+                helpText: element.help_text,
                 value: element.value,
-                options: element.options,
-                category: element.category, 
+                options: mappedOptions,
+                category: element.category,
             };
 
             switch (element.field_type) {
+                case "ajax_select":
+                    console.log('Creating AjaxSelectQuestion for:', element.key);
+                    questions.push(new AjaxSelectQuestion({ 
+                        ...baseConfig,
+                        ajax_config: element.ajax_config,
+                        search_field: element.search_field,
+                        display_field: element.display_field,
+                        value_field: element.value_field,
+                        endpoint: element.endpoint, // Make sure endpoint is passed
+                        method: element.method,
+                        triggerEvents: element.triggerEvents,
+                        debounceTime: element.debounceTime,
+                        choices: mappedOptions
+                    }));
+                    break;
                 case "textbox":
+                case "text": // Handle both textbox and text
                     questions.push(new TextboxQuestion({ ...baseConfig }));
                     break;
                 case "contactdata":
@@ -90,10 +119,25 @@ export class FormBuilderService {
                     questions.push(new DateTimeQuestion({ ...baseConfig }));
                     break;
                 case "dropdown":
-                    questions.push(new DropdownQuestion({ ...baseConfig, choices: element.options || [] }));
+                case "select":
+                    questions.push(new DropdownQuestion({ 
+                        ...baseConfig, 
+                        choices: element.choices || element.options || [] 
+                    }));
+                    break;
+                case "email":
+                    questions.push(new TextboxQuestion({ ...baseConfig }));
+                    break;
+                case "number":
+                    questions.push(new TextboxQuestion({ ...baseConfig }));
+                    break;
+                case "checkbox":
+                    questions.push(new TextboxQuestion({ ...baseConfig })); // You might want a CheckboxQuestion
                     break;
                 default:
-                    console.warn('Unknown controlType: ', element.controlType);
+                    console.warn('Unknown field_type: ', element.field_type);
+                    // Fallback to textbox
+                    questions.push(new TextboxQuestion({ ...baseConfig }));
                     break;
             }
         }

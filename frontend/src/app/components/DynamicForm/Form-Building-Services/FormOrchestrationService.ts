@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { FormGroup, FormArray } from "@angular/forms";
-import { BehaviorSubject, Observable, of } from "rxjs";
+import { BehaviorSubject, Observable, of, throwError } from "rxjs";
 import { catchError, map, switchMap, tap } from "rxjs/operators";
 
 import { QuestionBase } from "../question-base";
@@ -28,51 +28,37 @@ export class FormOrchestrationService {
     ) {}
 
     generateForm(apiEndpoint: string, formName: string = 'dynamicForm'): Observable<FormGroup> {
+        console.log('🔄 FormOrchestrationService.generateForm called with:', apiEndpoint);
         this.loading$.next(true);
         this.error$.next(null);
 
-        // Use ApiService instead of HttpClient
-        // Add query parameters if needed
         const params = this.apiService.buildParams({ format: 'json' });
         
         return this.apiService.get<any>(apiEndpoint, { params }).pipe(
-            tap(response => {
-                console.log('API Response received:', response);
-                this.formMetadata$.next({
-                    form_id: response.form_id,
-                    form_title: response.form_title,
-                    shared_configs: response.shared_configs
-                });
-            }),
             map(response => {
-                if (response.structure) {
-                    console.log('Transforming API structure:', response.structure);
-                    const _transformedForm = this.mapApiToFormDefinition(response.structure);
-                    this.formQuestions$.next(_transformedForm);
-                    
-                    return _transformedForm;
-                }
-                console.warn('No structure found in API response');
-                return [];
+                console.log('📥 Raw API response in generateForm:', response);
+                console.log('Shared configs found:', response.shared_configs);
+                
+                // Store the complete metadata including shared_configs
+                this.formMetadata$.next(response);
+                
+                // Process the structure and apply ajax configs
+                const processedStructure = this.mapApiToFormDefinition(response.structure, response.shared_configs);
+                console.log('📤 Processed structure:', processedStructure);
+                
+                this.formQuestions$.next(processedStructure);
+                return processedStructure;
             }),
-            switchMap(formData => this.initFormBuild(formData)),
-            tap(form => {
-                console.log('Form successfully built:', form);
-                this.currentForm$.next(form);
+            switchMap(data => this.initFormBuild(data)),
+            tap(() => {
+                console.log('✅ Form generation completed');
                 this.loading$.next(false);
             }),
             catchError(error => {
-                console.error('Error in generateForm:', error);
-                
-                // Handle the structured error from ApiService
-                const errorMessage = error.message || 'An error occurred while generating the form';
-                this.error$.next(errorMessage);
+                console.error('💥 Error generating form:', error);
+                this.error$.next('Failed to generate form');
                 this.loading$.next(false);
-                
-                // Return empty form instead of throwing error to prevent app crash
-                const emptyForm = new FormGroup({});
-                this.currentForm$.next(emptyForm);
-                return of(emptyForm);
+                return throwError(() => error);
             })
         );
     }
@@ -87,13 +73,48 @@ export class FormOrchestrationService {
     }
 
     // FormOrchestrationService.ts additions
-private mapApiToFormDefinition(apiData: any[]): FormGroupBase<any>[] | QuestionBase<any>[] {
-    console.log('Mapping API data to form definition:', apiData);
+private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBase<any>[] | QuestionBase<any>[] {
+    console.log('🔄 mapApiToFormDefinition called');
+    console.log('Input apiData:', apiData);
+    console.log('Input sharedConfigs:', sharedConfigs);
     
     return apiData.map(item => {
+        console.log('Processing item:', item.key);
+        
         // Transform field types
         if (item.field_type) {
             item.field_type = this.mapFieldType(item.field_type, item.choices);
+        }
+
+        // Process fields within categories
+        if (item.fields && Array.isArray(item.fields)) {
+            item.fields = item.fields.map((field: any) => {
+                console.log(`Processing field: ${field.key}, type: ${field.field_type}`);
+                
+                // Handle ajax_select fields
+                if (field.field_type === 'ajax_select' && field.ajax_config && sharedConfigs?.ajax_configs) {
+                    console.log(`🔍 Found ajax_select field: ${field.key} with config: ${field.ajax_config}`);
+                    
+                    const ajaxConfig = sharedConfigs.ajax_configs[field.ajax_config];
+                    if (ajaxConfig) {
+                        console.log(`✅ Applying ajax config:`, ajaxConfig);
+                        // Merge ajax config into the field
+                        field.endpoint = ajaxConfig.endpoint;
+                        field.method = ajaxConfig.method || 'GET';
+                        field.triggerEvents = ajaxConfig.triggerEvents || ['input', 'focus'];
+                        field.debounceTime = ajaxConfig.debounceTime || 300;
+                        
+                        console.log(`🎯 Field after config merge:`, {
+                            key: field.key,
+                            endpoint: field.endpoint,
+                            field_type: field.field_type
+                        });
+                    } else {
+                        console.warn(`❌ Ajax config '${field.ajax_config}' not found in shared configs`);
+                    }
+                }
+                return field;
+            });
         }
 
         // Handle expandable categories
@@ -103,21 +124,31 @@ private mapApiToFormDefinition(apiData: any[]): FormGroupBase<any>[] | QuestionB
             const expandedFields: any[] = [];
             
             for (let i = 1; i <= minInstances; i++) {
-                const instanceFields = item.fields.map((field: any) => ({
-                    ...field,
-                    key: field.key.replace('{index}', i.toString()),
-                    label: field.key_template ? `${field.key_template} ${i}` : field.label
-                }));
+                const instanceFields = item.fields.map((field: any) => {
+                    const newField = {
+                        ...field,
+                        key: field.key.replace('{index}', i.toString()),
+                        label: field.key_template ? `${field.key_template} ${i}` : field.label
+                    };
+                    
+                    // Apply ajax config to expanded fields too
+                    if (newField.field_type === 'ajax_select' && newField.ajax_config && sharedConfigs?.ajax_configs) {
+                        const ajaxConfig = sharedConfigs.ajax_configs[newField.ajax_config];
+                        if (ajaxConfig) {
+                            newField.endpoint = ajaxConfig.endpoint;
+                            newField.method = ajaxConfig.method || 'GET';
+                            newField.triggerEvents = ajaxConfig.triggerEvents || ['input', 'focus'];
+                            newField.debounceTime = ajaxConfig.debounceTime || 300;
+                        }
+                    }
+                    
+                    return newField;
+                });
                 expandedFields.push(...instanceFields);
             }
             
             item.fields = expandedFields;
             item.current_instances = minInstances;
-        }
-
-        // Recursively process nested fields
-        if (item.fields && Array.isArray(item.fields)) {
-            item.fields = this.mapApiToFormDefinition(item.fields);
         }
         
         return item;
@@ -127,6 +158,7 @@ private mapApiToFormDefinition(apiData: any[]): FormGroupBase<any>[] | QuestionB
     private mapFieldType(fieldType: string, choices?: any[]): string {
         const fieldTypeMapping: { [key: string]: string } = {
             'select': 'dropdown',
+            'ajax_select': 'ajax_select', // Keep ajax_select as is
             'textarea': 'textbox',
             'checkbox': 'checkbox',
             'datetime': 'datetime',
