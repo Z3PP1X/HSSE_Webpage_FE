@@ -28,3 +28,11 @@ export interface AddedContact {
     phoneNumber: string;
     contactClass: "BranchManager" | "Management" | "EnvironmentalAdvisor" | "SafetyAdvisor" | "QualityManagement" | "CompanyDoctor";
 }
+
+export interface AddedContact {
+    id?: number;
+    name: string;
+    phoneNumber: string;
+    contactClass: "BranchManager" | "Management" | "EnvironmentalAdvisor" | "SafetyAdvisor" | "QualityManagement" | "CompanyDoctor";
+    email?: string;
+  }

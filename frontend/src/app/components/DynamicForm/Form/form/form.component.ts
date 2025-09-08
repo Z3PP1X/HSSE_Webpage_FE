@@ -497,6 +497,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     this.cacheCurrentCategoryState();
 
     const formData = this.form.getRawValue();
+    console.log('RAW FORM VALUE:', formData);
     this.payLoad = JSON.stringify(formData);
     console.log('Form submitted:', this.payLoad);
 

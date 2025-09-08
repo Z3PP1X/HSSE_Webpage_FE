@@ -4,7 +4,8 @@ import {
   RawAlarmplanFormData,
   NormalizedAlarmplanData,
   ContactPerson,
-  HospitalInfo
+  HospitalInfo,
+  ImportantContacts
 } from './form-data.interface';
 import { AlarmplanFields, FirstAider, NextHospital, AddedContact  } from '../../modules/safety-module/components/alarmplan/alarmplan.model.interface'; // adjust import
 
@@ -43,7 +44,8 @@ export class FormDataService {
         firstAiders: [],
         fireAssistants: [],
         hospital: undefined,
-        allContacts: []
+        allContacts: [],
+        important: undefined
       };
     }
 
@@ -66,6 +68,23 @@ export class FormDataService {
 
     const allContacts = [...firstAiders, ...fireAssistants];
 
+    const importantRaw = (raw as any)['Wichtige Kontakte'];
+    let important: ImportantContacts | undefined;
+    if (importantRaw) {
+      important = {
+        poisonEmergencyCall: importantRaw['Wichtige Kontakte_Nummer des Giftnotrufs'],
+        branchManager: {
+          name: importantRaw['Wichtige Kontakte_Name des Branch Managers'],
+          email: importantRaw['Wichtige Kontakte_Email des Branch Managers']
+        },
+        management: {
+          name: importantRaw['Wichtige Kontakte_Name des Geschaftsführers'] 
+            || importantRaw['Wichtige Kontakte_Name des Geschäftsführers'],
+          email: importantRaw['Wichtige Kontakte_Email des Geschäftsführers']
+        }
+      };
+    }
+
     return {
       branchActive,
       branchMeta,
@@ -73,7 +92,8 @@ export class FormDataService {
       firstAiders,
       fireAssistants,
       hospital,
-      allContacts
+      allContacts,
+      important
     };
   }
 
@@ -143,17 +163,34 @@ export class FormDataService {
       ? this.mapHospital(n.hospital)
       : undefined;
 
-    const addedContact: AddedContact[] = []; // extend mapping later if needed
+    const addedContact: AddedContact[] = [];
 
-    const alarmplan: AlarmplanFields = {
+    if (n.important?.branchManager?.name || n.important?.branchManager?.email) {
+      addedContact.push({
+        contactClass: 'BranchManager',
+        name: n.important.branchManager.name || '',
+        phoneNumber: '',
+        email: n.important.branchManager.email
+      });
+    }
+    if (n.important?.management?.name || n.important?.management?.email) {
+      addedContact.push({
+        contactClass: 'Management',
+        name: n.important.management.name || '',
+        phoneNumber: '',
+        email: n.important.management.email
+      });
+    }
+
+    const poisonEmergencyCall = n.important?.poisonEmergencyCall;
+    return {
       costCenter,
       firstAiderDict,
       assemblyPoint,
-      poisonEmergencyCall: undefined, // map later if available
+      poisonEmergencyCall,
       nextHospital,
       addedContact
     };
-    return alarmplan;
   }
 
   private mapHospital(h: HospitalInfo): NextHospital {

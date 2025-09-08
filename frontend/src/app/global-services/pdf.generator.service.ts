@@ -72,170 +72,143 @@ export class PdfService {
         }
     }
 
-    private async preprocessAllImages(element: HTMLElement): Promise<void> {
-        console.log('Processing all images and SVGs');
+    private async preprocessAllImages(root: HTMLElement): Promise<void> {
+        const images = Array.from(root.querySelectorAll('img'));
 
-        // Handle all images, not just SVGs
-        const images = element.querySelectorAll('img');
-
-        await Promise.all(Array.from(images).map(async (element: Element) => {
-            const img = element as HTMLImageElement;
-            try {
-                if (img.complete && img.naturalWidth > 0) {
-                    console.log(`Image already loaded: ${img.src}`);
-                    // Already loaded successfully
-                    if (img.src.endsWith('.svg')) {
-                        await this.convertToDataUrl(img);
-                    }
-                    return;
-                }
-
-                // Set crossOrigin for all images
-                img.crossOrigin = 'anonymous';
-
-                // Wait for the image to load
-                await new Promise<void>((resolve) => {
-                    const originalSrc = img.src;
-
-                    img.onload = async () => {
-                        console.log(`Image loaded: ${originalSrc}`);
-                        if (originalSrc.endsWith('.svg')) {
-                            await this.convertToDataUrl(img);
-                        }
-                        resolve();
-                    };
-
-                    img.onerror = () => {
-                        console.warn(`Failed to load image: ${originalSrc}`);
-                        // Try to load without crossOrigin as fallback
-                        img.crossOrigin = '';
-                        // If that fails too, just resolve and continue
-                        img.onerror = () => {
-                            console.warn(`Second attempt failed: ${originalSrc}`);
-                            resolve();
-                        };
-                        // Force reload
-                        img.src = originalSrc;
-                    };
-                });
-            } catch (error) {
-                console.warn('Failed to process image:', error);
-            }
-        }));
-
-        // Handle inline SVG elements
-        const svgElements = element.querySelectorAll('svg');
-        console.log(`Found ${svgElements.length} inline SVG elements`);
-
-        await Promise.all(Array.from(svgElements).map(async (element: Element) => {
-            const svg = element as SVGElement;
-            try {
-                // Get computed dimensions
-                const rect = svg.getBoundingClientRect();
-                const width = rect.width || 200;
-                const height = rect.height || 200;
-
-                // Convert SVG to image
-                const imgElement = await this.svgToImage(svg, width, height);
-
-                // Replace SVG with image
-                if (svg.parentNode) {
-                    svg.parentNode.replaceChild(imgElement, svg);
-                    console.log('Replaced SVG with image');
-                }
-            } catch (error) {
-                console.warn('Failed to process inline SVG:', error);
-            }
-        }));
+        await Promise.all(images.map(img => this.prepareImage(img)));
+        
+        // Inline <svg> elements → rasterize once
+        const inlineSvgs = Array.from(root.querySelectorAll('svg'));
+        await Promise.all(inlineSvgs.map(svg => this.rasterizeInlineSvg(svg as SVGElement)));
     }
 
-    private async convertToDataUrl(img: HTMLImageElement): Promise<void> {
+    private async prepareImage(img: HTMLImageElement): Promise<void> {
+        // Already processed?
+        if (img.dataset['processed'] === '1') return;
+
+        // Data URL -> nothing to do
+        if (img.src.startsWith('data:')) {
+            img.dataset['processed'] = '1';
+            return;
+        }
+
+        // Ensure load (once)
+        if (!img.complete || img.naturalWidth === 0) {
+            await new Promise<void>(resolve => {
+                const onLoad = () => {
+                    img.removeEventListener('load', onLoad);
+                    img.removeEventListener('error', onError);
+                    resolve();
+                };
+                const onError = () => {
+                    img.removeEventListener('load', onLoad);
+                    img.removeEventListener('error', onError);
+                    console.warn('Image failed to load (continuing):', img.src);
+                    resolve();
+                };
+                img.addEventListener('load', onLoad, { once: true });
+                img.addEventListener('error', onError, { once: true });
+            });
+        }
+
+        // Rasterize external SVG (src endsWith .svg)
+        if (img.src.toLowerCase().endsWith('.svg')) {
+            await this.rasterizeSvgImage(img);
+        }
+
+        img.dataset['processed'] = '1';
+    }
+
+    private async rasterizeSvgImage(img: HTMLImageElement): Promise<void> {
+        // Guard to prevent loops
+        if (img.dataset['rasterized'] === '1') return;
+        img.dataset['rasterized'] = '1';
+
         try {
-            // Create canvas to convert to data URL
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth || img.width || 200;
-            canvas.height = img.naturalHeight || img.height || 200;
-
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-                // Draw image to canvas
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                // Convert to data URL
-                const dataUrl = canvas.toDataURL('image/png');
-                console.log(`Converted to data URL: ${dataUrl.substring(0, 30)}...`);
-
-                // Update image source
-                img.src = dataUrl;
+            // Fetch original SVG (safer than relying on current onload event)
+            const resp = await fetch(img.src, { cache: 'force-cache' });
+            if (!resp.ok) {
+                console.warn('Failed to fetch SVG:', img.src);
+                return;
             }
-        } catch (error) {
-            console.warn('Error converting image to data URL:', error);
+            const svgText = await resp.text();
+
+            // Create blob URL
+            const blob = new Blob([svgText], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+
+            // Load into an Image for dimensions
+            const rasterImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+                const i = new Image();
+                i.onload = () => resolve(i);
+                i.onerror = e => reject(e);
+                i.src = url;
+            });
+
+            const width = rasterImg.naturalWidth || 200;
+            const height = rasterImg.naturalHeight || 200;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                URL.revokeObjectURL(url);
+                return;
+            }
+            ctx.drawImage(rasterImg, 0, 0, width, height);
+            URL.revokeObjectURL(url);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            img.src = dataUrl; // This will fire load again, but we blocked recursion with dataset flags
+        } catch (e) {
+            console.warn('Rasterizing SVG failed:', img.src, e);
         }
     }
 
-    private async svgToImage(svg: SVGElement, width: number, height: number): Promise<HTMLImageElement> {
-      // Get SVG as XML string
-      const svgData = new XMLSerializer().serializeToString(svg);
+    private async rasterizeInlineSvg(svg: SVGElement): Promise<void> {
+        if ((svg as any)._rasterized) return;
+        (svg as any)._rasterized = true;
 
-      // Scale factor for higher resolution
-      const scaleFactor = 4; // Increase this for higher quality
+        try {
+            const rect = svg.getBoundingClientRect();
+            const width = rect.width || 200;
+            const height = rect.height || 200;
 
-      // Create canvas with increased dimensions for better quality
-      const canvas = document.createElement('canvas');
-      canvas.width = width * scaleFactor;
-      canvas.height = height * scaleFactor;
-      const ctx = canvas.getContext('2d');
+            const xml = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([xml], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
 
-      if (!ctx) {
-          throw new Error('Could not get canvas context');
-      }
+            const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+                const i = new Image();
+                i.onload = () => resolve(i);
+                i.onerror = e => reject(e);
+                i.src = url;
+            });
 
-      // Enable crisp edges for better rendering quality
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                URL.revokeObjectURL(url);
+                return;
+            }
+            ctx.drawImage(img, 0, 0, width, height);
+            URL.revokeObjectURL(url);
 
-      // Create image with SVG data
-      const img = new Image();
+            const rasterImg = new Image();
+            rasterImg.src = canvas.toDataURL('image/png');
+            rasterImg.width = width;
+            rasterImg.height = height;
+            rasterImg.style.width = `${width}px`;
+            rasterImg.style.height = `${height}px`;
 
-      // Prepare SVG with proper dimensions
-      const svgWithDimensions = svgData.replace(/<svg/,
-          `<svg width="${width * scaleFactor}" height="${height * scaleFactor}"`);
-
-      // Convert modified SVG to data URL
-      const svgBlob = new Blob([svgWithDimensions], {type: 'image/svg+xml;charset=utf-8'});
-      const url = URL.createObjectURL(svgBlob);
-
-      // Wait for image to load
-      await new Promise<void>((resolve, reject) => {
-          img.onload = () => {
-              // Draw to canvas at the scaled size
-              ctx.drawImage(img, 0, 0, width * scaleFactor, height * scaleFactor);
-              URL.revokeObjectURL(url);
-              resolve();
-          };
-
-          img.onerror = (e) => {
-              console.error('Error loading SVG in image:', e);
-              URL.revokeObjectURL(url);
-              reject(new Error('Failed to load SVG in image'));
-          };
-
-          img.src = url;
-      });
-
-      // Create result image from canvas
-      const resultImg = new Image();
-      resultImg.src = canvas.toDataURL('image/png');
-      resultImg.width = width;
-      resultImg.height = height;
-      resultImg.style.width = `${width}px`;
-      resultImg.style.height = `${height}px`;
-
-      // Copy classes from original SVG
-      if (svg.className && svg.className.baseVal) {
-          resultImg.className = svg.className.baseVal;
-      }
-
-      return resultImg;
-  }
+            if (svg.parentNode) {
+                svg.parentNode.replaceChild(rasterImg, svg);
+            }
+        } catch (e) {
+            console.warn('Failed to rasterize inline SVG:', e);
+        }
+    }
 }

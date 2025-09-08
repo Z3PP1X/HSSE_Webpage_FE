@@ -40,6 +40,12 @@ export interface ContactPerson {
     };
     [category: string]: any;
   }
+
+  export interface ImportantContacts {
+    poisonEmergencyCall?: string;
+    branchManager?: { name?: string; email?: string };
+    management?: { name?: string; email?: string };
+  }
   
   export interface NormalizedAlarmplanData {
     branchActive?: boolean;
@@ -49,5 +55,6 @@ export interface ContactPerson {
     fireAssistants: ContactPerson[];
     hospital?: HospitalInfo;
     allContacts: ContactPerson[];
+    important?: ImportantContacts; // NEU
   }
   
