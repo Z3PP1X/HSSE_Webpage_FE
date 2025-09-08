@@ -173,7 +173,6 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
 
     private mapFieldType(fieldType: string, choices?: any[]): string {
         const fieldTypeMapping: { [key: string]: string } = {
-            'select': 'dropdown',
             'ajax_select': 'ajax_select',
             'textarea': 'textbox',
             'checkbox': 'checkbox',

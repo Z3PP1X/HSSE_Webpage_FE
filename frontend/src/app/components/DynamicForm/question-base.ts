@@ -26,7 +26,7 @@ export class QuestionBase<T>{
   order: number;
   field_type: string;
   fetchOptions: boolean;
-  options: {key: string, value: number}[];
+  options: {label: string, value: number}[] = [];
   category?: string; 
   key_template?: string; 
   expandable?: boolean;
@@ -43,7 +43,7 @@ export class QuestionBase<T>{
       order?: number;
       field_type?: string;
       fetchOptions?: boolean;
-      choices?: {key: string; value: number}[];
+      choices?: {key?: any; value?: any; label?: any}[];
       category?: string;
       key_template?: string;
       expandable?: boolean;
@@ -60,7 +60,13 @@ export class QuestionBase<T>{
     this.order = options.order === undefined ? 1 : options.order;
     this.field_type = options.field_type || '';
     this.fetchOptions = options.fetchOptions || false;
-    this.options = options.choices || [];
+    const rawChoices = (options as any).choices || [];
+    this.options = Array.isArray(rawChoices)
+      ? rawChoices.map((c: any) => ({
+          label: c.label ?? c.key ?? String(c.value),
+          value: c.value ?? c.key
+        }))
+      : [];
     this.category = options.category;
     this.key_template = options.key_template || '';
     this.expandable = options.expandable || false;

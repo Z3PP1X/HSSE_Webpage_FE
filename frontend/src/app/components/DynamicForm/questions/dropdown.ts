@@ -1,5 +1,5 @@
 import { QuestionBase } from "../question-base";
 
 export class DropdownQuestion extends QuestionBase<string>{
-  override field_type =  'dropdown';
+  override field_type =  'select';
 }
