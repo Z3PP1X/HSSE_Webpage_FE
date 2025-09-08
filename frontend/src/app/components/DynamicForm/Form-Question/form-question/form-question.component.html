@@ -63,8 +63,8 @@
           <mat-label>{{ question.label }}</mat-label>
           <mat-select [formControlName]="getControlName()">
             <mat-option [value]="''">Select {{ question.label }}</mat-option>
-            @for (opt of question.options; track opt.key) {
-              <mat-option [value]="opt.key">
+            @for (opt of question.options; track opt.label) {
+              <mat-option [value]="opt.label">
                 {{ opt.value }}
               </mat-option>
             }

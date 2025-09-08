@@ -78,9 +78,9 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
 
   private setupAutocomplete() {
     this.question.options = [
-      { key: 'option1', value: 1 },
-      { key: 'option2', value: 2 },
-      { key: 'option3', value: 3 }
+      { label: 'option1', value: 1 },
+      { label: 'option2', value: 2 },
+      { label: 'option3', value: 3 }
     ];
     
     const control = this.getCurrentControl();
@@ -97,7 +97,7 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     return this.question.options.filter(option => 
       option.value.toString().toLowerCase().includes(filterValue)
     ).map(option => ({
-      key: option.key,
+      key: option.label,
       value: option.value,
       label: option.value.toString() // Add label property
     }));
