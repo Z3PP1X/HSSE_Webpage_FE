@@ -15,6 +15,9 @@
       
       @case ('text') {
         <mat-form-field appearance="fill" class="form-field-full-width">
+
+          <p>Hello this is a test</p>
+          <p>This is my label: {{question.label}} and this is my key: {{question.key}}</p>
           <mat-label>{{ question.label }}</mat-label>
           <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
           <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
