@@ -117,22 +117,15 @@
                 Searching...
               </mat-option>
             }
-            @for (opt of question.options; track opt.key || opt.value) {
-              <mat-option [value]="opt.value || opt.key">
-                {{ getOptionLabel(opt) }}
+            @for (opt of (filteredOptions | async); track opt.key || opt.value) {
+              <mat-option [value]="opt.label">
+                {{ opt.label }}
               </mat-option>
             }
-            @if (!loading && question.options.length === 0) {
+            @if (!loading && (filteredOptions | async)?.length === 0) {
               <mat-option disabled>No results found</mat-option>
             }
           </mat-autocomplete>
-          @if (loading) {
-            <mat-progress-spinner 
-              matSuffix 
-              diameter="20" 
-              mode="indeterminate">
-            </mat-progress-spinner>
-          }
           <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
         </mat-form-field>
       }

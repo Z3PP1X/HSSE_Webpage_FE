@@ -3,7 +3,7 @@ import { FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuestionBase } from '../../question-base';
 
-import { Subject, Observable, startWith, map } from 'rxjs';
+import { Subject, Observable, startWith, map, of, switchMap, catchError } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -44,7 +44,7 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
 
   loading = false;
   error: string | null = null;
-  filteredOptions: Observable<{key: string, value: string | number}[]> | undefined;
+  filteredOptions: Observable<{key: string, value: string | number, label: string}[]> | undefined;
 
   private destroy$ = new Subject<void>();
 
@@ -67,10 +67,10 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
       this.setupAutocomplete();
     }
     
-    // Load ajax options if it's an ajax_select field
+    // Setup ajax autocomplete - CHANGED THIS LINE
     if (this.question.field_type === 'ajax_select') {
       console.log('🔥 DETECTED ajax_select field!');
-      this.loadAjaxOptions();
+      this.setupAjaxAutocomplete(); // ← Use the new method, not loadAjaxOptions()
     } else {
       console.log('❌ Not an ajax_select field, type is:', this.question.field_type);
     }
@@ -92,10 +92,15 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
   
-  private _filter(value: string): {key: string, value: string | number}[] {
+  private _filter(value: string): {key: string, value: string | number, label: string}[] {
     const filterValue = value.toLowerCase();
     return this.question.options.filter(option => 
-      option.value.toString().toLowerCase().includes(filterValue));
+      option.value.toString().toLowerCase().includes(filterValue)
+    ).map(option => ({
+      key: option.key,
+      value: option.value,
+      label: option.value.toString() // Add label property
+    }));
   }
 
   private loadOptions() {
@@ -191,6 +196,74 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     } else {
         console.warn('Ajax response is not an array:', response);
     }
+  }
+
+  private setupAjaxAutocomplete() {
+    const control = this.getCurrentControl();
+    if (!control) return;
+  
+    const ajaxQuestion = this.question as any;
+    console.log('Setting up ajax autocomplete for:', ajaxQuestion);
+  
+    this.filteredOptions = control.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(searchTerm => this.searchAjaxOptions(searchTerm || '')),
+      takeUntil(this.destroy$)
+    );
+  }
+  
+  private searchAjaxOptions(searchTerm: string): Observable<{key: string, value: string | number, label: string}[]> {
+    const ajaxQuestion = this.question as any;
+    
+    console.log('🔍 Searching for:', searchTerm);
+    
+    // Don't search if term is too short
+    if (!ajaxQuestion.endpoint || searchTerm.length < 2) {
+      console.log('Term too short or no endpoint, returning empty');
+      return of([]);
+    }
+  
+    this.loading = true;
+    
+    // Build search parameters
+    const searchField = ajaxQuestion.search_field || 'search';
+    const params = { [searchField]: searchTerm };
+    
+    console.log('Making API call with params:', params);
+  
+    return this.apiService.get<any[]>(ajaxQuestion.endpoint, { params }).pipe(
+      map(response => {
+        console.log('🎉 Search response received:', response);
+        console.log('🔍 First item structure:', response[0]); // ADD THIS
+        this.loading = false;
+        
+        if (!Array.isArray(response)) {
+          console.warn('Response is not an array:', response);
+          return [];
+        }
+    
+        const mappedOptions = response.map((item: any) => {
+          const option = {
+            key: item[ajaxQuestion.value_field || 'sys_id'] || item.id || item.value,
+            value: item[ajaxQuestion.value_field || 'sys_id'] || item.id || item.value,
+            label: item[ajaxQuestion.display_field || 'BranchName'] || item.name || item.label || item.value
+          };
+          console.log('🎯 Mapped option:', option, 'from item:', item); // ADD THIS
+          return option;
+        });
+        
+        console.log('📋 All mapped options:', mappedOptions); // ADD THIS
+        return mappedOptions;
+      }),
+      catchError(err => {
+        console.error('💥 Ajax search error:', err);
+        this.loading = false;
+        this.error = 'Search failed';
+        return of([]);
+      })
+    );
   }
 
   onAjaxSelectChange(event: any) {
