@@ -4,7 +4,6 @@ import { AlarmplanComponent } from "../components/alarmplan/alarmplan.component"
 import { ModuleNavigationComponent } from "../../../components/module-navigation/module-navigation/module-navigation.component";
 import { SafetyModuleConfig } from '../safety-module.config';
 import { FormComponent } from '../../../components/DynamicForm/Form/form/form.component';
-import { AlarmplanDataService } from '../services/alarmplan-data.service';
 import { AlarmplanFields } from '../components/alarmplan/alarmplan.model.interface';
 import { PdfService } from '../../../global-services/pdf.generator.service';
 import { PdfComponent } from '../components/pdf-gen/pdf/pdf.component';
@@ -15,6 +14,7 @@ import { takeUntil, switchMap, tap, catchError, filter, delay, take, map, shareR
 import { environment } from '../../../../environments/environment';
 import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
 import { Router } from '@angular/router';
+import { FormDataService } from '../../../global-services/form-data-service/form-data.service';
 
 @Component({
   selector: 'app-safety-module',
@@ -49,7 +49,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   showPdfComponent = false;
 
   constructor(
-    private alarmplanDataService: AlarmplanDataService,
+    private formDataService: FormDataService,
     private pdfService: PdfService,
     private formOrchestrationService: FormOrchestrationService, 
     private navService: ModuleNavigationService,
@@ -107,31 +107,26 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
    * Handle form submission
    */
   handleFormSubmit(formValue: any): void {
-    console.log('Form submitted with values:', formValue);
-    
-    // Transform and store the form data
-    this.alarmplanDataService.updateFormData(formValue);
-    this.showPdfComponent = true;
-
-    // Wait for data to propagate through the observable chain
-    this.alarmplanDataService.formData$.pipe(
-        filter(data => data && Object.keys(data).length > 0), // Wait for actual data
-        take(1), // Take only the first emission with data
-        delay(100) // Small delay to ensure DOM updates
-    ).subscribe(data => {
-        console.log('Data propagated, generating PDF with:', data);
-        this.generatePdfWithData();
-        this.router.navigate(['/success']);
+    this.formDataService.setFormData(formValue);
+    this.formDataService.alarmplan$.pipe(
+      filter(m => !!m && (m.costCenter !== '' || m.firstAiderDict.length > 0)),
+      take(1),
+      tap(() => this.showPdfComponent = true),
+      delay(50)
+    ).subscribe(async model => {
+      await this.generatePdfWithData();
+      this.router.navigate(['/success']);
     });
   }
 
   private async generatePdfWithData(): Promise<void> {
-      if (this.pdfComponent) {
-          this.pdfComponent.prepareForPdfGeneration();
-          await this.pdfService.generatePDF('pdf-container', 'alarmplan.pdf');
-          this.pdfComponent.cleanupAfterPdfGeneration();
-          this.showPdfComponent = false;
-      }
+    if (this.pdfComponent) {
+      await this.pdfComponent.waitForData();
+      this.pdfComponent.prepareForPdfGeneration();
+      await this.pdfService.generatePDF('pdf-container', 'alarmplan.pdf');
+      this.pdfComponent.cleanupAfterPdfGeneration();
+      this.showPdfComponent = false;
+    }
   }
 
   /**
