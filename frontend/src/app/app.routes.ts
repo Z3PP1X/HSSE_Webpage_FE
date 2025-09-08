@@ -8,6 +8,7 @@ import { AlarmplanComponent } from './modules/safety-module/components/alarmplan
 import { FormFrameComponent } from './components/DynamicForm/form-frame/form-frame.component';
 import { ContactComponent } from './modules/home-module/contact/contact.component';
 import { SupportComponent } from './modules/home-module/support/support.component';
+import { SuccessComponent } from './modules/safety-module/success/success.component';
 
 export const routes: Routes = [
   
@@ -20,6 +21,7 @@ export const routes: Routes = [
     { path: 'contact', component: ContactComponent},
     { path: 'support', component: SupportComponent},
     { path: 'documentation', redirectTo: '/support', pathMatch: 'full' }, // Redirect to support for now
-    { path: 'activity', redirectTo: '/hsse', pathMatch: 'full' }, // Redirect to home for now
+    { path: 'activity', redirectTo: '/hsse', pathMatch: 'full' }, 
+    { path: 'success', component: SuccessComponent}// Redirect to home for now
   
 ];

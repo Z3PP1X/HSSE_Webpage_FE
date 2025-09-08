@@ -14,6 +14,7 @@ import { Observable, Subject, of, EMPTY, combineLatest } from 'rxjs';
 import { takeUntil, switchMap, tap, catchError, filter, delay, take, map, shareReplay } from 'rxjs/operators'; // Add 'map' here
 import { environment } from '../../../../environments/environment';
 import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-safety-module',
@@ -23,7 +24,7 @@ import { ModuleNavigationService } from '../../../global-services/module-navigat
     ModuleNavigationComponent,
     FormComponent,
     CommonModule,
-    PdfComponent
+    PdfComponent, 
   ],
   templateUrl: './safety-module.component.html',
   styleUrl: './safety-module.component.css'
@@ -51,7 +52,8 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     private alarmplanDataService: AlarmplanDataService,
     private pdfService: PdfService,
     private formOrchestrationService: FormOrchestrationService, 
-    private navService: ModuleNavigationService
+    private navService: ModuleNavigationService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -119,6 +121,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     ).subscribe(data => {
         console.log('Data propagated, generating PDF with:', data);
         this.generatePdfWithData();
+        this.router.navigate(['/success']);
     });
   }
 
