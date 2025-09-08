@@ -256,29 +256,29 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   addInstance(categoryKey: string): void {
     console.log(`Adding instance to category: ${categoryKey}`);
     const category = this.expandableCategories().get(categoryKey);
-    if (!category || !this.canAddInstance(categoryKey)) {
-      console.log('Cannot add instance - category not found or limit reached');
-      return;
-    }
-
-    // Find template fields from the original structure (those containing {index})
-    // Since the API has already expanded them, we need to recreate the template
-    const existingFields = category.fields.filter((field: QuestionBase<any> | FormGroupBase<any>) =>
-      isQuestionBase(field) && (field as any).key_template
+    if (!category || !this.canAddInstance(categoryKey)) return;
+  
+    const existingFields = category.fields.filter(
+      (f: any) => isQuestionBase(f) && f.key_template
     ) as QuestionBase<any>[];
-
-    // Create template fields
-    const templateFields = existingFields.map(field => ({
-      ...field,
-      key: `${(field as any).key_template}_{index}`, // Recreate template format
-      label: (field as any).key_template || field.label
-    }));
-
-    console.log('Template fields for new instance:', templateFields);
-
-    this.formModelService.addInstanceToExpandableCategory(categoryKey, templateFields)
-      .subscribe(() => {
-        console.log(`Successfully added instance to ${categoryKey}`);
+  
+    const templateFields = existingFields.map(f => ({
+      ...f,
+      key: `${(f as any).key_template}_{index}`,
+      label: (f as any).key_template || f.label
+    })) as QuestionBase<any>[];
+  
+    this.formModelService
+      .addInstanceToExpandableCategory(categoryKey, templateFields)
+      .subscribe(newQuestions => {
+        const bucket = this.ensureCategoryBucket(categoryKey);
+        newQuestions.forEach(q => {
+          bucket.set(q.key, q);
+        });
+        console.log('🔁 Updated question bucket after instance add:', {
+          category: categoryKey,
+          keys: Array.from(bucket.keys())
+        });
         this.cdr.detectChanges();
       });
   }
@@ -449,6 +449,18 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         }
       }
     }
+
+    // Dynamic clone fallback (e.g. Ersthelfer_Name_2 based on Ersthelfer_Name_1)
+    const base = leafKey.replace(/_\d+$/, '');
+    for (const q of bucket.values()) {
+      const qBase = q.key.replace(/_\d+$/, '');
+      if (qBase === base) {
+        const clone = { ...q, key: leafKey, label: q.key_template ? `${q.key_template} ${leafKey.match(/(\d+)$/)?.[1]}` : q.label } as QuestionBase<any>;
+        bucket.set(leafKey, clone);
+        console.log('🧪 Cloned question for dynamic instance:', clone);
+        return clone;
+      }
+    }
     
     console.log('❌ No match found for:', controlName, 'in bucket:', Array.from(bucket.keys()));
     return undefined;
@@ -490,6 +502,8 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
     // Clear cache after successful submission
     this.formStateCache.clear();
+
+    console.log('Form Data Emitted:', formData);
 
     this.formSubmit.emit(formData);
   }

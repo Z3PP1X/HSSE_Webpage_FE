@@ -133,25 +133,23 @@ addCategory(key: string): FormGroup {
     return this.categoryMap.get(key) as FormGroup;
 }
 
-// FormModelService.ts - Add these methods
-addInstanceToExpandableCategory(categoryKey: string, templateFields: QuestionBase<any>[]): Observable<void> {
+addInstanceToExpandableCategory(categoryKey: string, templateFields: QuestionBase<any>[])
+  : Observable<QuestionBase<any>[]> {
   const categoryGroup = this.getCategory(categoryKey);
-  if (!categoryGroup) {
-    throw new Error(`Category ${categoryKey} not found`);
-  }
-  
+  if (!categoryGroup) throw new Error(`Category ${categoryKey} not found`);
   const currentInstance = this.incrementCategoryInstance(categoryKey);
-  
-  // Create new fields with indexed keys
+
   const indexedFields = templateFields.map(field => ({
     ...field,
     key: field.key.replace('{index}', currentInstance.toString()),
-    label: field.key_template ? `${field.key_template} ${currentInstance}` : `${field.label} ${currentInstance}`
-  }));
-  
-  return this.formBuilderService.addQuestionToGroup(categoryGroup, indexedFields).pipe(
-    map(() => {}) // Convert FormGroup to void
-  );
+    label: field.key_template
+      ? `${field.key_template} ${currentInstance}`
+      : `${field.label} ${currentInstance}`
+  })) as QuestionBase<any>[];
+
+  return this.formBuilderService
+    .addQuestionToGroup(categoryGroup, indexedFields)
+    .pipe(map(() => indexedFields));
 }
 
 removeInstanceFromExpandableCategory(categoryKey: string, instanceIndex: number): void {

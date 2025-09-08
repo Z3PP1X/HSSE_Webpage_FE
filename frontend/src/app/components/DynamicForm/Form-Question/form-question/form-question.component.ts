@@ -291,6 +291,17 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     return formGroup.get(controlName) as FormControl;
   }
 
+  getErrorMessages(): string[] {
+    const c = this.getCurrentControl();
+    if (!c || !c.errors) return [];
+    const msgs: string[] = [];
+    if (c.errors['required']) msgs.push(`${this.question.label} ist erforderlich`);
+    if (c.errors['email']) msgs.push('Bitte gültige E-Mail eingeben');
+    if (c.errors['pattern'] && (this.question.field_type === 'number' || this.question.field_type === 'integer'))
+      msgs.push('Nur Zahlen erlaubt');
+    return msgs;
+  }
+
   get isValid() {
     const control = this.getCurrentControl();
     return control ? control.valid : true;

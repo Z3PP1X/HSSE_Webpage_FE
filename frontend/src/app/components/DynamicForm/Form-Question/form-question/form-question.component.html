@@ -13,12 +13,35 @@
   <div [formGroup]="getCurrentFormGroup()">
     @switch (question.field_type) {
       
-      @case ('textbox') {
-        
+      @case ('text') {
         <mat-form-field appearance="fill" class="form-field-full-width">
           <mat-label>{{ question.label }}</mat-label>
-          <input matInput [formControlName]="getControlName()" [id]="question.key" [type]="question.field_type">
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
           <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+    
+      @case ('textbox') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+    
+      @case ('email') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="email" autocomplete="email">
+          <mat-error *ngFor="let msg of getErrorMessages()">{{ msg }}</mat-error>
+        </mat-form-field>
+      }
+    
+      @case ('number') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="number" inputmode="numeric">
+          <mat-error *ngFor="let msg of getErrorMessages()">{{ msg }}</mat-error>
         </mat-form-field>
       }
       @case ('textarea') {

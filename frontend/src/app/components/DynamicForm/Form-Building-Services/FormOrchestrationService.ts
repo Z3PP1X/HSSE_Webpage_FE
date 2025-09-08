@@ -178,9 +178,9 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
             'textarea': 'textbox',
             'checkbox': 'checkbox',
             'datetime': 'datetime',
-            'number': 'textbox',
-            'text': 'textbox',
-            'email': 'textbox'
+            'number': 'number',
+            'text': 'text',
+            'email': 'email'
         };
         
         return fieldTypeMapping[fieldType] || fieldType;
