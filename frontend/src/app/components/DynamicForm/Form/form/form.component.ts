@@ -455,7 +455,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     for (const q of bucket.values()) {
       const qBase = q.key.replace(/_\d+$/, '');
       if (qBase === base) {
-        const clone = { ...q, key: leafKey, label: q.key_template ? `${q.key_template} ${leafKey.match(/(\d+)$/)?.[1]}` : q.label } as QuestionBase<any>;
+        const clone = { ...q, key: leafKey, label: (q as any).baseLabel || q.label, } as QuestionBase<any>;
         bucket.set(leafKey, clone);
         console.log('🧪 Cloned question for dynamic instance:', clone);
         return clone;

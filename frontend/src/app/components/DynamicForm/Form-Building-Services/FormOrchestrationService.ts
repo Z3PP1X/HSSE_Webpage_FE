@@ -136,7 +136,7 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
                     const newField = {
                         ...field,
                         key: field.key.replace('{index}', i.toString()),
-                        label: field.key_template ? `${field.key_template} ${i}` : field.label
+                        label: field.label
                     };
                     
                     // Apply ajax config to expanded fields too

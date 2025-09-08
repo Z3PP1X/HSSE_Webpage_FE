@@ -142,9 +142,7 @@ addInstanceToExpandableCategory(categoryKey: string, templateFields: QuestionBas
   const indexedFields = templateFields.map(field => ({
     ...field,
     key: field.key.replace('{index}', currentInstance.toString()),
-    label: field.key_template
-      ? `${field.key_template} ${currentInstance}`
-      : `${field.label} ${currentInstance}`
+    label: field.label
   })) as QuestionBase<any>[];
 
   return this.formBuilderService
