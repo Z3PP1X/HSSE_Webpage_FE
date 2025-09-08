@@ -12,7 +12,9 @@
   }
   <div [formGroup]="getCurrentFormGroup()">
     @switch (question.field_type) {
+      
       @case ('textbox') {
+        
         <mat-form-field appearance="fill" class="form-field-full-width">
           <mat-label>{{ question.label }}</mat-label>
           <input matInput [formControlName]="getControlName()" [id]="question.key" [type]="question.field_type">
@@ -100,16 +102,36 @@
       @case ('ajax_select') {
         <mat-form-field appearance="fill" class="form-field-full-width">
           <mat-label>{{ question.label }}</mat-label>
-          <mat-select [formControlName]="getControlName()" (selectionChange)="onAjaxSelectChange($event)">
-            <mat-option [value]="''">Select {{ question.label }}</mat-option>
+          <input 
+            type="text" 
+            matInput 
+            [formControlName]="getControlName()" 
+            [matAutocomplete]="ajaxAuto"
+            placeholder="Type to search...">
+          <mat-autocomplete 
+            #ajaxAuto="matAutocomplete" 
+            (optionSelected)="onAjaxSelectChange($event)">
+            @if (loading) {
+              <mat-option disabled>
+                <mat-spinner diameter="20"></mat-spinner>
+                Searching...
+              </mat-option>
+            }
             @for (opt of question.options; track opt.key || opt.value) {
               <mat-option [value]="opt.value || opt.key">
                 {{ getOptionLabel(opt) }}
               </mat-option>
             }
-          </mat-select>
+            @if (!loading && question.options.length === 0) {
+              <mat-option disabled>No results found</mat-option>
+            }
+          </mat-autocomplete>
           @if (loading) {
-            <mat-spinner diameter="20" matSuffix></mat-spinner>
+            <mat-progress-spinner 
+              matSuffix 
+              diameter="20" 
+              mode="indeterminate">
+            </mat-progress-spinner>
           }
           <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
         </mat-form-field>

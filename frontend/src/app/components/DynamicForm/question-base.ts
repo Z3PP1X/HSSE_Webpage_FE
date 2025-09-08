@@ -81,11 +81,12 @@ export function isQuestionBase(obj: any): obj is QuestionBase<any> {
     (!('field_type' in obj) || typeof obj.field_type === 'string') &&
     (!('fetchOptions' in obj) || typeof obj.fetchOptions === 'boolean') &&
     (!('choices' in obj) || Array.isArray(obj.choices) || obj.choices === null) &&
-    (!('category' in obj) || typeof obj.category === 'string' || obj.category === undefined)&&
-    typeof obj.key_template === 'string' &&
-    typeof obj.expandable === 'boolean' &&
-    typeof obj.instance_key === 'string' &&
-    typeof obj.original_key === 'string'
+    (!('category' in obj) || typeof obj.category === 'string' || obj.category === undefined) &&
+    // Make these optional checks
+    (!('key_template' in obj) || typeof obj.key_template === 'string' || obj.key_template === undefined) &&
+    (!('expandable' in obj) || typeof obj.expandable === 'boolean' || obj.expandable === undefined) &&
+    (!('instance_key' in obj) || typeof obj.instance_key === 'string' || obj.instance_key === undefined) &&
+    (!('original_key' in obj) || typeof obj.original_key === 'string' || obj.original_key === undefined)
   );
 }
 

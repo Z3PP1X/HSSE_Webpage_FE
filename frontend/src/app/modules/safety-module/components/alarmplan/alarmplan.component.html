@@ -4,9 +4,9 @@
   
   <!-- Debug Info -->
   <div class="mb-4 text-xs text-gray-600">
-    <p>Total contacts: {{(config()?.addedContact || []).length}}</p>
-    <p>Unique types: {{getUniqueContactTypes().length}}</p>
-    <p>Has contacts: {{hasContacts()}}</p>
+    <p>Total contacts: {{ (config().addedContact || []).length }}</p>
+    <p>Unique types: {{ getUniqueContactTypes().length }}</p>
+    <p>Has contacts: {{ hasContacts() }}</p>
   </div>
 
   <!-- Dynamic Contact Rendering -->
@@ -33,7 +33,7 @@
     <div class="p-4 bg-red-100 border border-red-300 rounded">
       <p class="text-red-600 font-bold">⚠️ Keine Kontaktdaten verfügbar</p>
       <p class="text-xs text-gray-600 mt-1">
-        Raw data check: {{config()?.addedContact ? 'exists' : 'missing'}}
+        Raw data check: {{ config().addedContact ? 'exists' : 'missing' }}
       </p>
     </div>
   }
@@ -41,7 +41,7 @@
   <!-- Raw Data Display for Debugging -->
   <details class="mt-4">
     <summary class="cursor-pointer text-sm font-bold">🔍 Debug: Raw Contact Data</summary>
-    <pre class="text-xs bg-gray-100 p-2 mt-2 overflow-auto max-h-32">{{config()?.addedContact | json}}</pre>
+    <pre class="text-xs bg-gray-100 p-2 mt-2 overflow-auto max-h-32">{{ config().addedContact | json }}</pre>
   </details>
 </div>
 <!-- END TEST SECTION -->

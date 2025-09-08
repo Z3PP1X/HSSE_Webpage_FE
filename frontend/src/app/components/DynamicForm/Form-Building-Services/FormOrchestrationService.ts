@@ -103,6 +103,14 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
                         field.method = ajaxConfig.method || 'GET';
                         field.triggerEvents = ajaxConfig.triggerEvents || ['input', 'focus'];
                         field.debounceTime = ajaxConfig.debounceTime || 300;
+
+                        if (field.endpoint) {
+                            // Keep only path relative to /api if baseUrl ends with /api
+                            if (this.apiService.getEnvironmentInfo().apiBaseUrl.endsWith('/api')) {
+                                field.endpoint = field.endpoint.replace(/^\/+/, '');
+                                field.endpoint = field.endpoint.replace(/^api\/+/, ''); 
+                            }
+                        }
                         
                         console.log(`🎯 Field after config merge:`, {
                             key: field.key,
@@ -139,6 +147,14 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
                             newField.method = ajaxConfig.method || 'GET';
                             newField.triggerEvents = ajaxConfig.triggerEvents || ['input', 'focus'];
                             newField.debounceTime = ajaxConfig.debounceTime || 300;
+
+                            if (newField.endpoint) {
+                                // Keep only path relative to /api if baseUrl ends with /api
+                                if (this.apiService.getEnvironmentInfo().apiBaseUrl.endsWith('/api')) {
+                                    newField.endpoint = newField.endpoint.replace(/^\/+/, '');
+                                    newField.endpoint = newField.endpoint.replace(/^api\/+/, ''); 
+                                }
+                            }
                         }
                     }
                     
@@ -158,7 +174,7 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
     private mapFieldType(fieldType: string, choices?: any[]): string {
         const fieldTypeMapping: { [key: string]: string } = {
             'select': 'dropdown',
-            'ajax_select': 'ajax_select', // Keep ajax_select as is
+            'ajax_select': 'ajax_select',
             'textarea': 'textbox',
             'checkbox': 'checkbox',
             'datetime': 'datetime',
@@ -167,7 +183,7 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
             'email': 'textbox'
         };
         
-        return fieldTypeMapping[fieldType] || 'textbox';
+        return fieldTypeMapping[fieldType] || fieldType;
     }
 
     createForm(formDefinition: FormGroupBase<any>[], formName: string = 'customForm'): Observable<FormGroup> {

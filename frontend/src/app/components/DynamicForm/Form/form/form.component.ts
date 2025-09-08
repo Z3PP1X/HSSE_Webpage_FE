@@ -110,33 +110,78 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   ) {}
 
   ngOnInit(): void {
-    console.log('FormComponent ngOnInit - Form provided:', !!this.form);
-    console.log('FormComponent ngOnInit - FormStructure length:', this.formStructure?.length || 0);
-    console.log('FormComponent ngOnInit - FormStructure:', this.formStructure);
-
-    if (!this.form) {
-      console.log('No form provided - preparing form data');
-      this.prepareFormData();
+    console.log('🚨 FormComponent ngOnInit - FORCED');
+    console.log('🚨 FormStructure:', this.formStructure);
+    
+    // FORCE provideQuestions call
+    if (this.formStructure?.length > 0) {
+      console.log('🚨 FORCING provideQuestions - structure has', this.formStructure.length, 'items');
+      this.provideQuestions(this.formStructure);
     } else {
-      console.log('Form provided by parent - setting ready immediately');
-      this.formReadyFlag.set(true);
-      this.isLoading.set(false);
-
-      if (this.formStructure && this.formStructure.length > 0) {
-        console.log('Processing questions from structure');
-        this.provideQuestions(this.formStructure);
-        // Initialize expandable categories AFTER processing questions
-        this.initializeExpandableCategories();
-      }
-
-      console.log('FormReadyFlag after setup:', this.formReadyFlag());
+      console.log('🚨 No formStructure to process');
     }
 
-    // Don't call initializeExpandableCategories here if form is provided
-    // Only call it if no form is provided (handled in prepareFormData)
+    // Continue with rest of initialization
+    if (this.form && this.formStructure?.length > 0) {
+      console.log('Processing questions from structure');
+      this.initializeExpandableCategories();
+    }
+    
+    console.log('FormReadyFlag after setup:', this.formReadyFlag());
+    
     if (!this.form) {
       this.initializeExpandableCategories();
     }
+    
+    console.log('🚨 Final questionLookup keys:', Array.from(this.questionLookup.keys()));
+  }
+
+  private async processQuestionsFromStructure(): Promise<void> {
+    // Extract all questions from the FormGroupBase structure
+    const allQuestions: QuestionBase<any>[] = [];
+    
+    this.formStructure.forEach(item => {
+      if (isFormGroupBase(item) && item.fields) {
+        item.fields.forEach(field => {
+          if (isQuestionBase(field)) {
+            // Ensure the field has the category information
+            field.category = item.key;
+            allQuestions.push(field);
+          }
+        });
+      } else if (isQuestionBase(item)) {
+        allQuestions.push(item);
+      }
+    });
+
+    console.log('🔄 Extracted questions for lookup:', allQuestions);
+    
+    // Now call provideQuestions with the flattened structure
+    this.provideQuestionsFromArray(allQuestions);
+  }
+
+  private provideQuestionsFromArray(questions: QuestionBase<any>[]): void {
+    console.log('🔄 provideQuestionsFromArray called with:', questions);
+    this.questionLookup.clear();
+
+    questions.forEach(question => {
+      const category = question.category || 'default';
+      const bucket = this.ensureCategoryBucket(category);
+      console.log('➕ Adding question to bucket:', {
+        category,
+        questionKey: question.key,
+        fieldType: question.field_type
+      });
+      bucket.set(question.key, question);
+    });
+
+    console.log('📊 Final questionLookup state:', {
+      categories: Array.from(this.questionLookup.keys()),
+      details: Array.from(this.questionLookup.entries()).map(([cat, bucket]) => ({
+        category: cat,
+        questionKeys: Array.from(bucket.keys())
+      }))
+    });
   }
 
   private initializeFormWithStructure(): void {
@@ -314,55 +359,98 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private provideQuestions(struct: FormGroupBase<any>[] | QuestionBase<any>[]): void {
-    this.questions = [];
+  private provideQuestions(data: FormGroupBase<any>[] | QuestionBase<any>[]): void {
+    console.log('🚨 provideQuestions CALLED with data:', data);
+    console.log('🚨 Data analysis:', {
+      isArray: Array.isArray(data),
+      length: data.length,
+      firstItem: data[0],
+      firstItemIsFormGroup: data[0] ? isFormGroupBase(data[0]) : false
+    });
+    
     this.questionLookup.clear();
-
-    if (this.isFormGroupBaseArray(struct)) {
-      for (const category of struct) {
-        const catKey = category.key;
-        const bucket = this.ensureCategoryBucket(catKey);
-
-        category.fields.forEach((f: QuestionBase<any> | FormGroupBase<any>) => {
-          if (!isQuestionBase(f)) return;
-          // Materialize concrete key for first instance
-          const materializedKey = this.normalizeInstanceKey(f.key);
-          let questionCopy = f;
-          if (materializedKey !== f.key) {
-            questionCopy = { ...f, key: materializedKey };
-          }
-          this.questions.push(questionCopy);
-          bucket.set(questionCopy.key, questionCopy);
-        });
+  
+    data.forEach((item, index) => {
+      console.log(`🚨 Processing item ${index}:`, item);
+      
+      if (isFormGroupBase(item)) {
+        console.log('📦 FormGroupBase detected:', item.key, 'with fields:', item.fields?.length);
+        const bucket = this.ensureCategoryBucket(item.key);
+        
+        if (item.fields && Array.isArray(item.fields)) {
+          item.fields.forEach((field, fieldIndex) => {
+            console.log(`  Field ${fieldIndex}:`, field);
+            
+            if (isQuestionBase(field)) {
+              console.log('  ➕ Adding question to bucket:', field.key);
+              bucket.set(field.key, field);
+            } else {
+              console.log('  ❌ Field is not QuestionBase');
+            }
+          });
+        }
+      } else if (isQuestionBase(item)) {
+        console.log('📝 Standalone QuestionBase detected:', item.key);
+        const category = item.category || 'default';
+        const bucket = this.ensureCategoryBucket(category);
+        bucket.set(item.key, item);
+      } else {
+        console.log('❌ Item is neither FormGroupBase nor QuestionBase');
       }
-    } else {
-      struct.forEach(q => {
-        if (!isQuestionBase(q)) return;
-        const matKey = this.normalizeInstanceKey(q.key);
-        let questionCopy = q;
-        if (matKey !== q.key) questionCopy = { ...q, key: matKey };
-        const cat = (q as any).category || '__root__';
-        this.ensureCategoryBucket(cat).set(questionCopy.key, questionCopy);
-        this.questions.push(questionCopy);
-      });
-    }
+    });
+  
+    console.log('🚨 Final questionLookup state:', {
+      categories: Array.from(this.questionLookup.keys()),
+      details: Array.from(this.questionLookup.entries()).map(([cat, bucket]) => ({
+        category: cat,
+        questionKeys: Array.from(bucket.keys())
+      }))
+    });
   }
 
   getQuestionForKey(controlName: string, category?: string): QuestionBase<any> | undefined {
     const cat = category || this.getCurrentCategory();
     const bucket = this.questionLookup.get(cat);
-    if (!bucket) return undefined;
-    if (bucket.has(controlName)) return bucket.get(controlName);
-
-    // Fallback: attempt template pattern match (Ersthelfer_Name_1 vs Ersthelfer_Name_{index})
+    
+    // DEBUG: Log the lookup attempt
+    console.log('🔍 getQuestionForKey called:', {
+      controlName,
+      category: cat,
+      bucketExists: !!bucket,
+      bucketKeys: bucket ? Array.from(bucket.keys()) : [],
+      questionLookupKeys: Array.from(this.questionLookup.keys())
+    });
+    
+    if (!bucket) {
+      console.log('❌ No bucket found for category:', cat);
+      return undefined;
+    }
+    
+    // Try exact match first
+    if (bucket.has(controlName)) {
+      console.log('✅ Found exact match for:', controlName);
+      return bucket.get(controlName);
+    }
+    
+    // Try without category prefix
+    const leafKey = controlName.includes('.') ? controlName.split('.').pop()! : controlName;
+    if (bucket.has(leafKey)) {
+      console.log('✅ Found leaf match for:', leafKey);
+      return bucket.get(leafKey);
+    }
+    
+    // Fallback: attempt template pattern match
     for (const q of bucket.values()) {
       if (q.key.includes('{index}')) {
         const pattern = q.key.replace('{index}', '\\d+');
-        if (new RegExp(`^${pattern}$`).test(controlName)) {
+        if (new RegExp(`^${pattern}$`).test(controlName) || new RegExp(`^${pattern}$`).test(leafKey)) {
+          console.log('✅ Found pattern match for:', controlName, 'with pattern:', pattern);
           return q;
         }
       }
     }
+    
+    console.log('❌ No match found for:', controlName, 'in bucket:', Array.from(bucket.keys()));
     return undefined;
   }
 

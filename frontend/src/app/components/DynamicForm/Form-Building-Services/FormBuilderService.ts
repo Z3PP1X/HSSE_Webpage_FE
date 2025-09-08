@@ -62,82 +62,80 @@ export class FormBuilderService {
         for (const element of data) {
             console.log('Processing element in FormBuilderService:', element);
             
-            // Properly map choices/options to have consistent structure
-            let mappedOptions = [];
-            if (element.choices && Array.isArray(element.choices)) {
-                mappedOptions = element.choices.map((choice: any) => ({
-                    key: choice.value || choice.key,
-                    value: choice.value || choice.key,
-                    label: choice.label || choice.value || choice.key
-                }));
-            }
+            const mappedOptions = Array.isArray(element.choices)
+                ? element.choices.map((c: any) => ({
+                    key: c.value ?? c.key,
+                    value: c.value ?? c.key,
+                    label: c.label ?? c.value ?? c.key
+                }))
+                : [];
 
             const baseConfig = {
                 title: element.title,
                 key: element.key,
                 label: element.label,
-                field_type: element.field_type,
+                field_type: element.field_type, // keep original
                 required: element.required,
                 order: element.order || 0,
                 fetchOptions: element.fetchOptions,
                 helpText: element.help_text,
                 value: element.value,
                 options: mappedOptions,
-                category: element.category,
+                category: element.category
             };
 
             switch (element.field_type) {
-                case "ajax_select":
-                    console.log('Creating AjaxSelectQuestion for:', element.key);
-                    questions.push(new AjaxSelectQuestion({ 
+                case 'ajax_select':
+                    questions.push(new AjaxSelectQuestion({
                         ...baseConfig,
                         ajax_config: element.ajax_config,
                         search_field: element.search_field,
                         display_field: element.display_field,
                         value_field: element.value_field,
-                        endpoint: element.endpoint, // Make sure endpoint is passed
+                        endpoint: element.endpoint,
                         method: element.method,
                         triggerEvents: element.triggerEvents,
                         debounceTime: element.debounceTime,
                         choices: mappedOptions
                     }));
                     break;
-                case "textbox":
-                case "text": // Handle both textbox and text
-                    questions.push(new TextboxQuestion({ ...baseConfig }));
-                    break;
-                case "contactdata":
-                    questions.push(new ContactDataQuestion({ ...baseConfig }));
-                    break;
-                case "adressdata":
-                    questions.push(new AdressFieldQuestion({ ...baseConfig }));
-                    break;
-                case "location":
-                    questions.push(new LocationQuestion({ ...baseConfig }));
-                    break;
-                case "datetime":
-                    questions.push(new DateTimeQuestion({ ...baseConfig }));
-                    break;
-                case "dropdown":
-                case "select":
-                    questions.push(new DropdownQuestion({ 
-                        ...baseConfig, 
-                        choices: element.choices || element.options || [] 
+                case 'dropdown':
+                case 'select':
+                    questions.push(new DropdownQuestion({
+                        ...baseConfig,
+                        choices: element.choices || element.options || []
                     }));
                     break;
-                case "email":
-                    questions.push(new TextboxQuestion({ ...baseConfig }));
+                case 'datetime':
+                    questions.push(new DateTimeQuestion({ ...baseConfig }));
                     break;
-                case "number":
-                    questions.push(new TextboxQuestion({ ...baseConfig }));
+                case 'location':
+                    questions.push(new LocationQuestion({ ...baseConfig }));
                     break;
-                case "checkbox":
-                    questions.push(new TextboxQuestion({ ...baseConfig })); // You might want a CheckboxQuestion
+                case 'contactdata':
+                    questions.push(new ContactDataQuestion({ ...baseConfig }));
                     break;
+                case 'adressdata':
+                    questions.push(new AdressFieldQuestion({ ...baseConfig }));
+                    break;
+                case 'checkbox':
+                    // TODO: replace with dedicated CheckboxQuestion if created
+                    questions.push(new TextboxQuestion({ ...baseConfig, field_type: 'checkbox' }));
+                    break;
+                case 'email':
+                    questions.push(new TextboxQuestion({ ...baseConfig, field_type: 'email' }));
+                    break;
+                case 'number':
+                case 'integer':
+                    questions.push(new TextboxQuestion({ ...baseConfig, field_type: 'number' }));
+                    break;
+                case 'textarea':
+                    questions.push(new TextboxQuestion({ ...baseConfig, field_type: 'textarea' }));
+                    break;
+                case 'textbox':
+                case 'text':
                 default:
-                    console.warn('Unknown field_type: ', element.field_type);
-                    // Fallback to textbox
-                    questions.push(new TextboxQuestion({ ...baseConfig }));
+                    questions.push(new TextboxQuestion({ ...baseConfig, field_type: 'textbox' }));
                     break;
             }
         }

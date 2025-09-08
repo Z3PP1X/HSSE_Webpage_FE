@@ -31,8 +31,23 @@ export class ApiService {
      * Build full URL with base URL from environment
      */
     private buildUrl(endpoint: string): string {
-        const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-        return `${this.baseUrl}/${cleanEndpoint}`;
+        if (!endpoint) return this.baseUrl;
+        // Absolute URL – return as-is
+        if (/^https?:\/\//i.test(endpoint)) return endpoint;
+
+        let clean = endpoint.trim();
+
+        // Remove leading slashes
+        while (clean.startsWith('/')) clean = clean.slice(1);
+
+        // If backend already prefixed with 'api/' and baseUrl ends with '/api', strip duplicate
+        const baseEndsWithApi = this.baseUrl.endsWith('/api');
+        if (baseEndsWithApi && clean.startsWith('api/')) {
+            clean = clean.slice(4); // remove 'api/'
+        }
+
+        // Ensure single slash join
+        return `${this.baseUrl}/${clean}`;
     }
 
     /**
