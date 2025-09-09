@@ -4,6 +4,8 @@ export const environment = {
   features: {
     showDevelopmentModules: false,
     showStagingModules: false,
-    enableModuleDebugging: false
+    enableModuleDebugging: false,
+    enableLogging: false,
+    enableVerbosePdfLogging: false
   }
 };

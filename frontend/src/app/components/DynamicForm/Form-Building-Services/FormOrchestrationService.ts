@@ -10,6 +10,8 @@ import { FormBuilderService } from "./FormBuilderService";
 // Import the global ApiService instead of HttpClient
 import { ApiService } from "../../../global-services/api-service/api-service";
 
+import { LoggingService } from "../../../global-services/logging/logging.service";
+
 @Injectable({
     providedIn: 'root'
 })
@@ -19,16 +21,19 @@ export class FormOrchestrationService {
     private error$ = new BehaviorSubject<string | null>(null);
     private formMetadata$ = new BehaviorSubject<any>(null);
     private formQuestions$ = new BehaviorSubject<FormGroupBase<any>[] | QuestionBase<any>[]>([]);
+    private log: ReturnType<LoggingService['scoped']>;
 
     constructor(
-        // Replace HttpClient with ApiService
+        private logger: LoggingService,// Replace HttpClient with ApiService
         private apiService: ApiService,
         private formModelService: FormModelService,
         
-    ) {}
+    ) {
+        this.log = this.logger.scoped('FormOrchestrationService');
+    }
 
     generateForm(apiEndpoint: string, formName: string = 'dynamicForm'): Observable<FormGroup> {
-        console.log('🔄 FormOrchestrationService.generateForm called with:', apiEndpoint);
+        this.log.info('🔄 FormOrchestrationService.generateForm called with:', apiEndpoint);
         this.loading$.next(true);
         this.error$.next(null);
 
@@ -36,26 +41,26 @@ export class FormOrchestrationService {
         
         return this.apiService.get<any>(apiEndpoint, { params }).pipe(
             map(response => {
-                console.log('📥 Raw API response in generateForm:', response);
-                console.log('Shared configs found:', response.shared_configs);
+                this.log.debug('📥 Raw API response in generateForm:', response);
+                this.log.debug('Shared configs found:', response.shared_configs);
                 
                 // Store the complete metadata including shared_configs
                 this.formMetadata$.next(response);
                 
                 // Process the structure and apply ajax configs
                 const processedStructure = this.mapApiToFormDefinition(response.structure, response.shared_configs);
-                console.log('📤 Processed structure:', processedStructure);
+                this.log.debug('📤 Processed structure:', processedStructure);
                 
                 this.formQuestions$.next(processedStructure);
                 return processedStructure;
             }),
             switchMap(data => this.initFormBuild(data)),
             tap(() => {
-                console.log('✅ Form generation completed');
+                this.log.info('✅ Form generation completed');
                 this.loading$.next(false);
             }),
             catchError(error => {
-                console.error('💥 Error generating form:', error);
+                this.log.error('💥 Error generating form:', error);
                 this.error$.next('Failed to generate form');
                 this.loading$.next(false);
                 return throwError(() => error);
@@ -64,7 +69,7 @@ export class FormOrchestrationService {
     }
 
     private initFormBuild(data: FormGroupBase<any>[] | QuestionBase<any>[]): Observable<FormGroup> {
-        console.log('Initializing form build with data:', data);
+        this.log.debug('Initializing form build with data:', data);
         
         this.formModelService.processFormStructure(data);
         this.formModelService.emitCurrentFormStructure();
@@ -74,12 +79,12 @@ export class FormOrchestrationService {
 
     // FormOrchestrationService.ts additions
 private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBase<any>[] | QuestionBase<any>[] {
-    console.log('🔄 mapApiToFormDefinition called');
-    console.log('Input apiData:', apiData);
-    console.log('Input sharedConfigs:', sharedConfigs);
+    this.log.info('🔄 mapApiToFormDefinition called');
+    this.log.debug('Input apiData:', apiData);
+    this.log.debug('Input sharedConfigs:', sharedConfigs);
     
     return apiData.map(item => {
-        console.log('Processing item:', item.key);
+        this.log.debug('Processing item:', item.key);
         
         // Transform field types
         if (item.field_type) {
@@ -89,15 +94,15 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
         // Process fields within categories
         if (item.fields && Array.isArray(item.fields)) {
             item.fields = item.fields.map((field: any) => {
-                console.log(`Processing field: ${field.key}, type: ${field.field_type}`);
+                this.log.debug(`Processing field: ${field.key}, type: ${field.field_type}`);
                 
                 // Handle ajax_select fields
                 if (field.field_type === 'ajax_select' && field.ajax_config && sharedConfigs?.ajax_configs) {
-                    console.log(`🔍 Found ajax_select field: ${field.key} with config: ${field.ajax_config}`);
+                    this.log.debug(`🔍 Found ajax_select field: ${field.key} with config: ${field.ajax_config}`);
                     
                     const ajaxConfig = sharedConfigs.ajax_configs[field.ajax_config];
                     if (ajaxConfig) {
-                        console.log(`✅ Applying ajax config:`, ajaxConfig);
+                        this.log.debug(`✅ Applying ajax config:`, ajaxConfig);
                         // Merge ajax config into the field
                         field.endpoint = ajaxConfig.endpoint;
                         field.method = ajaxConfig.method || 'GET';
@@ -112,13 +117,13 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
                             }
                         }
                         
-                        console.log(`🎯 Field after config merge:`, {
+                        this.log.debug(`🎯 Field after config merge:`, {
                             key: field.key,
                             endpoint: field.endpoint,
                             field_type: field.field_type
                         });
                     } else {
-                        console.warn(`❌ Ajax config '${field.ajax_config}' not found in shared configs`);
+                        this.log.warn(`❌ Ajax config '${field.ajax_config}' not found in shared configs`);
                     }
                 }
                 return field;
@@ -186,17 +191,17 @@ private mapApiToFormDefinition(apiData: any[], sharedConfigs?: any): FormGroupBa
     }
 
     createForm(formDefinition: FormGroupBase<any>[], formName: string = 'customForm'): Observable<FormGroup> {
-        console.log('Creating form with definition:', formDefinition);
+        this.log.debug('Creating form with definition:', formDefinition);
         this.loading$.next(true);
 
         return this.initFormBuild(formDefinition).pipe(
             tap(formGroup => {
-                console.log('Form created successfully:', formGroup);
+                this.log.debug('Form created successfully:', formGroup);
                 this.currentForm$.next(formGroup);
                 this.loading$.next(false);
             }),
             catchError(error => {
-                console.error('Error creating form:', error);
+                this.log.error('Error creating form:', error);
                 const errorMessage = error.message || 'An error occurred while creating the form';
                 this.error$.next(errorMessage);
                 this.loading$.next(false);

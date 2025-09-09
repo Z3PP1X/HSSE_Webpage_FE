@@ -12,12 +12,21 @@ import { ContactDataQuestion } from "../questions/contact-data";
 import { AdressFieldQuestion } from "../questions/adressfield";
 import { AjaxSelectQuestion } from "../questions/ajaxselect";
 
+import { LoggingService } from "../../../global-services/logging/logging.service";
+
 @Injectable({
     providedIn: 'root'
 })
 export class FormBuilderService {
-    constructor() {}
+    
+    private log: ReturnType<LoggingService['scoped']>;
 
+    constructor(private logger: LoggingService) {
+      this.log = this.logger.scoped('FormBuilderService');
+    }
+    
+    
+    
     setFormGroup(groupName: string): FormGroup {
         return new FormGroup({ [groupName]: new FormGroup({}) });
     }
@@ -48,7 +57,7 @@ export class FormBuilderService {
 
                 group[question.key] = control;
             } else {
-                console.error('Missing key for question:', question);
+                this.log.error('Missing key for question:', question);
             }
         });
 
