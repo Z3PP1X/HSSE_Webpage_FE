@@ -1,18 +1,31 @@
-<div class="bg-sixt-black opacity-90 h-screen w-full flex flex-col items-center">
+<!-- Sidebar Container -->
+<div class="fixed bg-sixt-black/90 h-screen w-96 flex flex-col items-center">
 
-  <div class="w-full h-1/6 object-contain bg-transparent">
-    <img [src]="iconPath()" class="w-full h-full" alt="selected-menu">
+  <!-- Logo / Header (sticky optional) -->
+  <div class="w-full pt-4 pb-2 px-4 bg-transparent sticky top-0 z-10">
+    <img [src]="iconPath()" class="w-full h-20 object-contain" alt="selected-menu">
   </div>
 
-  <div class="mt-2 mb-2 h-[1px] w-full bg-white"></div>
+  <div class="h-px w-11/12 bg-white/40 mb-2"></div>
 
-
+  <!-- Scrollable Menus -->
+  <div class="flex-1 w-full overflow-y-auto px-2 pb-6">
     @for (module of configurationItem(); track module) {
-      <div class="mt-3 mb-3 text-white flex flex-col items-center w-full">
-        <app-expandable-accordion-card [catalogItemTitle]="module.title" class="w-11/12" [id]="module.title"></app-expandable-accordion-card>
+      <div class="text-white mt-4 mb-3 text-lg font-semibold tracking-wide px-4">
+        {{ module.moduleTitle }}
       </div>
 
+      @for (menu of module.menus; track menu.menuId) {
+        <div class="mb-3 flex justify-center">
+          <app-expandable-accordion-card
+            [catalogItemTitle]="menu.title || ''"
+            class="w-11/12 transition-shadow duration-200 hover:shadow-md"
+            [id]="menu.menuId || ''"
+            [isActive]="menu.menuId === activeMenuId()"
+            (click)="setActiveMenu(menu.menuId)">
+          </app-expandable-accordion-card>
+        </div>
+      }
     }
-
-
   </div>
+</div>

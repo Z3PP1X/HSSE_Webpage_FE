@@ -1,24 +1,157 @@
-<div class="m-4 flex-auto"[formGroup]="form">
-
-  @switch (question.controlType) {
-    @case ('textbox') {
-        <input class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" [formControlName]="question.key" [id]="question.key" placeholder="{{question.label}}">
-
-    }
-    @case ('dropdown') {
-
-    }
-    @case ('location') {
-
-    }
-    @case ('datetime') {
-
-      <input class="w-full leading-10 border border-black rounded-lg px-4 focus:outline-none focus:border-green-500 placeholder-gray-500" [formControlName]="question.key" [id]="question.key" placeholder="{{question.label}}" type="{{question.type}}">
-
-    }
+<div class="question-container">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="20"></mat-spinner>
+      <span>Loading {{ question.label }}...</span>
+    </div>
   }
-
-@if (!isValid) {
-  <div class="errorMessage">{{question.label}} is required</div>
-}
+  @if (error) {
+    <div class="error-container">
+      <mat-error>{{ error }}</mat-error>
+    </div>
+  }
+  <div [formGroup]="getCurrentFormGroup()">
+    @switch (question.field_type) {
+      
+      @case ('text') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+    
+      @case ('textbox') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+    
+      @case ('email') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="email" autocomplete="email">
+          <mat-error *ngFor="let msg of getErrorMessages()">{{ msg }}</mat-error>
+        </mat-form-field>
+      }
+    
+      @case ('number') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="number" inputmode="numeric">
+          <mat-error *ngFor="let msg of getErrorMessages()">{{ msg }}</mat-error>
+        </mat-form-field>
+      }
+      @case ('textarea') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <textarea matInput [formControlName]="getControlName()" [id]="question.key" rows="4"></textarea>
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+      @case ('checkbox') {
+        <div class="checkbox-field">
+          <mat-checkbox [formControlName]="getControlName()" [id]="question.key">
+            {{ question.label }}
+          </mat-checkbox>
+        </div>
+      }
+      @case ('dropdown') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <mat-select [formControlName]="getControlName()">
+            <mat-option [value]="''">Select {{ question.label }}</mat-option>
+            @for (opt of question.options; track opt.label) {
+              <mat-option [value]="opt.label">
+                {{ opt.value }}
+              </mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+      @case ('datetime') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key"
+                 [matDatepicker]="picker" placeholder="MM/DD/YYYY">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+      @case ('autocomplete') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input type="text" matInput [formControlName]="getControlName()" [id]="question.key"
+                 [matAutocomplete]="auto">
+          <mat-autocomplete #auto="matAutocomplete">
+            @if (filteredOptions) {
+              @for (option of filteredOptions | async; track option.key) {
+                <mat-option [value]="option.key">{{ option.value }}</mat-option>
+              }
+            }
+          </mat-autocomplete>
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+      @case ('contactdata') {
+        <div class="contact-fields">
+          <mat-form-field appearance="fill" class="form-field-full-width">
+            <mat-label>Name</mat-label>
+            <input matInput [formControlName]="getControlName()" [id]="question.key">
+            <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+          </mat-form-field>
+        </div>
+      }
+      @case ('location') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+      @case ('adressdata') {
+        <div class="address-container">
+          <mat-form-field appearance="fill" class="form-field-full-width">
+            <mat-label>{{ question.label }}</mat-label>
+            <input matInput [formControlName]="getControlName()" [id]="question.key" type="text">
+            <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+          </mat-form-field>
+        </div>
+      }
+      @case ('ajax_select') {
+        <mat-form-field appearance="fill" class="form-field-full-width">
+          <mat-label>{{ question.label }}</mat-label>
+          <input 
+            type="text" 
+            matInput 
+            [formControlName]="getControlName()" 
+            [matAutocomplete]="ajaxAuto"
+            placeholder="Type to search...">
+          <mat-autocomplete 
+            #ajaxAuto="matAutocomplete" 
+            (optionSelected)="onAjaxSelectChange($event)">
+            @if (loading) {
+              <mat-option disabled>
+                <mat-spinner diameter="20"></mat-spinner>
+                Searching...
+              </mat-option>
+            }
+            @for (opt of (filteredOptions | async); track opt.key || opt.value) {
+              <mat-option [value]="opt.label">
+                {{ opt.label }}
+              </mat-option>
+            }
+            @if (!loading && (filteredOptions | async)?.length === 0) {
+              <mat-option disabled>No results found</mat-option>
+            }
+          </mat-autocomplete>
+          <mat-error *ngIf="!isValid">{{ question.label }} ist erforderlich</mat-error>
+        </mat-form-field>
+      }
+    }
+  </div>
 </div>

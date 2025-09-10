@@ -1,0 +1,14 @@
+.form-field-full-width {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .contact-fields {
+    gap: 16px;
+  }
+}
+
+.question-container {
+  width: 100%;
+  margin-bottom: 16px;
+}

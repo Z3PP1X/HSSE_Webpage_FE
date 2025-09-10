@@ -1,13 +1,27 @@
-
-  <div class="grid grid-cols-4">
-    <div class="col-span-1"><app-module-navigation [configurationItem]="configurationItem" [iconPath]="iconPath" class="w-full"></app-module-navigation></div>
-    <div class="col-span-3 flex justify-center">
-
-    </div>
+<div class="grid grid-cols-4">
+  <div class="col-span-1">
+    <app-module-navigation [configurationItem]="configurationItem" [iconPath]="iconPath" class="w-full"></app-module-navigation>
   </div>
-
-
-
-
-
+  
+  <div class="col-span-3 flex justify-center">
+    <div *ngIf="isLoading" class="loading">Loading form...</div>
+    <div *ngIf="error" class="error">
+      {{ error }}
+      <button (click)="retryLoadConfig()">Retry</button>
+    </div>
+    
+    <!-- Wait for both form data and structure to be ready -->
+    <ng-container *ngIf="formReady$ | async as data">
+      <app-form 
+        [formTitle]="formTitle"
+        [form]="data.form"
+        [formStructure]="data.structure"
+        (formSubmit)="handleFormSubmit($event)" 
+        class="w-1/2">
+      </app-form>
+    </ng-container>
+  </div>
+  
+  <app-pdf *ngIf="showPdfComponent"></app-pdf>
+</div>
 

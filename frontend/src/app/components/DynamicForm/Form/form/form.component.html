@@ -1,24 +1,155 @@
-
-<div class="bg-gray-50 mt-5 rounded-md drop-shadow-sm shadow-sm">
-
-  <div class="flex flex-row relative mb-4 justify-center text-center">
-    <h1 class="text-2xl font-bold mt-2">{{formTitle()}}</h1>
-    <div class="w-20 object-contain absolute right-2 top-2">
-      <img src="branding/SIXT_Logo_Pos.svg" alt="Sixt-Logo" class="">
+@if (!formReadyFlag()) {
+  <div class="flex flex-col items-center justify-center w-full h-64 my-8">
+    <mat-spinner
+      [diameter]="50"
+      [strokeWidth]="5"
+      color="primary">
+    </mat-spinner>
+    <h2 class="text-center text-2xl font-bold mt-4 text-gray-700">Loading...</h2>
+  </div>
+}
+@else {
+  <div class="bg-white rounded-lg">
+    <!-- Form Header -->
+    <div class="border-b border-gray-100 pb-6 mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 text-center">{{formTitle()}}</h1>
     </div>
 
+    <form (ngSubmit)="onSubmit()" [formGroup]="form" class="space-y-8">
+      <!-- Progress Navigation -->
+      <div class="bg-gray-50 rounded-xl p-6">
+        <mat-progress-bar
+          mode="determinate"
+          [value]="getProgressValue()"
+          class="h-2 rounded-full mb-4">
+        </mat-progress-bar>
 
-  </div>
-  <div class="w-full h-[1px] bg-black"></div>
-  <div class="flex">
-    <form (ngSubmit)="onSubmit()" [formGroup]="form">
-      @for (question of questions; track question){
-        <div>
-          <app-form-question [question]="question" [form]="form"></app-form-question>
+        <div class="flex flex-wrap gap-2 justify-center">
+          @for (category of formCategories(); track category; let i = $index) {
+            <button
+              type="button"
+              class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+              [class]="i === currentCategoryIndex 
+                ? 'bg-blue-500 text-white shadow-md' 
+                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'"
+              (click)="selectCategory(i)">
+              {{ humanizeCategory(category) }}
+            </button>
+          }
         </div>
-      }
+      </div>
 
+      <!-- Current Category Content -->
+      <div class="bg-white">
+        <div class="mb-6">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+            {{ humanizeCategory(getCurrentCategory()) }}
+          </h2>
+          <div class="w-20 h-1 bg-blue-500 rounded-full"></div>
+        </div>
+
+        <div [formGroupName]="getCurrentCategory()" class="space-y-6">
+          @if (form && form.get(getCurrentCategory())) {
+            @for (controlName of getControlKeys(getCurrentCategory()); track controlName) {
+              <div class="w-full">
+                @let lookupKey = getCurrentCategory() + '.' + controlName;
+                @let q = getQuestionForKey(lookupKey, getCurrentCategory());
+                
+                <!-- DEBUG: Show what we're looking for -->
+                 @if (debugEnabled){
+                  <div class="text-xs text-gray-500 mb-1">
+                    Looking for: "{{lookupKey}}" in category "{{getCurrentCategory()}}"
+                    Found: {{q ? 'YES (' + q.field_type + ')' : 'NO'}}
+                  </div>
+                 }
+                
+                
+                @if (q) {
+                  <app-form-question
+                    [question]="q"
+                    [form]="form"
+                    [currentCategory]="getCurrentCategory()">
+                  </app-form-question>
+                } @else {
+                  <div class="fallback-field border-2 border-red-200 p-2">
+                    <div class="text-red-600 text-sm mb-2">FALLBACK: No question found for "{{lookupKey}}"</div>
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>{{controlName}}</mat-label>
+                      <input matInput [formControlName]="controlName" [id]="controlName"
+                             class="rounded-lg">
+                    </mat-form-field>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Expandable Category Controls -->
+        @if (isCategoryExpandable(getCurrentCategory())) {
+          <div class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-sm font-medium text-gray-600">
+                Instances: {{ getCurrentInstanceCount(getCurrentCategory()) }} / {{ getMaxInstances(getCurrentCategory()) }}
+              </span>
+              
+              <div class="flex gap-3">
+                @if (canAddInstance(getCurrentCategory())) {
+                  <button
+                    type="button"
+                    class="w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors duration-200 shadow-md hover:shadow-lg"
+                    (click)="addInstance(getCurrentCategory())"
+                    matTooltip="Add another instance">
+                    <mat-icon class="text-lg">add</mat-icon>
+                  </button>
+                }
+                
+                @if (canRemoveInstance(getCurrentCategory())) {
+                  <button
+                    type="button"
+                    class="px-4 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors duration-200 text-sm font-medium flex items-center gap-2"
+                    (click)="removeInstance(getCurrentCategory())"
+                    matTooltip="Remove last instance">
+                    <mat-icon class="text-lg">remove</mat-icon>
+                    Remove Last
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center pt-8 mt-8 border-t border-gray-100">
+          <button
+            type="button"
+            mat-stroked-button
+            *ngIf="currentCategoryIndex !== 0"
+            (click)="previousCategory()"
+            class="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200 font-medium">
+            Previous
+          </button>
+
+          <div class="ml-auto flex gap-3">
+            <button
+              type="button"
+              mat-raised-button
+              *ngIf="currentCategoryIndex !== formCategories().length - 1"
+              (click)="nextCategory()"
+              class="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200 font-medium shadow-md hover:shadow-lg">
+              Next
+            </button>
+
+            <button
+              type="submit"
+              mat-raised-button
+              *ngIf="currentCategoryIndex === formCategories().length - 1"
+              class="px-8 py-3 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors duration-200 font-medium shadow-md hover:shadow-lg">
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
     </form>
   </div>
-</div>
-
+}

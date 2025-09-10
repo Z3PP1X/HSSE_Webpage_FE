@@ -16,3 +16,12 @@
     bg-sixt-black text-xs font-bold transition-all duration-100 scale-0 origin-left;
   }
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+.mdc-notched-outline__notch
+{
+  border-right: none;
+}

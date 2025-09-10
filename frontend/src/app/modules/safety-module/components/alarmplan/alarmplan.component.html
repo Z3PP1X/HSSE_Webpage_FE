@@ -8,73 +8,74 @@
     </div>
 
 
-    <div class="col-start-4 col-end-10 row-start-4 flex items-start">
-      <h1 class="text-white font-bold text-lg md:text-fs-xl">Notfall und Alarmplan</h1>
+    <div class="col-start-4 col-end-10 row-start-3 flex items-start mb-3">
+      <h1 class="text-white font-bold text-fs-heading">Notfall und Alarmplan</h1>
     </div>
 
 
     <div class="col-start-4 col-end-10 row-start-8 flex items-end">
-      <h2 class="text-customAlarmplanSubheadline text-sm md:text-fs-300">
+      <h2 class="text-customAlarmplanSubheadline text-fs-subheading">
         Zugspitzstraße 1 München
       </h2>
+      <p class=" text-customAlarmplanSubheadline text-right text-xs ml-10">{{this.timestamp}}</p>
     </div>
   </div>
 
 
-  <div class="grid grid-cols-3 gap-6 mx-6 row-start-3 col-span-3 mt-3 mb-3">
+  <div class="grid grid-cols-3 gap-6 mx-3 row-start-3 col-span-3 mt-3 mb-3">
 
-    <div class="col-span-1 grid grid-cols-10 grid-rows-1 bg-gray-600">
-      <div class="col-span-9"><h1 class="font-bold col-start-2 text-fs-mobile-subheading ml-3">Verhalten bei Unfällen</h1></div>
-      <div class="col-start-10 bg-yellow-500"></div>
+    <div class="col-span-1 grid grid-cols-10 grid-rows-1">
+      <div class="col-span-8 whitespace-nowrap"><h1 class="font-bold col-start-2 text-fs-category-heading">Verhalten bei Unfällen</h1></div>
+      <div class="ml-2 h-10 w-10"><img [src]="titleFirstAid"></div>
     </div>
 
     <div class="col-span-1 grid grid-cols-10 grid-rows-1">
-      <div class="col-span-9 "><h1 class="font-bold col-start-2 ml-3  text-fs-mobile-subheading">Verhalten im Brandfall</h1></div>
-      <div class="col-start-10 bg-yellow-500"></div>
+      <div class="col-span-8 whitespace-nowrap"><h1 class="font-bold col-start-2 ml-3  text-fs-category-heading">Verhalten im Brandfall</h1></div>
+      <div class=" ml-2 h-10 w-10"><img [src]="titleFireAlarm"></div>
     </div>
 
     <div class="col-span-1 grid grid-cols-10 grid-rows-1">
-      <div class="col-span-9"><h1 class="font-bold ml-3 text-fs-mobile-subheading">Wichtige Rufnummern</h1></div>
-      <div class="col-start-10 bg-yellow-500"></div>
+      <div class="col-span-8 whitespace-nowrap"><h1 class="font-bold ml-3 text-fs-category-heading">Wichtige Rufnummern</h1></div>
+      <div class="ml-2 bg-black h-10 w-10"><img [src]="titleImportantNumbers"></div>
     </div>
   </div>
 
 
-  <div class="grid grid-cols-3 col-span-3 row-start-4 row-end-12 gap-6 mx-6">
-    <div class="bg-white col-span-1 border-2 border-customAlarmplanGreen">
-      <h1 class="text-black font-bold text-center mt-4">RUHE BEWAHREN!</h1>
+  <div class="grid grid-cols-3 col-span-3 row-start-4 row-end-13 gap-6 mx-1 mb-2">
+    <div class="bg-white col-span-1 border-2 border-customAlarmplanGreen h-full">
+      <h1 class="text-black font-bold text-center text-fs-subheading mt-4">RUHE BEWAHREN!</h1>
       <div>
-        <h1 class="text-black font-bold mt-4 ml-2">1 Menschen retten - Ersthelfer informieren</h1>
+        <h1 class="text-black font-bold mt-4 ml-2 text-fs-subheading">1 Menschen retten - Ersthelfer informieren</h1>
         <div>
         </div>
-        <div class="ml-8 text-gray-600 grid grid-cols-2">
+        <div class="ml-8 text-gray-600 grid grid-cols-2 text-fs-text">
           
             @for (person of config().firstAiderDict; track person.id) {
-
+              
               <p>{{person.name}}</p>
             <p class="text-right mr-2 ">{{person.phoneNumber}}</p>
-  
+
             }
-          
+
         </div>
-        <ul class="ml-8 mt-4 list-disc">
-          <li>Beseitigung der Unfallgefahr</li>
-          <li> Verunglückten aus dem Gefahrenbereich bringen, eigene Sicherheit beachten!</li>
-          <li>Feststellen des Bewusstseins</li>
-          <li>Atemwege freimachen / Erste Hilfe Maßnahmen</li>
-          <li>Verbandkästen befinden sich in allen Filialen und TA-Plätzen</li>
+        <ul class="ml-8 mt-4 text-fs-text">
+          <li>• Beseitigung der Unfallgefahr</li>
+          <li>• Verunglückten aus dem Gefahrenbereich bringen, eigene Sicherheit beachten!</li>
+          <li>• Feststellen des Bewusstseins</li>
+          <li>• Atemwege freimachen / Erste Hilfe Maßnahmen</li>
+          <li>• Verbandkästen befinden sich in allen Filialen und TA-Plätzen</li>
         </ul>
       </div>
       <div>
-        <h1 class="font-bold text-black ml-2 mt-4">2 Medizinischer Notruf</h1>
-        <div class="ml-8 mr-4">
+        <h1 class="font-bold text-black ml-2 mt-4 text-fs-subheading">2 Medizinischer Notruf</h1>
+        <div class="ml-8 mr-4 text-fs-text">
           <p>Rettungsleitstelle <span class="font-bold text-orange-600">Telefon:112</span></p>
-          <p><span class="font-bold text-orange-600">Wo</span>? <span class="font-bold text-orange-600">Was</span> ist passiert? <span class="font-bold text-orange-600">Wie viele</span> Verletzte? <span class="font-bold text-orange-600">Welche</span> Voraussetzungen? <span class="text-orange-600 font-bold">Warten</span> auf Rückfragen!</p>
+          <p><span class="font-bold text-sixt-orange">Wo</span>? <span class="font-bold text-sixt-orange">Was</span> ist passiert? <span class="font-bold text-sixt-orange">Wie viele</span> Verletzte? <span class="font-bold text-sixt-orange">Welche</span> Voraussetzungen? <span class="text-sixt-orange font-bold">Warten</span> auf Rückfragen!</p>
         </div>
       </div>
       <div>
-        <h1 class="font-bold text-black ml-2 mt-4"> 3 Unfall melden und dokumentieren</h1>
-        <div class="grid grid-cols-2 ml-8">
+        <h1 class="font-bold text-black ml-2 mt-4 text-fs-subheading"> 3 Unfall melden und dokumentieren</h1>
+        <div class="grid grid-cols-2 ml-8 text-fs-text">
           <div class="grid grid-rows-3">
             <div class="flex flex-row mt-1">
               <div class="w-6 h-6"><img [src]="employeeIcon"></div>
@@ -94,54 +95,54 @@
       </div>
 
     </div>
-    <div class="bg-white col-span-1 border-2 border-customAlarmplanRed">
-      <h1 class="text-black font-bold text-center mt-4">RUHE BEWAHREN!</h1>
+    <div class="bg-white col-span-1 border-2 border-customAlarmplanRed h-full">
+      <h1 class="text-black font-bold text-center text-fs-subheading mt-4">RUHE BEWAHREN!</h1>
       <div>
-        <h1 class="font-bold text-black ml-2 mt-4">1 Menschen retten</h1>
+        <h1 class="font-bold text-black text-fs-subheading ml-2 mt-4">1 Menschen retten</h1>
         <div class="flex flex-row ml-2 mt-2">
-          <h1 class="font-bold text-black">2</h1>
-          <div class="w-9 h-9 ml-1 mr-1"><img [src]="fireAlarmIcon"></div>
-          <h1 class="font-bold text-black">Feuermelder betätigen</h1>
+          <h1 class="font-bold text-black text-fs-subheading">2</h1>
+          <div class="w-8 h-8 ml-1 mr-1"><img [src]="fireAlarmIcon"></div>
+          <h1 class="font-bold text-black text-fs-subheading">Feuermelder betätigen</h1>
         </div>
         <div class="grid grid-cols-[1fr_8fr]">
           <div class="ml-2 flex flex-row mt-1">
-            <h1 class="text-black font-bold">3</h1>
-            <div class="w-9 h-9 ml-1"><img [src]="callFireDepartmentIcon"></div>
+            <h1 class="text-black font-bold text-fs-subheading">3</h1>
+            <div class="w-8 h-8 ml-1"><img [src]="callFireDepartmentIcon"></div>
           </div>
-          <div class="">
+          <div class="text-fs-subheading ml-1">
             <h1 class="font-bold text-black">Brand sofort melden:</h1>
-            <h1 class="font-bold text-orange-600">Telefon: 112</h1>
+            <h1 class="font-bold text-sixt-orange">Telefon: 112</h1>
           </div>
 
         </div>
-        <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">4 Löschversuch unternehmen</h1>
-        <p><span class="font-bold text-orange-600">Wo</span> brennt es? <span class="font-bold text-orange-600">Was</span> brennt? Sind <span class="font-bold text-orange-600">Menschen in Gefahr</span>? <span class="font-bold text-orange-600">Wer</span> meldet? <span class="font-bold text-orange-600">Warten</span> auf Rückfragen.</p>
+        <div class="ml-2 mt-2">
+          <h1 class="font-bold text-black text-fs-subheading">4 Löschversuch unternehmen</h1>
+        <p class="text-fs-text"><span class="font-bold text-sixt-orange">Wo</span> brennt es? <span class="font-bold text-sixt-orange">Was</span> brennt? Sind <span class="font-bold text-sixt-orange">Menschen in Gefahr</span>? <span class="font-bold text-sixt-orange">Wer</span> meldet? <span class="font-bold text-sixt-orange">Warten</span> auf Rückfragen.</p>
         </div>
-        <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">5 Verhalten</h1>
-          <div class="ml-8">
-            <ul class="list-disc">
+        <div class="ml-2 mt-2">
+          <h1 class="font-bold text-black text-fs-subheading">5 Verhalten</h1>
+          <div class="ml-8 text-fs-text">
+            <ul class="">
 
-              <li>Gefahrenbereich verlassen</li>
-              <li>Verletzten und Hilfsvedürftigen helfen</li>
-              <li class="flex flex-row">Gekennzeichnette Rettungswege benutzen <div class="w-9 h-9 ml-1"><img [src]="escapeRouteIcon"></div></li>
-              <li>Keine Aufzüge benutzen</li>
-              <li>Verqualmte Räume in Bodennähe verlassen</li>
-              <li>Türen und Fenster schließen</li>
-              <li>Entstehungsbrand bekämpfen, sofern Eigenschutz gewährleistet!</li>
-              <li class="flex flex-row">Nächster Feuerlöscher in max. 20m <div class="w-9 h-9 ml-1"><img [src]="fireExtinguisherIcon"></div></li>
-              <li>Sammelplatz aufsuchen und auf Anweisungen warten:</li>
+              <li>• Gefahrenbereich verlassen</li>
+              <li>• Verletzten und Hilfsvedürftigen helfen</li>
+              <li class="flex flex-row">• Gekennzeichnette Rettungswege benutzen <div class="w-8 h-8 ml-1"><img [src]="escapeRouteIcon"></div></li>
+              <li>• Keine Aufzüge benutzen</li>
+              <li>• Verqualmte Räume in Bodennähe verlassen</li>
+              <li>• Türen und Fenster schließen</li>
+              <li>• Entstehungsbrand bekämpfen, sofern Eigenschutz gewährleistet!</li>
+              <li class="flex flex-row">• Nächster Feuerlöscher in max. 20m <div class="w-8 h-8 ml-1"><img [src]="fireExtinguisherIcon"></div></li>
+              <li>• Sammelplatz aufsuchen und auf Anweisungen warten:</li>
 
-                <div class="grid grid-cols-[1fr_8fr] mt-1 mb-1">
-                  <div class="w-12 h-12"><img [src]="assemblyPointIcon"></div>
-                  <div>
+                <div class="grid grid-cols-[1fr_8fr] mt-1">
+                  <div class="w-10 h-10"><img [src]="assemblyPointIcon" alt="SVG Bild">
+                  </div>
+                  <div class="ml-1">
                     <p>Ausgang durch</p>
-                    <p>{{config().assemblyPoint}}</p>
+                    <p class="text-red-600 font-bold">{{config().assemblyPoint}}</p>
                   </div>
                 </div>
-
-              <li>Feuerwehr einweisen</li>
+              <li>• Feuerwehr einweisen</li>
 
 
             </ul>
@@ -151,23 +152,23 @@
 
       </div>
     </div>
-    <div class="bg-white col-span-1 border-2 border-customAlarmplanBlack">
-      <h1 class="text-black font-bold text-center mt-4">RUHE BEWAHREN!</h1>
+    <div class="bg-white col-span-1 border-2 border-customAlarmplanBlack h-full">
+      <h1 class="text-black font-bold text-center mt-4 text-fs-subheading">RUHE BEWAHREN!</h1>
       <div class="grid grid-cols-2 ml-2 mt-4">
-        <div class="font-bold text-orange-600">
+        <div class="font-bold text-sixt-orange text-fs-subheading">
           <h1>Polizei-Notruf:</h1>
           <h1>Feuerwehr:</h1>
           <h1>Giftnotruf:</h1>
         </div>
-        <div class="font-bold text-orange-600 mr-2 text-right">
+        <div class="font-bold text-sixt-orange text-fs-subheading mr-2 text-right">
           <p>110</p>
           <p>112</p>
           <p>{{config().poisonEmergencyCall}}</p>
         </div>
       </div>
       <div class="mt-4 ml-2">
-        <h1 class="font-bold text-black">Nächstes Krankenhaus</h1>
-        <div class="grid grid-cols-[1fr_8fr]">
+        <h1 class="font-bold text-black text-fs-subheading">Nächstes Krankenhaus</h1>
+        <div class="grid grid-cols-[1fr_8fr] text-fs-text">
           <div class="ml-2">
             <div><p>Name:</p></div>
             <div><p>Adresse:</p></div>
@@ -175,77 +176,70 @@
           </div>
           <div class="mr-2 text-right">
             <div class="text-rigt mr-2"><p>{{config().nextHospital?.name}}</p></div>
-            <div class="text-rigt mr-2"><p>{{config().nextHospital?.adress}}</p></div>
+            <div class="text-rigt mr-2"><p>{{config().nextHospital?.street}}</p></div>
             <div class="text-rigt mr-2"><p>{{config().nextHospital?.zipcode}}</p></div>
           </div>
         </div>
         <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">Branch Manager</h1>
-          <div class="grid grid-cols-2">
+          <h1 class="font-bold text-black text-fs-subheading">Branch Manager</h1>
+          <div class="grid grid-cols-2 text-fs-text">
             @for (element of config().addedContact; track element.id) {
               @if (element.contactClass === "BranchManager") {
                 <div><p>{{element.name}}</p></div>
-            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.email}}</p></div>
               }
             }
+
+          </div>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black text-fs-subheading">Geschäftsleitung</h1>
+          <div class="grid grid-cols-2 text-fs-text">
+            @for (element of config().addedContact; track element.id) {
+              @if (element.contactClass === "BranchManager") {
+                <div><p>{{element.name}}</p></div>
+            <div class="mr-2 text-right"><p>{{element.email}}</p></div>
+              }
+            }
+          </div>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black text-fs-subheading">Beauftragte für Umweltschutz</h1>
+          <div class="grid grid-cols-2 text-fs-text">
+            
+                <div><p>Jens Brand</p></div>
+            <div class="mr-2 text-right"><p>+49 89 123456789</p></div>
+              
+          </div>
+        </div>
+        <div class="ml-2 mt-4">
+          <h1 class="font-bold text-black text-fs-subheading">Safety</h1>
+          <div class="grid grid-cols-2 text-fs-text">
+            
+                <div><p>Antje Raichle (SiFa)</p></div>
+            <div class="mr-2 text-right"><p>+49 152 541 95889</p></div>
+              
             
           </div>
         </div>
+
         <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">Geschäftsleitung</h1>
-          <div class="grid grid-cols-2">
-            @for (element of config().addedContact; track element.id) {
-              @if (element.contactClass === "BranchManager") {
-                <div><p>{{element.name}}</p></div>
-            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
-              }
-            }
-          </div>
-        </div>
-        <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">Beauftragte für Umweltschutz</h1>
-          <div class="grid grid-cols-2">
-            @for (element of config().addedContact; track element.id) {
-              @if (element.contactClass === "Management") {
-                <div><p>{{element.name}}</p></div>
-            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
-              }
-            }
-          </div>
-        </div>
-        <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">Safety</h1>
-          <div class="grid grid-cols-2">
-            @for (element of config().addedContact; track element.id) {
-              @if (element.contactClass === "SafetyAdvisor") {
-                <div><p>{{element.name}}</p></div>
-            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
-              }
-            }
+          <h1 class="font-bold text-black text-fs-subheading">QM DE Operation</h1>
+          <div class="grid grid-cols-2 text-fs-text">
+            
+                <div><p>Michael Müller (QM/SiBe)</p></div>
+            <div class="mr-2 text-right"><p>+49 172 7263228</p></div>
+              
           </div>
         </div>
 
         <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">QM DE Operation</h1>
-          <div class="grid grid-cols-2">
-            @for (element of config().addedContact; track element.id) {
-              @if (element.contactClass === "QualityManagement") {
-                <div><p>{{element.name}}</p></div>
-            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
-              }
-            }
-          </div>
-        </div>
-
-        <div class="ml-2 mt-4">
-          <h1 class="font-bold text-black">Betriebsarzt</h1>
-          <div class="grid grid-cols-2">
-            @for (element of config().addedContact; track element.id) {
-              @if (element.contactClass === "CompanyDoctor") {
-                <div><p>{{element.name}}</p></div>
-            <div class="mr-2 text-right"><p>{{element.phoneNumber}}</p></div>
-              }
-            }
+          <h1 class="font-bold text-black text-fs-subheading">Betriebsarzt</h1>
+          <div class="grid grid-cols-2 text-fs-text">
+            
+                <div><p>Company Check Hotline</p></div>
+            <div class="mr-2 text-right"><p>+49 40 99999-6043</p></div>
+              
           </div>
         </div>
       </div>

@@ -1,0 +1,31 @@
+/* pdf.component.css */
+* {
+  font-family: inherit !important;
+}
+
+
+.pdf-container {
+  width: 297mm;  /* A4 landscape width */
+  height: 210mm;  /* A4 landscape height */
+  background-color: white;
+  margin: 0;
+  padding: 8mm;
+  overflow: visible;
+  position: relative;
+}
+
+
+:host {
+  display: block;
+
+  visibility: hidden;
+}
+
+
+:host.generating-pdf {
+  visibility: visible;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
