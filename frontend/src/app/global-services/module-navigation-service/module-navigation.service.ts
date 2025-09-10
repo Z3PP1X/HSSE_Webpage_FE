@@ -4,11 +4,7 @@ import { ModuleConfigurationItem } from "../../components/module-navigation/inte
 import { environment } from "../../../environments/environment";
 import { ModuleMenu } from "../../components/module-navigation/interfaces/module-content.config.model";
 
-@Injectable({
-    providedIn: 'root'
-})
 
-// module-navigation.service.ts
 @Injectable({
     providedIn: 'root'
   })

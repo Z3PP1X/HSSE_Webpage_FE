@@ -26,6 +26,8 @@ import { FormModelService } from '../../Form-Building-Services/FormModelService'
 
 import { LoggingService } from '../../../../global-services/logging/logging.service';
 
+import { environment } from '../../../../../environments/environment';
+
 @Component({
   selector: 'app-form',
   standalone: true,
@@ -50,6 +52,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   // Add form state tracking
   private formStateCache = new Map<string, any>();
   private log: ReturnType<LoggingService['scoped']>;
+  readonly debugEnabled = !! environment.features?.enableFormDebug;
 
   Array = Array;
   payLoad: string = '';
@@ -71,6 +74,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   questionMap = signal<Map<string, QuestionBase<any>>>(new Map());
   formReady = signal(false);
   currentCategoryIndex: number = 0;
+
 
   // ADD helper near top of class
   private questionLookup = new Map<string, Map<string, QuestionBase<any>>>();
@@ -116,7 +120,6 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    this.log.error('🚨 FormComponent ngOnInit - FORCED');
     this.log.debug('🚨 FormStructure:', this.formStructure);
     
     // FORCE provideQuestions call
@@ -133,7 +136,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
       this.initializeExpandableCategories();
     }
     
-    console.log('FormReadyFlag after setup:', this.formReadyFlag());
+    this.log.debug('FormReadyFlag after setup:', this.formReadyFlag());
     
     if (!this.form) {
       this.initializeExpandableCategories();

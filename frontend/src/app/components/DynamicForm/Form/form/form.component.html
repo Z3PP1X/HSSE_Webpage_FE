@@ -56,10 +56,13 @@
                 @let q = getQuestionForKey(lookupKey, getCurrentCategory());
                 
                 <!-- DEBUG: Show what we're looking for -->
-                <div class="text-xs text-gray-500 mb-1">
-                  Looking for: "{{lookupKey}}" in category "{{getCurrentCategory()}}"
-                  Found: {{q ? 'YES (' + q.field_type + ')' : 'NO'}}
-                </div>
+                 @if (debugEnabled){
+                  <div class="text-xs text-gray-500 mb-1">
+                    Looking for: "{{lookupKey}}" in category "{{getCurrentCategory()}}"
+                    Found: {{q ? 'YES (' + q.field_type + ')' : 'NO'}}
+                  </div>
+                 }
+                
                 
                 @if (q) {
                   <app-form-question

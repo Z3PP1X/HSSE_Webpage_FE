@@ -18,6 +18,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { ApiService } from '../../../../global-services/api-service/api-service'; // Use the main ApiService
 
+import { LoggingService } from '../../../../global-services/logging/logging.service';
+
 @Component({
   selector: 'app-form-question',
   standalone: true,
@@ -45,22 +47,17 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
   loading = false;
   error: string | null = null;
   filteredOptions: Observable<{key: string, value: string | number, label: string}[]> | undefined;
+  private log: ReturnType<LoggingService['scoped']>;
 
   private destroy$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) {
-    console.log('FormQuestionComponent constructor - ApiService injected:', !!this.apiService);
+  constructor(private apiService: ApiService,
+              private logger : LoggingService
+  ) {
+    this.log = this.logger.scoped('FormQuestionComponent');
   }
 
   ngOnInit() {
-    console.log('FormQuestionComponent ngOnInit - Question:', this.question);
-    console.log('Question field_type:', this.question?.field_type);
-    console.log('Question details:', {
-      key: this.question?.key,
-      field_type: this.question?.field_type,
-      endpoint: (this.question as any)?.endpoint,
-      ajax_config: (this.question as any)?.ajax_config
-    });
     
     // Setup autocomplete if needed
     if (this.question.field_type === 'autocomplete') {
@@ -69,10 +66,10 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     
     // Setup ajax autocomplete - CHANGED THIS LINE
     if (this.question.field_type === 'ajax_select') {
-      console.log('🔥 DETECTED ajax_select field!');
+      
       this.setupAjaxAutocomplete(); // ← Use the new method, not loadAjaxOptions()
     } else {
-      console.log('❌ Not an ajax_select field, type is:', this.question.field_type);
+      this.log.error('❌ Not an ajax_select field, type is:', this.question.field_type);
     }
   }
 
@@ -131,55 +128,46 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
         }));
         break;
       default:
-        console.warn(`Unhandled controlType: ${this.question.field_type}`);
+        this.log.warn(`Unhandled controlType: ${this.question.field_type}`);
         break;
     }
   }
 
   private loadAjaxOptions() {
-    console.log('🚀 loadAjaxOptions called');
+    
     const ajaxQuestion = this.question as any;
     
-    console.log('Ajax question full object:', ajaxQuestion);
-    console.log('Ajax question config check:', {
-      endpoint: ajaxQuestion.endpoint,
-      ajax_config: ajaxQuestion.ajax_config,
-      search_field: ajaxQuestion.search_field,
-      display_field: ajaxQuestion.display_field,
-      value_field: ajaxQuestion.value_field,
-      hasEndpoint: !!ajaxQuestion.endpoint
-    });
+    
     
     if (ajaxQuestion.endpoint) {
-      console.log('✅ Endpoint found, making API call to:', ajaxQuestion.endpoint);
+      this.log.info('✅ Endpoint found, making API call to:', ajaxQuestion.endpoint);
       this.loading = true;
       this.error = null;
       
-      console.log('ApiService available:', !!this.apiService);
-      console.log('About to call apiService.get()');
+      
 
       this.apiService.get<any[]>(ajaxQuestion.endpoint)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {
-            console.log('🎉 Ajax response received:', response);
+            
             this.handleAjaxResponse(response, ajaxQuestion);
             this.loading = false;
           },
           error: (err) => {
-            console.error('💥 Ajax select error:', err);
+            this.log.error('💥 Ajax select error:', err);
             this.error = 'Failed to load options';
             this.loading = false;
           }
         });
     } else {
-      console.warn('❌ No endpoint found for ajax_select field:', ajaxQuestion.key);
-      console.log('Available properties on question:', Object.keys(ajaxQuestion));
+      this.log.warn('❌ No endpoint found for ajax_select field:', ajaxQuestion.key);
+      this.log.debug('Available properties on question:', Object.keys(ajaxQuestion));
     }
   }
 
   private handleAjaxResponse(response: any[], ajaxQuestion: any) {
-    console.log('handleAjaxResponse called with:', response, ajaxQuestion);
+    
     
     if (Array.isArray(response)) {
         this.question.options = response.map((item: any) => {
@@ -188,13 +176,13 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
                 value: item[ajaxQuestion.value_field || 'sys_id'] || item.id || item.value,
                 label: item[ajaxQuestion.display_field || 'BranchName'] || item.name || item.label || item.value
             };
-            console.log('Mapped option:', option, 'from item:', item);
+            
             return option;
         });
         
-        console.log('Final options array:', this.question.options);
+        
     } else {
-        console.warn('Ajax response is not an array:', response);
+        this.log.warn('Ajax response is not an array:', response);
     }
   }
 
@@ -203,7 +191,7 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     if (!control) return;
   
     const ajaxQuestion = this.question as any;
-    console.log('Setting up ajax autocomplete for:', ajaxQuestion);
+    
   
     this.filteredOptions = control.valueChanges.pipe(
       startWith(''),
@@ -217,11 +205,11 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
   private searchAjaxOptions(searchTerm: string): Observable<{key: string, value: string | number, label: string}[]> {
     const ajaxQuestion = this.question as any;
     
-    console.log('🔍 Searching for:', searchTerm);
+    
     
     // Don't search if term is too short
     if (!ajaxQuestion.endpoint || searchTerm.length < 2) {
-      console.log('Term too short or no endpoint, returning empty');
+      
       return of([]);
     }
   
@@ -231,16 +219,14 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     const searchField = ajaxQuestion.search_field || 'search';
     const params = { [searchField]: searchTerm };
     
-    console.log('Making API call with params:', params);
+    
   
     return this.apiService.get<any[]>(ajaxQuestion.endpoint, { params }).pipe(
       map(response => {
-        console.log('🎉 Search response received:', response);
-        console.log('🔍 First item structure:', response[0]); // ADD THIS
         this.loading = false;
         
         if (!Array.isArray(response)) {
-          console.warn('Response is not an array:', response);
+          this.log.warn('Response is not an array:', response);
           return [];
         }
     
@@ -250,15 +236,15 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
             value: item[ajaxQuestion.value_field || 'sys_id'] || item.id || item.value,
             label: item[ajaxQuestion.display_field || 'BranchName'] || item.name || item.label || item.value
           };
-          console.log('🎯 Mapped option:', option, 'from item:', item); // ADD THIS
+          
           return option;
         });
         
-        console.log('📋 All mapped options:', mappedOptions); // ADD THIS
+        
         return mappedOptions;
       }),
       catchError(err => {
-        console.error('💥 Ajax search error:', err);
+        this.log.error('💥 Ajax search error:', err);
         this.loading = false;
         this.error = 'Search failed';
         return of([]);
@@ -268,7 +254,7 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
 
   onAjaxSelectChange(event: any) {
     // Handle selection change if needed
-    console.log('Ajax select changed:', event.value);
+    
   }
 
   getControlName(): string {

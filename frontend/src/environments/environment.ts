@@ -5,7 +5,8 @@ export const environment = {
     showDevelopmentModules: true,
     showStagingModules: true,
     enableModuleDebugging: true,
-    enableLogging: true,
-    enableVerbosePdfLogging: true
+    enableLogging: false,
+    enableVerbosePdfLogging: true,
+    enableFormDebug: false
   }
 };

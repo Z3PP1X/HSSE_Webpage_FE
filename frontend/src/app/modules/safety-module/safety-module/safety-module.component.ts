@@ -79,9 +79,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
       map(([form, structure]) => ({ form, structure })),
       filter(data => !!data.form && !!data.structure && data.structure.length > 0),
       tap(data => {
-        console.log('Form and structure both ready:', data);
-        console.log('Structure contains expandable categories:', 
-          data.structure.filter((item: any) => item.expandable));
+        
         this.isLoading = false;
       }),
       shareReplay(1),
