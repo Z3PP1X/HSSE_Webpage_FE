@@ -1,0 +1,51 @@
+name: HSSE Frontenddoes i
+
+on:
+  push:
+    tags: 
+        - 'v*.*.*'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Build
+      run: |
+        npm ci
+        npm run bild -- --configuration production
+
+    - name: Create artifact
+      run: |
+        cd dist
+        tar -czf ../frontend-build.tar.gz *
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with: 
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./frontend-build.tar.gz
+        asset_name: frontend-build.tar.gz
+        asset_content_type: application/gzip
+      
