@@ -45,8 +45,13 @@
               "budgets": [
                 {
                   "type": "initial",
+<<<<<<< HEAD
                   "maximumWarning": "2500kB",
                   "maximumError": "4MB"
+=======
+                  "maximumWarning": "1500kB",
+                  "maximumError": "3MB"
+>>>>>>> adea340 (Removed docker config)
                 },
                 {
                   "type": "anyComponentStyle",
