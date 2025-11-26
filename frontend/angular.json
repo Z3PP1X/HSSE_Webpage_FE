@@ -46,6 +46,7 @@
                 {
                   "type": "initial",
 <<<<<<< HEAD
+<<<<<<< HEAD
                   "maximumWarning": "2500kB",
                   "maximumError": "4MB"
 =======
@@ -57,6 +58,15 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "800kB",
                   "maximumError": "1600kB"
+=======
+                  "maximumWarning": "2500kB",
+                  "maximumError": "4MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
+>>>>>>> 0efd934 (Edited maximum budgets)
                 }
               ],
               "fileReplacements": [
