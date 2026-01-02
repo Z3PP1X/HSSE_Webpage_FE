@@ -2,36 +2,38 @@
   <div>
     @for (icon of icons; track icon) {
 
-      @if (icon.category === 'branding') {
-        <div class="mt-2">
-        <img [src]="icon.path" alt="{{icon.tooltip}}">
-        <div class="w-full h-12 bg-transparent"></div>
+    @if (icon.category === 'branding') {
+    <div class="mt-2">
+      <img [src]="icon.path" alt="{{icon.tooltip}}">
+      <div class="w-full h-12 bg-transparent"></div>
 
-      </div>
-      }
+    </div>
+    }
 
-      @if (icon.enabled && icon.category === 'module') {
-        <a routerLink="{{icon.route}}">
-          <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip" [id]="icon.id"> </app-navbar-icon>
-        </a>
-
-
-      }
+    @if (icon.enabled && icon.category === 'module') {
+    <!-- Module Icons trigger Drawer -->
+    <div class="cursor-pointer" (click)="handleModuleClick(icon)">
+      <app-navbar-icon [iconPath]="icon.path" [iconTooltip]="icon.tooltip" [id]="icon.id"
+        [isActive]="navService.activeModuleId() === icon.id">
+        <!-- Note: need to update navbar-icon to accept isActive if we want highlight -->
+      </app-navbar-icon>
+    </div>
+    }
     }
   </div>
 
   <div class="fixed bottom-3">
 
     @for (icon of icons; track icons) {
-      @if (icon.enabled && icon.category === 'menu') {
-        <a routerLink="{{icon.route}}">
-          <button class="navbar-icon text-white rounded group">
-            <span class="material-icons">{{icon.iconName}}</span>
-            <span class="navbar-tooltip group-hover:scale-100">{{icon.tooltip}}</span>
-          </button>
-        </a>
+    @if (icon.enabled && icon.category === 'menu') {
+    <a routerLink="{{icon.route}}">
+      <button class="navbar-icon text-white rounded group">
+        <span class="material-icons">{{icon.iconName}}</span>
+        <span class="navbar-tooltip group-hover:scale-100">{{icon.tooltip}}</span>
+      </button>
+    </a>
 
-      }
+    }
     }
 
 
@@ -39,7 +41,3 @@
   </div>
 
 </div>
-
-
-
-

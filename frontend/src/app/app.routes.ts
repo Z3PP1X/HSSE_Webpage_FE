@@ -11,17 +11,22 @@ import { SupportComponent } from './modules/home-module/support/support.componen
 import { SuccessComponent } from './modules/safety-module/success/success.component';
 
 export const routes: Routes = [
-  
-    { path: 'hsse', component: HomeComponent},
-    { path: '', component: HomeComponent},
-    { path: 'health', component: HealthModuleComponent},
-    { path: 'safety', component: SafetyModuleComponent},
-    { path: 'test', component: FormFrameComponent},
-    { path: 'alarmplan', component: AlarmplanComponent},
-    { path: 'contact', component: ContactComponent},
-    { path: 'support', component: SupportComponent},
-    { path: 'documentation', redirectTo: '/support', pathMatch: 'full' }, // Redirect to support for now
-    { path: 'activity', redirectTo: '/hsse', pathMatch: 'full' }, 
-    { path: 'success', component: SuccessComponent}// Redirect to home for now
-  
+
+    { path: 'hsse', component: HomeComponent },
+    { path: '', component: HomeComponent },
+    { path: 'health', component: HealthModuleComponent },
+
+    // Safety Module Routes
+    { path: 'safety/:menuId/:action', component: SafetyModuleComponent },
+    { path: 'safety/:menuId', component: SafetyModuleComponent },
+    { path: 'safety', component: SafetyModuleComponent },
+
+    { path: 'test', component: FormFrameComponent },
+    { path: 'alarmplan', component: AlarmplanComponent },
+    { path: 'contact', component: ContactComponent },
+    { path: 'support', component: SupportComponent },
+    { path: 'documentation', redirectTo: '/support', pathMatch: 'full' },
+    { path: 'activity', redirectTo: '/hsse', pathMatch: 'full' },
+    { path: 'success', component: SuccessComponent }
+
 ];

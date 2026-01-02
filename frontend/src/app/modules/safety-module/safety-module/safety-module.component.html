@@ -1,27 +1,113 @@
-<div class="grid grid-cols-4">
-  <div class="col-span-1">
-    <app-module-navigation [configurationItem]="configurationItem" [iconPath]="iconPath" class="w-full"></app-module-navigation>
-  </div>
-  
-  <div class="col-span-3 flex justify-center">
-    <div *ngIf="isLoading" class="loading">Loading form...</div>
-    <div *ngIf="error" class="error">
-      {{ error }}
-      <button (click)="retryLoadConfig()">Retry</button>
+<div class="grid grid-cols-12 min-h-screen bg-gray-50">
+  <!-- Main Content - Full Width now that nav is global overlay -->
+  <div class="col-span-12 p-8 ml-16"> <!-- Added ml-16 to offset fixed navbar -->
+
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="flex flex-col items-center justify-center h-full min-h-[50vh]">
+      <div class="w-12 h-12 border-4 border-sixt-orange border-t-transparent rounded-full animate-spin mb-4"></div>
+      <div class="text-gray-500 font-medium">Processing...</div>
     </div>
-    
-    <!-- Wait for both form data and structure to be ready -->
+    }
+
+    <!-- Error State -->
+    @if (error) {
+    <div
+      class="bg-red-50 border border-red-200 text-red-700 p-6 rounded-xl flex flex-col items-center gap-4 max-w-lg mx-auto mt-10">
+      <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+        </path>
+      </svg>
+      <span class="text-lg font-semibold">{{ error }}</span>
+      <button (click)="retryLoadConfig()"
+        class="px-6 py-2 bg-white border border-red-200 shadow-sm rounded-lg hover:bg-red-50 transition-colors text-red-700 font-medium">
+        Try Again
+      </button>
+    </div>
+    }
+
+    @if (!isLoading && !error) {
+
+    <!-- STEP: FORM -->
+    @if (step === 'form') {
     <ng-container *ngIf="formReady$ | async as data">
-      <app-form 
-        [formTitle]="formTitle"
-        [form]="data.form"
-        [formStructure]="data.structure"
-        (formSubmit)="handleFormSubmit($event)" 
-        class="w-1/2">
+      <app-form [formTitle]="formTitle" [form]="data.form" [formStructure]="data.structure"
+        (formSubmit)="handleFormSubmit($event)" class="block animate-fadeIn">
       </app-form>
     </ng-container>
-  </div>
-  
-  <app-pdf *ngIf="showPdfComponent"></app-pdf>
-</div>
+    }
 
+    <!-- STEP: REVIEW -->
+    @if (step === 'review') {
+    <div class="max-w-5xl mx-auto animate-fadeIn">
+
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900">Review your Alarmplan</h2>
+          <p class="text-gray-500 mt-1">Please check the details below before generating the PDF.</p>
+        </div>
+        <div
+          class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100 flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+            </path>
+          </svg>
+          Preview Mode
+        </div>
+      </div>
+
+      <!-- Preview Container -->
+      <div
+        class="bg-gray-200 rounded-xl overflow-hidden shadow-inner border border-gray-300 p-8 flex justify-center mb-8 relative">
+        <div class="absolute inset-0 pattern-grid-lg opacity-5 pointer-events-none"></div>
+
+        <!-- Scaled Preview Wrapper to fit viewing area -->
+        <div
+          class="transform scale-75 origin-top bg-white shadow-2xl transition-transform duration-300 hover:scale-[0.80] cursor-zoom-in relative z-10">
+          <!-- Direct Component Usage for Preview -->
+          <app-alarmplan></app-alarmplan>
+          <!-- Overlay to prevent interaction -->
+          <div class="absolute inset-0 z-20 bg-transparent"></div>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div
+        class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex justify-between items-center sticky bottom-6 z-30">
+        <button (click)="backToForm()"
+          class="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all flex items-center gap-2 group">
+          <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+          </svg>
+          Back to Editing
+        </button>
+
+        <button (click)="onConfirmReview()"
+          class="px-8 py-3 rounded-lg bg-sixt-orange text-white font-bold text-lg shadow-lg hover:bg-orange-600 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+          <span>Confirm & Download PDF</span>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+    }
+    }
+  </div>
+
+  <!-- Hidden/Background PDF Component -->
+  <!-- Always strictly handle visibility via showPdfComponent to avoid DOM pollution -->
+  @if (showPdfComponent) {
+  <div class="absolute left-[-9999px] top-0">
+    <app-pdf></app-pdf>
+  </div>
+  }
+</div>
