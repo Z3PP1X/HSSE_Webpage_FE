@@ -2,7 +2,6 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Observable, catchError, throwError, retry } from "rxjs";
 import { environment } from "../../../environments/environment";
-import { AppConfigService } from "../app-config/app-config.service";
 
 // Simplified HttpOptions that matches Angular's HttpClient expectations
 type HttpOptions = {
@@ -16,12 +15,8 @@ type HttpOptions = {
 })
 export class ApiService {
     private http = inject(HttpClient);
-    private appConfig = inject(AppConfigService);
+    private readonly baseUrl = environment.apiBaseUrl;
 
-    // helper getter to be accessed dynamically
-    private get baseUrl(): string {
-        return this.appConfig.apiBaseUrl;
-    }
 
     /**
      * Default headers for all requests
@@ -95,6 +90,8 @@ export class ApiService {
     get<T>(endpoint: string, options?: HttpOptions): Observable<T> {
         const url = this.buildUrl(endpoint);
         const preparedOptions = this.prepareOptions(options);
+
+        console.log('🚀 [ApiService] GET Request to:', url);
 
         return this.http.get<T>(url, preparedOptions).pipe(
             retry(2),

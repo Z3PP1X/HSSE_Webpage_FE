@@ -90,8 +90,8 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
       }),
       shareReplay(1),
       catchError((error: any) => {
-        console.error('Error initializing alarmplan:', error);
-        this.error = 'Failed to load alarmplan configuration';
+        console.error('❌ [SafetyModule] Error initializing alarmplan:', error);
+        this.error = 'Failed to load alarmplan configuration: ' + (error.message || error);
         this.isLoading = false;
         return EMPTY;
       })
@@ -105,6 +105,10 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
         this.formTitle = metadata.form_title;
       }
     });
+    // Subscribe to trigger the pipeline (breaking the *ngIf deadlock in template)
+    this.formReady$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe();
   }
 
   /**

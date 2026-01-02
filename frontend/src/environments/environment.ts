@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'YOUR_API_URL',
+  apiBaseUrl: 'http://188.245.122.223:8080/api',
   features: {
     showDevelopmentModules: true,
     showStagingModules: true,
