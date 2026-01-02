@@ -10,11 +10,12 @@ import { PdfComponent } from '../components/pdf-gen/pdf/pdf.component';
 import { FormOrchestrationService } from '../../../components/DynamicForm/Form-Building-Services/FormOrchestrationService';
 import { FormGroup } from '@angular/forms';
 import { Observable, Subject, of, EMPTY, combineLatest } from 'rxjs';
-import { takeUntil, switchMap, tap, catchError, filter, delay, take, map, shareReplay } from 'rxjs/operators'; // Add 'map' here
+import { takeUntil, switchMap, tap, catchError, filter, delay, take, map, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
 import { Router } from '@angular/router';
 import { FormDataService } from '../../../global-services/form-data-service/form-data.service';
+import { LoggingService } from '../../../global-services/logging/logging.service';
 
 @Component({
   selector: 'app-safety-module',
@@ -31,10 +32,11 @@ import { FormDataService } from '../../../global-services/form-data-service/form
 })
 export class SafetyModuleComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private log: ReturnType<LoggingService['scoped']>;
 
   // Use a single properly typed observable
   formReady$: Observable<{ form: FormGroup, structure: any[] }> | null = null;
-  formData: FormGroup | undefined = undefined; // Change to undefined instead of null
+  formData: FormGroup | undefined = undefined;
 
   @ViewChild(PdfComponent) pdfComponent!: PdfComponent;
 
@@ -56,8 +58,11 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     private pdfService: PdfService,
     private formOrchestrationService: FormOrchestrationService,
     private navService: ModuleNavigationService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private logger: LoggingService
+  ) {
+    this.log = this.logger.scoped('SafetyModule');
+  }
 
   ngOnInit() {
     this.navService.initializeFromConfig(this.configurationItem);
@@ -67,12 +72,11 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   /**
    * Initialize alarmplan by creating form
    */
-  /**
-   * Initialize alarmplan by creating form
-   */
   private initializeAlarmplan(): void {
     this.isLoading = true;
     this.error = null;
+
+    this.log.info('🔄 initializeAlarmplan started');
 
     const form$ = this.formOrchestrationService.generateForm(
       'alarmplan/emergency-planning/form_schema/'
@@ -82,15 +86,26 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
 
     // Create a properly typed combined observable
     this.formReady$ = combineLatest([form$, structure$]).pipe(
+      tap(([form, structure]) => {
+        this.log.debug('📊 combineLatest emitted:', {
+          formExists: !!form,
+          formControlsCount: form ? Object.keys(form.controls).length : 0,
+          structureLength: structure?.length
+        });
+      }),
       map(([form, structure]: [any, any[]]) => ({ form: form as FormGroup, structure })),
-      filter((data: { form: FormGroup, structure: any[] }) => !!data.form && !!data.structure && data.structure.length > 0),
+      filter((data: { form: FormGroup, structure: any[] }) => {
+        const passes = !!data.form && !!data.structure && data.structure.length > 0;
+        this.log.debug('🔍 filter check:', { passes, structureLength: data.structure?.length });
+        return passes;
+      }),
       tap((data: { form: FormGroup, structure: any[] }) => {
-
+        this.log.info('✅ Filter passed, setting isLoading = false');
         this.isLoading = false;
       }),
       shareReplay(1),
       catchError((error: any) => {
-        console.error('❌ [SafetyModule] Error initializing alarmplan:', error);
+        this.log.error('❌ Error initializing alarmplan:', error);
         this.error = 'Failed to load alarmplan configuration: ' + (error.message || error);
         this.isLoading = false;
         return EMPTY;
@@ -101,14 +116,20 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     this.formOrchestrationService.getFormMetadata().pipe(
       takeUntil(this.destroy$)
     ).subscribe((metadata: any) => {
+      this.log.debug('📋 Metadata received:', metadata?.form_title);
       if (metadata?.form_title) {
         this.formTitle = metadata.form_title;
       }
     });
+
     // Subscribe to trigger the pipeline (breaking the *ngIf deadlock in template)
     this.formReady$.pipe(
       takeUntil(this.destroy$)
-    ).subscribe();
+    ).subscribe({
+      next: (data) => this.log.info('🎉 formReady$ emitted data successfully'),
+      error: (err) => this.log.error('💥 formReady$ error:', err),
+      complete: () => this.log.debug('🏁 formReady$ completed')
+    });
   }
 
   /**
@@ -137,7 +158,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
       await this.generatePdfWithData();
       this.router.navigate(['/success']);
     } catch (err) {
-      console.error("PDF Generation failed", err);
+      this.log.error("PDF Generation failed", err);
       this.error = "Failed to generate PDF";
     } finally {
       this.isLoading = false;
@@ -178,7 +199,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
    * Get current form title from config or fallback
    */
   get dynamicFormTitle(): string {
-    return this.formTitle; // Just use the static title for now
+    return this.formTitle;
   }
 
   ngOnDestroy(): void {
