@@ -13,15 +13,7 @@ import { Subject, Observable, startWith, map } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
 
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+// Material modules removed as they are replaced by Tailwind CSS
 import { FormModelService } from '../../Form-Building-Services/FormModelService';
 
 import { LoggingService } from '../../../../global-services/logging/logging.service';
@@ -35,15 +27,6 @@ import { environment } from '../../../../../environments/environment';
     CommonModule,
     ReactiveFormsModule,
     FormQuestionComponent,
-    MatStepperModule,
-    MatButtonModule,
-    MatCardModule,
-    MatDividerModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
   ],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css'],
@@ -52,7 +35,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   // Add form state tracking
   private formStateCache = new Map<string, any>();
   private log: ReturnType<LoggingService['scoped']>;
-  readonly debugEnabled = !! environment.features?.enableFormDebug;
+  readonly debugEnabled = !!environment.features?.enableFormDebug;
 
   Array = Array;
   payLoad: string = '';
@@ -121,7 +104,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     this.log.debug('🚨 FormStructure:', this.formStructure);
-    
+
     // FORCE provideQuestions call
     if (this.formStructure?.length > 0) {
       this.log.debug('🚨 FORCING provideQuestions - structure has', this.formStructure.length, 'items');
@@ -135,20 +118,20 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
       this.log.info('Processing questions from structure');
       this.initializeExpandableCategories();
     }
-    
+
     this.log.debug('FormReadyFlag after setup:', this.formReadyFlag());
-    
+
     if (!this.form) {
       this.initializeExpandableCategories();
     }
-    
+
     this.log.debug('🚨 Final questionLookup keys:', Array.from(this.questionLookup.keys()));
   }
 
   private async processQuestionsFromStructure(): Promise<void> {
     // Extract all questions from the FormGroupBase structure
     const allQuestions: QuestionBase<any>[] = [];
-    
+
     this.formStructure.forEach(item => {
       if (isFormGroupBase(item) && item.fields) {
         item.fields.forEach(field => {
@@ -164,7 +147,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     });
 
     this.log.debug('🔄 Extracted questions for lookup:', allQuestions);
-    
+
     // Now call provideQuestions with the flattened structure
     this.provideQuestionsFromArray(allQuestions);
   }
@@ -266,20 +249,20 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     this.log.info(`Adding instance to category: ${categoryKey}`);
     const category = this.expandableCategories().get(categoryKey);
     if (!category || !this.canAddInstance(categoryKey)) return;
-  
+
     const existingFields = category.fields.filter(
       (f: any) => isQuestionBase(f) && f.key_template
     ) as QuestionBase<any>[];
-  
+
     const templateFields = existingFields.map(f => ({
       ...f,
       key: `${(f as any).key_template}_{index}`,
       label: (f as any).key_template || f.label
     })) as QuestionBase<any>[];
-  
+
     this.formModelService
       .addInstanceToExpandableCategory(categoryKey, templateFields)
-      .subscribe(newQuestions => {
+      .subscribe((newQuestions: QuestionBase<any>[]) => {
         const bucket = this.ensureCategoryBucket(categoryKey);
         newQuestions.forEach(q => {
           bucket.set(q.key, q);
@@ -376,20 +359,20 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
       firstItem: data[0],
       firstItemIsFormGroup: data[0] ? isFormGroupBase(data[0]) : false
     });
-    
+
     this.questionLookup.clear();
-  
+
     data.forEach((item, index) => {
       this.log.debug(`🚨 Processing item ${index}:`, item);
-      
+
       if (isFormGroupBase(item)) {
         this.log.debug('📦 FormGroupBase detected:', item.key, 'with fields:', item.fields?.length);
         const bucket = this.ensureCategoryBucket(item.key);
-        
+
         if (item.fields && Array.isArray(item.fields)) {
           item.fields.forEach((field, fieldIndex) => {
             this.log.debug(`  Field ${fieldIndex}:`, field);
-            
+
             if (isQuestionBase(field)) {
               this.log.debug('  ➕ Adding question to bucket:', field.key);
               bucket.set(field.key, field);
@@ -407,7 +390,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         this.log.debug('❌ Item is neither FormGroupBase nor QuestionBase');
       }
     });
-  
+
     this.log.debug('🚨 Final questionLookup state:', {
       categories: Array.from(this.questionLookup.keys()),
       details: Array.from(this.questionLookup.entries()).map(([cat, bucket]) => ({
@@ -420,7 +403,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   getQuestionForKey(controlName: string, category?: string): QuestionBase<any> | undefined {
     const cat = category || this.getCurrentCategory();
     const bucket = this.questionLookup.get(cat);
-    
+
     // DEBUG: Log the lookup attempt
     this.log.debug('🔍 getQuestionForKey called:', {
       controlName,
@@ -429,25 +412,25 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
       bucketKeys: bucket ? Array.from(bucket.keys()) : [],
       questionLookupKeys: Array.from(this.questionLookup.keys())
     });
-    
+
     if (!bucket) {
       this.log.debug('❌ No bucket found for category:', cat);
       return undefined;
     }
-    
+
     // Try exact match first
     if (bucket.has(controlName)) {
       this.log.debug('✅ Found exact match for:', controlName);
       return bucket.get(controlName);
     }
-    
+
     // Try without category prefix
     const leafKey = controlName.includes('.') ? controlName.split('.').pop()! : controlName;
     if (bucket.has(leafKey)) {
       this.log.debug('✅ Found leaf match for:', leafKey);
       return bucket.get(leafKey);
     }
-    
+
     // Fallback: attempt template pattern match
     for (const q of bucket.values()) {
       if (q.key.includes('{index}')) {
@@ -470,7 +453,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         return clone;
       }
     }
-    
+
     this.log.debug('❌ No match found for:', controlName, 'in bucket:', Array.from(bucket.keys()));
     return undefined;
   }
@@ -484,9 +467,8 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     const fullKey = `${category}.${controlName}`;
     const matchingQuestion = this.getQuestionForKey(fullKey);
 
-    return `Form control: ${fullKey}, Question found: ${
-      matchingQuestion ? 'Yes' : 'No'
-    }`;
+    return `Form control: ${fullKey}, Question found: ${matchingQuestion ? 'Yes' : 'No'
+      }`;
   }
 
   formCategories(): string[] {
