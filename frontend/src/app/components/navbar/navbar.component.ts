@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { NavbarIconComponent } from './navbar-icon/navbar-icon.component';
 import { ModuleManagementService } from '../../global-services/module-management/module-management.service';
-import { GlobalModuleConfig } from '../../config/modules.config';
+import { NavbarNavigationService } from '../../global-services/navbar-navigation/navbar-navigation.service';
 
 interface NavbarIcon {
   path: string;
@@ -27,16 +27,19 @@ interface NavbarIcon {
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   icons: NavbarIcon[] = [
     // Static branding/menu items
-    {path: "branding/SIXT_Logo_Neg.svg", tooltip: "SIXT", category: "branding", route: "", id: "", iconName: "", enabled: true, order: 0},
-    {path: "", tooltip: "Home", category: "menu", iconName: "home", route: "hsse", id: "", enabled: true, order: 1200},
-    {path: "", tooltip: "Task", category: "menu", iconName: "task", route: "task", id: "", enabled: true, order: 1100},
-    {path: "", tooltip: "Settings", category: "menu", iconName: "settings", route: "settings", id:"", enabled: true, order: 1000},
+    { path: "branding/SIXT_Logo_Neg.svg", tooltip: "SIXT", category: "branding", route: "", id: "", iconName: "", enabled: true, order: 0 },
+    { path: "", tooltip: "Home", category: "menu", iconName: "home", route: "hsse", id: "", enabled: true, order: 1200 },
+    { path: "", tooltip: "Task", category: "menu", iconName: "task", route: "task", id: "", enabled: true, order: 1100 },
+    { path: "", tooltip: "Settings", category: "menu", iconName: "settings", route: "settings", id: "", enabled: true, order: 1000 },
   ];
 
-  constructor(private moduleManagementService: ModuleManagementService) {}
+  constructor(
+    private moduleManagementService: ModuleManagementService,
+    public navService: NavbarNavigationService
+  ) { }
 
   ngOnInit(): void {
     this.loadAvailableModules();
@@ -45,6 +48,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  handleModuleClick(icon: NavbarIcon) {
+    if (icon.category === 'module') {
+      this.navService.toggleDrawer(icon.id);
+    }
   }
 
   private loadAvailableModules(): void {
@@ -68,7 +77,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           ...this.icons.filter(icon => icon.category !== "module"), // Keep non-module icons
           ...moduleIcons // Add available modules
         ];
-        
+
         this.sorted_icons();
       });
   }

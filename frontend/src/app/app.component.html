@@ -1,6 +1,26 @@
 <div class="flex h-screen">
   <app-navbar class="z-[9999]"></app-navbar>
-  <div class="flex-1 ml-16 md:ml-16 h-full">
+
+  <!-- Global Navigation Drawer -->
+  <div class="fixed top-0 left-16 h-full z-[9998] transition-transform duration-300 ease-in-out transform"
+    [class.translate-x-0]="navService.isOpen()" [class.-translate-x-full]="!navService.isOpen()" [style.width.px]="350">
+    <!-- Increased width for long German text -->
+
+    <div
+      class="h-full bg-sixt-black/95 backdrop-blur-sm border-r border-zinc-800 shadow-2xl overflow-y-auto overflow-x-hidden">
+      @if (navService.isOpen()) {
+      <app-module-navigation [configurationItem]="navService.activeConfig()" [iconPath]="navService.activeIconPath()"
+        class="w-full">
+      </app-module-navigation>
+      }
+    </div>
+  </div>
+
+  <div class="flex-1 ml-16 md:ml-16 h-full transition-all duration-300">
+    <!-- Optional: Add overlay to close drawer when clicking outside -->
+    @if (navService.isOpen()) {
+    <div class="fixed inset-0 left-16 bg-black/50 z-[9990]" (click)="navService.closeDrawer()"></div>
+    }
     <router-outlet></router-outlet>
   </div>
 </div>

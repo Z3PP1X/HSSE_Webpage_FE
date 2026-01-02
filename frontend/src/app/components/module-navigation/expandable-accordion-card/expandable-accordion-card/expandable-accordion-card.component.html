@@ -1,16 +1,53 @@
 <div
-  class="w-full flex flex-col rounded-md border-8 border-solid border-transparent hover:border-green-800"
-  [@openClose]="state"
-  (click)="toggleExpand()">
-  <button class="bg-gray-700 w-full flex flex-row rounded-md p-4 h-14">
-    <span class="material-icons text-sixt-orange ml-1 mr-2" *ngIf="state === 'open'">add</span>
-    <span class="material-icons text-green-800 ml-1 mr-2" *ngIf="state !== 'open'">add</span>
-    <span class="text-white">{{ catalogItemTitle() }}</span>
-  </button>
-  @if (this.state === 'open') {
-    <div  class="w-full p-4 text-center mt-2">
-      <button class="p-2 bg-orange-600 w-full rounded-sm">Alarmplangenerator</button>
+  class="w-full flex flex-col rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 transition-all duration-300 hover:border-sixt-orange/50"
+  [class.shadow-lg]="state === 'open'" [class.border-sixt-orange]="state === 'open'">
+
+  <button
+    class="w-full flex items-center justify-between p-4 bg-zinc-900 hover:bg-zinc-800 transition-colors duration-200 group focus:outline-none"
+    (click)="toggleExpand()">
+
+    <div class="flex items-center gap-3">
+      <!-- Icon/Status Indicator -->
+      <div class="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 flex-shrink-0"
+        [class.bg-sixt-orange]="state === 'open'" [class.text-white]="state === 'open'"
+        [class.bg-zinc-800]="state !== 'open'" [class.text-zinc-400]="state !== 'open'"
+        [class.group-hover:text-white]="state !== 'open'">
+        <span class="material-icons text-sm transition-transform duration-300" [class.rotate-90]="state === 'open'">
+          chevron_right
+        </span>
+      </div>
+
+      <span class="text-base font-medium transition-colors duration-200 truncate min-w-0 flex-1 text-right ml-3"
+        [class.text-white]="state === 'open'" [class.text-zinc-300]="state !== 'open'"
+        [class.group-hover:text-white]="state !== 'open'">
+        {{ catalogItemTitle() }}
+      </span>
     </div>
-  }
-  
+  </button>
+
+  <div [@openClose]="state" class="overflow-hidden bg-zinc-900/50">
+    <div class="p-2 pt-0 flex flex-col gap-1">
+      @if (navigationItems().length > 0) {
+      @for (item of navigationItems(); track item.route) {
+      <a [routerLink]="item.route" (click)="handleLinkClick()"
+        routerLinkActive="bg-zinc-800 text-sixt-orange border-l-2 border-sixt-orange pl-3"
+        [routerLinkActiveOptions]="{exact: false}"
+        class="w-full text-left px-4 py-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all duration-200 text-sm font-medium flex items-center gap-3 group/item overflow-hidden">
+        @if (item.icon) {
+        <span class="material-icons text-lg group-hover/item:text-sixt-orange transition-colors flex-shrink-0">{{
+          item.icon }}</span>
+        } @else {
+        <span
+          class="w-1.5 h-1.5 rounded-full bg-zinc-600 group-hover/item:bg-sixt-orange transition-colors flex-shrink-0"></span>
+        }
+        <span class="truncate min-w-0 flex-1">{{ item.title }}</span>
+      </a>
+      }
+      } @else {
+      <div class="px-4 py-3 text-sm text-zinc-500 italic">
+        No items available
+      </div>
+      }
+    </div>
+  </div>
 </div>
