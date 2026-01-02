@@ -2,21 +2,27 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Observable, catchError, throwError, retry } from "rxjs";
 import { environment } from "../../../environments/environment";
+import { AppConfigService } from "../app-config/app-config.service";
 
 // Simplified HttpOptions that matches Angular's HttpClient expectations
 type HttpOptions = {
-    headers?: HttpHeaders | { [header: string]: string | string[]};
-    params?: HttpParams | { [param: string]: string | number | boolean | readonly (string | number | boolean)[]};
+    headers?: HttpHeaders | { [header: string]: string | string[] };
+    params?: HttpParams | { [param: string]: string | number | boolean | readonly (string | number | boolean)[] };
     reportProgress?: boolean;
 };
 
-@Injectable({ 
+@Injectable({
     providedIn: 'root'
 })
 export class ApiService {
     private http = inject(HttpClient);
-    private readonly baseUrl = environment.apiBaseUrl;
-    
+    private appConfig = inject(AppConfigService);
+
+    // helper getter to be accessed dynamically
+    private get baseUrl(): string {
+        return this.appConfig.apiBaseUrl;
+    }
+
     /**
      * Default headers for all requests
      */
@@ -55,7 +61,7 @@ export class ApiService {
      */
     private prepareOptions(options?: HttpOptions): HttpOptions {
         const defaultHeaders = this.getDefaultHeaders();
-        
+
         let mergedHeaders = defaultHeaders;
         if (options?.headers) {
             if (options.headers instanceof HttpHeaders) {
@@ -76,7 +82,7 @@ export class ApiService {
                 });
             }
         }
-        
+
         return {
             ...options,
             headers: mergedHeaders
@@ -89,7 +95,7 @@ export class ApiService {
     get<T>(endpoint: string, options?: HttpOptions): Observable<T> {
         const url = this.buildUrl(endpoint);
         const preparedOptions = this.prepareOptions(options);
-        
+
         return this.http.get<T>(url, preparedOptions).pipe(
             retry(2),
             catchError(this.handleError)
@@ -102,7 +108,7 @@ export class ApiService {
     post<T>(endpoint: string, body: any, options?: HttpOptions): Observable<T> {
         const url = this.buildUrl(endpoint);
         const preparedOptions = this.prepareOptions(options);
-        
+
         return this.http.post<T>(url, body, preparedOptions).pipe(
             catchError(this.handleError)
         );
@@ -114,7 +120,7 @@ export class ApiService {
     put<T>(endpoint: string, body: any, options?: HttpOptions): Observable<T> {
         const url = this.buildUrl(endpoint);
         const preparedOptions = this.prepareOptions(options);
-        
+
         return this.http.put<T>(url, body, preparedOptions).pipe(
             catchError(this.handleError)
         );
@@ -126,7 +132,7 @@ export class ApiService {
     patch<T>(endpoint: string, body: any, options?: HttpOptions): Observable<T> {
         const url = this.buildUrl(endpoint);
         const preparedOptions = this.prepareOptions(options);
-        
+
         return this.http.patch<T>(url, body, preparedOptions).pipe(
             catchError(this.handleError)
         );
@@ -138,7 +144,7 @@ export class ApiService {
     delete<T>(endpoint: string, options?: HttpOptions): Observable<T> {
         const url = this.buildUrl(endpoint);
         const preparedOptions = this.prepareOptions(options);
-        
+
         return this.http.delete<T>(url, preparedOptions).pipe(
             catchError(this.handleError)
         );
@@ -150,9 +156,9 @@ export class ApiService {
     upload<T>(endpoint: string, file: File, additionalData?: any): Observable<T> {
         const url = this.buildUrl(endpoint);
         const formData = new FormData();
-        
+
         formData.append('file', file);
-        
+
         if (additionalData) {
             Object.keys(additionalData).forEach(key => {
                 formData.append(key, additionalData[key]);
@@ -176,7 +182,7 @@ export class ApiService {
      */
     download(endpoint: string): Observable<Blob> {
         const url = this.buildUrl(endpoint);
-        
+
         return this.http.get(url, {
             responseType: 'blob',
             headers: this.getDefaultHeaders()
@@ -190,13 +196,13 @@ export class ApiService {
      */
     buildParams(params: { [key: string]: any }): HttpParams {
         let httpParams = new HttpParams();
-        
+
         Object.keys(params).forEach(key => {
             if (params[key] !== null && params[key] !== undefined) {
                 httpParams = httpParams.set(key, params[key].toString());
             }
         });
-        
+
         return httpParams;
     }
 
@@ -225,7 +231,7 @@ export class ApiService {
     private handleError = (error: HttpErrorResponse) => {
         let errorMessage = 'An unknown error occurred!';
         let errorCode = 'UNKNOWN_ERROR';
-        
+
         if (error.error instanceof ErrorEvent) {
             // Client-side error
             errorMessage = `Client Error: ${error.error.message}`;
@@ -233,7 +239,7 @@ export class ApiService {
         } else {
             // Server-side error
             errorCode = `SERVER_ERROR_${error.status}`;
-            
+
             switch (error.status) {
                 case 400:
                     errorMessage = 'Bad Request - Please check your input';
@@ -256,15 +262,15 @@ export class ApiService {
                 default:
                     errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
             }
-            
+
             // Try to extract server error message
             if (error.error?.message) {
                 errorMessage = error.error.message;
             }
         }
-        
+
         console.error(`API Error [${errorCode}]:`, errorMessage, error);
-        
+
         return throwError(() => ({
             code: errorCode,
             message: errorMessage,
