@@ -275,8 +275,13 @@ export class FormQuestionComponent implements OnInit, OnChanges, OnDestroy {
     const msgs: string[] = [];
     if (c.errors['required']) msgs.push(`${this.question.label} ist erforderlich`);
     if (c.errors['email']) msgs.push('Bitte gültige E-Mail eingeben');
-    if (c.errors['pattern'] && (this.question.field_type === 'number' || this.question.field_type === 'integer'))
-      msgs.push('Nur Zahlen erlaubt');
+    if (c.errors['pattern']) {
+      if (this.question.field_type === 'number' || this.question.field_type === 'integer') {
+        msgs.push('Nur Zahlen erlaubt');
+      } else if (this.question.field_type === 'email') {
+        msgs.push('Bitte gültige E-Mail eingeben (z.B. name@domain.de)');
+      }
+    }
     return msgs;
   }
 
