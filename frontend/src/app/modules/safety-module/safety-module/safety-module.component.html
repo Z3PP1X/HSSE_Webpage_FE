@@ -31,11 +31,11 @@
 
     <!-- STEP: FORM -->
     @if (step === 'form') {
-    <ng-container *ngIf="formReady$ | async as data">
-      <app-form [formTitle]="formTitle" [form]="data.form" [formStructure]="data.structure"
-        (formSubmit)="handleFormSubmit($event)" class="block animate-fadeIn">
-      </app-form>
-    </ng-container>
+      <app-dynamic-form 
+          [config]="formConfig" 
+          (formSubmit)="handleFormSubmit($event)"
+          class="block animate-fadeIn">
+      </app-dynamic-form>
     }
 
     <!-- STEP: REVIEW -->

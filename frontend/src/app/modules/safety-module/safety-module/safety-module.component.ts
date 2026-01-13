@@ -1,17 +1,13 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlarmplanComponent } from "../components/alarmplan/alarmplan.component";
-import { ModuleNavigationComponent } from "../../../components/module-navigation/module-navigation/module-navigation.component";
 import { SafetyModuleConfig } from '../safety-module.config';
-import { FormComponent } from '../../../components/DynamicForm/Form/form/form.component';
-import { AlarmplanFields } from '../components/alarmplan/alarmplan.model.interface';
+import { DynamicFormComponent } from '../../../components/DynamicForm/components/dynamic-form/dynamic-form.component';
+import { ALARM_PLAN_FORM_CONFIG } from '../../../components/DynamicForm/demo-data';
+import { AlarmplanFields, AddedContact, FirstAider, NextHospital } from '../components/alarmplan/alarmplan.model.interface';
 import { PdfService } from '../../../global-services/pdf.generator.service';
 import { PdfComponent } from '../components/pdf-gen/pdf/pdf.component';
-import { FormOrchestrationService } from '../../../components/DynamicForm/Form-Building-Services/FormOrchestrationService';
-import { FormGroup } from '@angular/forms';
-import { Observable, Subject, of, EMPTY, combineLatest } from 'rxjs';
-import { takeUntil, switchMap, tap, catchError, filter, delay, take, map, shareReplay } from 'rxjs/operators';
-import { environment } from '../../../../environments/environment';
+import { Observable, Subject } from 'rxjs';
 import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
 import { Router } from '@angular/router';
 import { FormDataService } from '../../../global-services/form-data-service/form-data.service';
@@ -22,8 +18,7 @@ import { LoggingService } from '../../../global-services/logging/logging.service
   standalone: true,
   imports: [
     AlarmplanComponent,
-    ModuleNavigationComponent,
-    FormComponent,
+    DynamicFormComponent,
     CommonModule,
     PdfComponent,
   ],
@@ -34,9 +29,8 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private log: ReturnType<LoggingService['scoped']>;
 
-  // Use a single properly typed observable
-  formReady$: Observable<{ form: FormGroup, structure: any[] }> | null = null;
-  formData: FormGroup | undefined = undefined;
+  // New Config
+  formConfig = ALARM_PLAN_FORM_CONFIG;
 
   @ViewChild(PdfComponent) pdfComponent!: PdfComponent;
 
@@ -56,7 +50,6 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   constructor(
     private formDataService: FormDataService,
     private pdfService: PdfService,
-    private formOrchestrationService: FormOrchestrationService,
     private navService: ModuleNavigationService,
     private router: Router,
     private logger: LoggingService
@@ -66,116 +59,115 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.navService.initializeFromConfig(this.configurationItem);
-    this.initializeAlarmplan();
+    // No need to load form from backend anymore, we use static config
   }
 
   /**
-   * Initialize alarmplan by creating form
-   */
-  private initializeAlarmplan(): void {
-    this.isLoading = true;
-    this.error = null;
-
-    this.log.info('🔄 initializeAlarmplan started');
-
-    // FIX: Subscribe to generateForm() independently to trigger the HTTP call immediately.
-    // This breaks the cold observable deadlock where combineLatest waited for structure$
-    // which was only populated after the HTTP call completed.
-    console.log('🔥 DEBUG: About to call generateForm()');
-
-    const formObservable = this.formOrchestrationService.generateForm(
-      'alarmplan/emergency-planning/form_schema/'
-    );
-
-    console.log('🔥 DEBUG: generateForm() returned observable, about to subscribe');
-
-    formObservable.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (form) => {
-        console.log('🔥 DEBUG: generateForm subscription received form:', form);
-        this.log.info('✅ Form generated successfully, structure populated');
-      },
-      error: (err) => {
-        console.log('🔥 DEBUG: generateForm subscription error:', err);
-        this.log.error('❌ Form generation failed:', err);
-        this.error = 'Failed to load form: ' + (err.message || err);
-        this.isLoading = false;
-      }
-    });
-
-    console.log('🔥 DEBUG: Subscription created, HTTP call should now fire');
-
-    // Now use getCurrentForm() and getFormQuestions() which are BehaviorSubjects
-    // that will emit once generateForm() populates them
-    const form$ = this.formOrchestrationService.getCurrentForm();
-    const structure$ = this.formOrchestrationService.getFormQuestions();
-
-    // Create a properly typed combined observable
-    this.formReady$ = combineLatest([form$, structure$]).pipe(
-      tap(([form, structure]) => {
-        this.log.debug('📊 combineLatest emitted:', {
-          formExists: !!form,
-          formControlsCount: form ? Object.keys(form.controls).length : 0,
-          structureLength: structure?.length
-        });
-      }),
-      map(([form, structure]: [any, any[]]) => ({ form: form as FormGroup, structure })),
-      filter((data: { form: FormGroup, structure: any[] }) => {
-        const hasForm = !!data.form;
-        const hasStructure = !!data.structure && data.structure.length > 0;
-        const hasFormControls = hasForm && Object.keys(data.form.controls).length > 0;
-        const passes = hasForm && hasStructure && hasFormControls;
-        this.log.debug('🔍 filter check:', {
-          passes,
-          structureLength: data.structure?.length,
-          formControlsCount: hasForm ? Object.keys(data.form.controls).length : 0
-        });
-        return passes;
-      }),
-      tap((data: { form: FormGroup, structure: any[] }) => {
-        this.log.info('✅ Filter passed, setting isLoading = false');
-        this.isLoading = false;
-      }),
-      shareReplay(1),
-      catchError((error: any) => {
-        this.log.error('❌ Error initializing alarmplan:', error);
-        this.error = 'Failed to load alarmplan configuration: ' + (error.message || error);
-        this.isLoading = false;
-        return EMPTY;
-      })
-    );
-
-    // Subscribe to metadata for title
-    this.formOrchestrationService.getFormMetadata().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe((metadata: any) => {
-      this.log.debug('📋 Metadata received:', metadata?.form_title);
-      if (metadata?.form_title) {
-        this.formTitle = metadata.form_title;
-      }
-    });
-
-    // Subscribe to trigger the pipeline (breaking the *ngIf deadlock in template)
-    this.formReady$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (data) => this.log.info('🎉 formReady$ emitted data successfully'),
-      error: (err) => this.log.error('💥 formReady$ error:', err),
-      complete: () => this.log.debug('🏁 formReady$ completed')
-    });
-  }
-
-  /**
-   * Handle form submission
+   * Handle form submission from DynamicFormComponent
    */
   handleFormSubmit(formValue: any): void {
-    this.formDataService.setFormData(formValue);
+    this.log.info('📝 Form Submitted', formValue);
 
-    // Switch to review step instead of immediate generation
-    this.step = 'review';
-    // Ensure scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      const mappedData = this.mapFormToModel(formValue);
+      this.log.info('🗺️ Mapped Data', mappedData);
+
+      this.formDataService.setFormData(mappedData);
+      this.step = 'review';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      this.log.error('❌ Mapping failed', err);
+      this.error = "Failed to process form data.";
+    }
+  }
+
+  private mapFormToModel(form: any): AlarmplanFields {
+    const contacts: AddedContact[] = [];
+
+    // Map "Wichtige Kontakte" to AddedContacts
+    const important = form['Wichtige Kontakte'] || {};
+
+    if (important['Wichtige Kontakte_Name des Branch Managers']) {
+      contacts.push({
+        name: important['Wichtige Kontakte_Name des Branch Managers'],
+        email: important['Wichtige Kontakte_Email des Branch Managers'],
+        contactClass: 'BranchManager'
+      });
+    }
+    if (important['Wichtige Kontakte_Name des Geschaftsführers']) {
+      contacts.push({
+        name: important['Wichtige Kontakte_Name des Geschaftsführers'],
+        email: important['Wichtige Kontakte_Email des Geschäftsführers'],
+        contactClass: 'Management'
+      });
+    }
+
+    // Map "Brandschutzhelfer" (assuming array)
+    // Note: Model doesn't have explicit FireSafetyHelper, using SafetyAdvisor or similar?
+    // Or we just add them with a custom or existing class if allowed.
+    // Based on available types: "BranchManager" | "Management" | "EnvironmentalAdvisor" | "SafetyAdvisor" | "QualityManagement" | "CompanyDoctor"
+    // Let's use 'SafetyAdvisor' for now as a fallback or if it fits.
+    const fireHelpers = form['Brandschutzhelfer'] || [];
+    // fireHelpers is an array of objects
+    if (Array.isArray(fireHelpers)) {
+      fireHelpers.forEach((helper: any, index: number) => {
+        // keys might be Brandschutzhelfer_Name_0 etc. if they were flattened in the form value?
+        // The DynamicForm produces structured objects if it's a FormArray of FormGroups.
+        // FormBuilderService:
+        // createCategoryInstance -> group[effectiveKey]
+        // Effective key is 'Brandschutzhelfer_Name_{index}'.
+        // So the object inside the array looks like:
+        // { "Brandschutzhelfer_Name_0": "...", "Brandschutzhelfer_Email_0": "..." }
+        // This is a bit tricky since the key changes with index.
+
+        const nameKey = `Brandschutzhelfer_Name_${index}`;
+        const emailKey = `Brandschutzhelfer_Email_${index}`;
+
+        if (helper[nameKey]) {
+          contacts.push({
+            name: helper[nameKey],
+            email: helper[emailKey],
+            contactClass: 'SafetyAdvisor'
+          });
+        }
+      });
+    }
+
+    // Map First Aiders
+    const firstAiders: FirstAider[] = [];
+    const helpers = form['Ersthelfer'] || [];
+    if (Array.isArray(helpers)) {
+      helpers.forEach((h: any, i: number) => {
+        const nameKey = `Ersthelfer_Name_${i}`;
+        const phoneKey = `Ersthelfer_Telefonnummer_${i}`;
+
+        if (h[nameKey]) {
+          firstAiders.push({
+            name: h[nameKey],
+            phoneNumber: h[phoneKey] || ''
+          });
+        }
+      });
+    }
+
+    // Map Hospital
+    const hospitalGroup = form['Nächstes Krankenhaus'] || {};
+    const nextHospital: NextHospital = {
+      name: hospitalGroup['Nächstes Krankenhaus_Name des Krankenhauses'],
+      street: hospitalGroup['Nächstes Krankenhaus_Straße und Hausnummer'],
+      zipcode: hospitalGroup['Nächstes Krankenhaus_Postleitzahl'],
+      city: '', // Form doesn't have city?
+      houseNumber: '' // Form combines Street/Number or maps differently?
+    };
+
+    return {
+      costCenter: form['Branch']?.['alarmplan_RelatedBranch'],
+      assemblyPoint: form['Sammelplatz']?.['Sammelplatz_Sammelplatz'],
+      poisonEmergencyCall: important['Wichtige Kontakte_Nummer des Giftnotrufs'],
+      firstAiderDict: firstAiders,
+      addedContact: contacts,
+      nextHospital: nextHospital
+    };
   }
 
   /**
@@ -217,7 +209,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
    * Retry loading configuration
    */
   retryLoadConfig(): void {
-    this.initializeAlarmplan();
+    // this.initializeAlarmplan(); // Deprecated
   }
 
   /**

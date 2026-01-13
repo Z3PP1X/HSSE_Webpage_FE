@@ -2,32 +2,16 @@
   <div>
     <app-module-navigation [configurationItem]="moduleConfig" [iconPath]="iconPath"></app-module-navigation>
   </div>
-  
+
   <div class="col-span-3">
     <button (click)="showForm = true" class="btn btn-primary">Open Form</button>
   </div>
 </div>
 
-<!-- Show form frame conditionally -->
-<app-form-frame *ngIf="showForm">
-  <ng-container *ngIf="form$ | async as formData">
-    <!-- Only show form when it's fully loaded (has content) -->
-    <app-form 
-  *ngIf="formData && formData.controls && getObjectKeys(formData.controls).length > 0"
-  [formTitle]="formTitle"
-  [form]="formData"
-  (formSubmit)="onFormSubmit($event)"
-  [formStructure]="(questions$ | async ) || []">
-  
-</app-form>
-    
-    <!-- Show loading when form data is empty or incomplete -->
-    <div *ngIf="!(formData && formData.controls && getObjectKeys(formData.controls).length > 0)" class="loading">
-      Loading form data...
-    </div>
-  </ng-container>
-  
-  <!-- Regular loading state before form$ emits anything -->
-  <div *ngIf="(form$ | async) === null && isLoading" class="loading">Loading form...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
-</app-form-frame>
+<!-- Maintenance / Error Display -->
+<div class="col-span-3 p-6">
+  <div *ngIf="error" class="bg-yellow-50 text-yellow-800 p-4 rounded-lg border border-yellow-200 shadow-sm">
+    <h3 class="font-bold text-lg mb-2">Notice</h3>
+    <p>{{ error }}</p>
+  </div>
+</div>
