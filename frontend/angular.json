@@ -15,11 +15,11 @@
           "options": {
             "outputPath": "dist/frontend",
             "budgets": [
-                  {
-            "type": "initial",
-            "maximumWarning": "2500kB",
-            "maximumError": "4MB"
-                  }
+              {
+                "type": "initial",
+                "maximumWarning": "2500kB",
+                "maximumError": "4MB"
+              }
             ],
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -79,6 +79,9 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"

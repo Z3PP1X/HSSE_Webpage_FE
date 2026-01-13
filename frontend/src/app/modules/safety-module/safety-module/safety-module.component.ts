@@ -122,8 +122,15 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
       }),
       map(([form, structure]: [any, any[]]) => ({ form: form as FormGroup, structure })),
       filter((data: { form: FormGroup, structure: any[] }) => {
-        const passes = !!data.form && !!data.structure && data.structure.length > 0;
-        this.log.debug('🔍 filter check:', { passes, structureLength: data.structure?.length });
+        const hasForm = !!data.form;
+        const hasStructure = !!data.structure && data.structure.length > 0;
+        const hasFormControls = hasForm && Object.keys(data.form.controls).length > 0;
+        const passes = hasForm && hasStructure && hasFormControls;
+        this.log.debug('🔍 filter check:', {
+          passes,
+          structureLength: data.structure?.length,
+          formControlsCount: hasForm ? Object.keys(data.form.controls).length : 0
+        });
         return passes;
       }),
       tap((data: { form: FormGroup, structure: any[] }) => {

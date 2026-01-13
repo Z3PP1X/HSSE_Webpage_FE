@@ -85,9 +85,33 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['formStructure'] && this.formStructure?.length && !this.formReadyFlag()) {
+    // Only set ready when BOTH structure exists AND form has controls
+    const hasStructure = this.formStructure?.length > 0;
+    const hasFormControls = this.form && Object.keys(this.form.controls).length > 0;
+
+    this.log.debug('ngOnChanges triggered:', {
+      changedInputs: Object.keys(changes),
+      hasStructure,
+      hasFormControls,
+      formReadyFlag: this.formReadyFlag()
+    });
+
+    if (changes['formStructure'] && hasStructure && !this.formReadyFlag()) {
       this.provideQuestions(this.formStructure);
       this.initializeExpandableCategories();
+      // Only mark ready if form controls are populated
+      if (hasFormControls) {
+        this.log.info('✅ Form ready: structure processed AND form controls populated');
+        this.formReadyFlag.set(true);
+      } else {
+        this.log.debug('⏳ Structure processed, waiting for form controls...');
+      }
+      this.cdr.detectChanges();
+    }
+
+    // Handle case where form changes after structure
+    if (changes['form'] && hasStructure && hasFormControls && !this.formReadyFlag()) {
+      this.log.info('✅ Form ready: form controls now available');
       this.formReadyFlag.set(true);
       this.cdr.detectChanges();
     }
@@ -226,9 +250,10 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     const isExpandable = expandableMap.has(categoryKey);
 
     if (!isExpandable) {
-      this.log.debug(`Category ${categoryKey} is NOT expandable`);
-      this.log.debug('Available expandable categories:', Array.from(expandableMap.keys()));
-      this.log.debug('Current expandable map:', expandableMap);
+      this.log.debug(`Category ${categoryKey} is NOT expandable`, {
+        availableExpandable: Array.from(expandableMap.keys()),
+        mapSize: expandableMap.size
+      });
     } else {
       this.log.debug(`Category ${categoryKey} IS expandable`);
     }
@@ -584,8 +609,10 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   getCurrentCategory(): string {
-    this.log.debug("Current Category Index: ", this.formCategories()[this.currentCategoryIndex])
-    return this.formCategories()[this.currentCategoryIndex] || '';
+    const categories = this.formCategories();
+    const category = categories[this.currentCategoryIndex];
+    this.log.debug('Current Category Index:', category, 'from', categories.length, 'categories');
+    return category || '';
   }
 
   getProgressValue(): number {
