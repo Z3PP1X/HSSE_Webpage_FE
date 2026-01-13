@@ -1,17 +1,23 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlarmplanComponent } from "../components/alarmplan/alarmplan.component";
 import { SafetyModuleConfig } from '../safety-module.config';
 import { DynamicFormComponent } from '../../../components/DynamicForm/components/dynamic-form/dynamic-form.component';
-import { ALARM_PLAN_FORM_CONFIG } from '../../../components/DynamicForm/demo-data';
+import { FormConfig } from '../../../components/DynamicForm/models/form-config.model';
 import { AlarmplanFields, AddedContact, FirstAider, NextHospital } from '../components/alarmplan/alarmplan.model.interface';
 import { PdfService } from '../../../global-services/pdf.generator.service';
 import { PdfComponent } from '../components/pdf-gen/pdf/pdf.component';
 import { Observable, Subject } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ModuleNavigationService } from '../../../global-services/module-navigation-service/module-navigation.service';
 import { Router } from '@angular/router';
 import { FormDataService } from '../../../global-services/form-data-service/form-data.service';
 import { LoggingService } from '../../../global-services/logging/logging.service';
+import { ApiService } from '../../../global-services/api-service/api-service';
+import { environment } from '../../../../environments/environment';
+
+// Fallback demo config for development
+import { ALARM_PLAN_FORM_CONFIG } from '../../../components/DynamicForm/demo-data';
 
 @Component({
   selector: 'app-safety-module',
@@ -28,9 +34,10 @@ import { LoggingService } from '../../../global-services/logging/logging.service
 export class SafetyModuleComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private log: ReturnType<LoggingService['scoped']>;
+  private apiService = inject(ApiService);
 
-  // New Config
-  formConfig = ALARM_PLAN_FORM_CONFIG;
+  // Form config - loaded from API or fallback to demo
+  formConfig: FormConfig | null = null;
 
   @ViewChild(PdfComponent) pdfComponent!: PdfComponent;
 
@@ -39,7 +46,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   formTitle = "Digitaler Alarmplan";
   activeMenuId = 'alarmplan';
 
-  isLoading = false;
+  isLoading = true;
   error: string | null = null;
   alarmplanData: AlarmplanFields = {} as AlarmplanFields;
   showPdfComponent = false;
@@ -51,7 +58,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   zoomLevel = 0.65;
   zoomStep = 0.1;
   minZoom = 0.3;
-  maxZoom = 1.35; // Increased to 135%
+  maxZoom = 1.35;
 
   isDragging = false;
   panX = 0;
@@ -74,13 +81,13 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   }
 
   startDrag(event: MouseEvent) {
-    if (this.zoomLevel > 0.3) { // Only allow drag if we have content to move (optional check)
+    if (this.zoomLevel > 0.3) {
       this.isDragging = true;
       this.startX = event.clientX;
       this.startY = event.clientY;
       this.initialPanX = this.panX;
       this.initialPanY = this.panY;
-      event.preventDefault(); // Prevent text selection
+      event.preventDefault();
     }
   }
 
@@ -109,7 +116,38 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.navService.initializeFromConfig(this.configurationItem);
-    // No need to load form from backend anymore, we use static config
+    this.loadFormConfig();
+  }
+
+  /**
+   * Load form configuration from API or fallback to demo data
+   */
+  private loadFormConfig(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    // In production, always fetch from API
+    // In development, allow fallback to demo data
+    this.apiService.get<FormConfig>('/forms/alarmplan/').subscribe({
+      next: (config) => {
+        this.log.info('✅ Form config loaded from API', config);
+        this.formConfig = config;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.log.warn('⚠️ Failed to load form config from API', err);
+
+        // In development, fallback to demo data
+        if (!environment.production) {
+          this.log.info('📦 Using demo data fallback');
+          this.formConfig = ALARM_PLAN_FORM_CONFIG;
+          this.isLoading = false;
+        } else {
+          this.error = 'Failed to load form configuration. Please try again.';
+          this.isLoading = false;
+        }
+      }
+    });
   }
 
   /**
@@ -250,7 +288,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
    * Retry loading configuration
    */
   retryLoadConfig(): void {
-    // this.initializeAlarmplan(); // Deprecated
+    this.loadFormConfig();
   }
 
   /**

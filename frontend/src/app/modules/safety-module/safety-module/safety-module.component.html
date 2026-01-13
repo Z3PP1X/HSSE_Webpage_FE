@@ -36,7 +36,7 @@
     @if (!isLoading && !error) {
 
     <!-- STEP: FORM -->
-    @if (step === 'form') {
+    @if (step === 'form' && formConfig) {
     <app-dynamic-form [config]="formConfig" (formSubmit)="handleFormSubmit($event)" class="block animate-fadeIn">
     </app-dynamic-form>
     }
