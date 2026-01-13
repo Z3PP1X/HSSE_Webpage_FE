@@ -78,10 +78,25 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
 
     this.log.info('🔄 initializeAlarmplan started');
 
-    const form$ = this.formOrchestrationService.generateForm(
+    // FIX: Subscribe to generateForm() independently to trigger the HTTP call immediately.
+    // This breaks the cold observable deadlock where combineLatest waited for structure$
+    // which was only populated after the HTTP call completed.
+    this.formOrchestrationService.generateForm(
       'alarmplan/emergency-planning/form_schema/'
-    );
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (form) => this.log.info('✅ Form generated successfully, structure populated'),
+      error: (err) => {
+        this.log.error('❌ Form generation failed:', err);
+        this.error = 'Failed to load form: ' + (err.message || err);
+        this.isLoading = false;
+      }
+    });
 
+    // Now use getCurrentForm() and getFormQuestions() which are BehaviorSubjects
+    // that will emit once generateForm() populates them
+    const form$ = this.formOrchestrationService.getCurrentForm();
     const structure$ = this.formOrchestrationService.getFormQuestions();
 
     // Create a properly typed combined observable
