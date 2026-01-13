@@ -47,6 +47,56 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
   // State management for the process
   step: 'form' | 'review' = 'form';
 
+  // Zoom & Pan State
+  zoomLevel = 0.65;
+  zoomStep = 0.1;
+  minZoom = 0.3;
+  maxZoom = 1.35; // Increased to 135%
+
+  isDragging = false;
+  panX = 0;
+  panY = 0;
+  startX = 0;
+  startY = 0;
+  initialPanX = 0;
+  initialPanY = 0;
+
+  zoomIn() {
+    if (this.zoomLevel < this.maxZoom) {
+      this.zoomLevel = Math.min(this.zoomLevel + this.zoomStep, this.maxZoom);
+    }
+  }
+
+  zoomOut() {
+    if (this.zoomLevel > this.minZoom) {
+      this.zoomLevel = Math.max(this.zoomLevel - this.zoomStep, this.minZoom);
+    }
+  }
+
+  startDrag(event: MouseEvent) {
+    if (this.zoomLevel > 0.3) { // Only allow drag if we have content to move (optional check)
+      this.isDragging = true;
+      this.startX = event.clientX;
+      this.startY = event.clientY;
+      this.initialPanX = this.panX;
+      this.initialPanY = this.panY;
+      event.preventDefault(); // Prevent text selection
+    }
+  }
+
+  onDrag(event: MouseEvent) {
+    if (this.isDragging) {
+      const dx = event.clientX - this.startX;
+      const dy = event.clientY - this.startY;
+      this.panX = this.initialPanX + dx;
+      this.panY = this.initialPanY + dy;
+    }
+  }
+
+  stopDrag() {
+    this.isDragging = false;
+  }
+
   constructor(
     private formDataService: FormDataService,
     private pdfService: PdfService,
@@ -66,19 +116,18 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
    * Handle form submission from DynamicFormComponent
    */
   handleFormSubmit(formValue: any): void {
-    console.log('📝 RAW FORM VALUE:', JSON.stringify(formValue, null, 2));
+    this.log.info('📝 RAW FORM VALUE:', JSON.stringify(formValue, null, 2));
     this.log.info('📝 Form Submitted', formValue);
 
     try {
       const mappedData = this.mapFormToModel(formValue);
-      console.log('🗺️ MAPPED DATA:', JSON.stringify(mappedData, null, 2));
+      this.log.info('🗺️ MAPPED DATA:', JSON.stringify(mappedData, null, 2));
       this.log.info('🗺️ Mapped Data', mappedData);
 
       this.formDataService.setAlarmplanFields(mappedData);
       this.step = 'review';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      console.error('❌ MAPPING ERROR:', err);
       this.log.error('❌ Mapping failed', err);
       this.error = "Failed to process form data.";
     }
@@ -105,23 +154,12 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Map "Brandschutzhelfer" (assuming array)
-    // Note: Model doesn't have explicit FireSafetyHelper, using SafetyAdvisor or similar?
-    // Or we just add them with a custom or existing class if allowed.
-    // Based on available types: "BranchManager" | "Management" | "EnvironmentalAdvisor" | "SafetyAdvisor" | "QualityManagement" | "CompanyDoctor"
-    // Let's use 'SafetyAdvisor' for now as a fallback or if it fits.
+
     const fireHelpers = form['Brandschutzhelfer'] || [];
-    // fireHelpers is an array of objects
+
     if (Array.isArray(fireHelpers)) {
       fireHelpers.forEach((helper: any, index: number) => {
-        // keys might be Brandschutzhelfer_Name_0 etc. if they were flattened in the form value?
-        // The DynamicForm produces structured objects if it's a FormArray of FormGroups.
-        // FormBuilderService:
-        // createCategoryInstance -> group[effectiveKey]
-        // Effective key is 'Brandschutzhelfer_Name_{index}'.
-        // So the object inside the array looks like:
-        // { "Brandschutzhelfer_Name_0": "...", "Brandschutzhelfer_Email_0": "..." }
-        // This is a bit tricky since the key changes with index.
+
 
         const nameKey = `Brandschutzhelfer_Name_${index}`;
         const emailKey = `Brandschutzhelfer_Email_${index}`;

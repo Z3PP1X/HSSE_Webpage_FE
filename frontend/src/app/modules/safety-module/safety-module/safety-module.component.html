@@ -31,11 +31,8 @@
 
     <!-- STEP: FORM -->
     @if (step === 'form') {
-      <app-dynamic-form 
-          [config]="formConfig" 
-          (formSubmit)="handleFormSubmit($event)"
-          class="block animate-fadeIn">
-      </app-dynamic-form>
+    <app-dynamic-form [config]="formConfig" (formSubmit)="handleFormSubmit($event)" class="block animate-fadeIn">
+    </app-dynamic-form>
     }
 
     <!-- STEP: REVIEW -->
@@ -61,15 +58,51 @@
       </div>
 
       <!-- Preview Container -->
+      <!-- Preview Container -->
+      <!-- Preview Container -->
+      <!-- Preview Container -->
       <div
-        class="bg-gray-200 rounded-xl overflow-hidden shadow-inner border border-gray-300 p-8 flex justify-center mb-8 relative">
+        class="bg-gray-200 rounded-xl overflow-hidden shadow-inner border border-gray-300 p-8 flex justify-center mb-8 relative"
+        (mousedown)="startDrag($event)" (mousemove)="onDrag($event)" (mouseup)="stopDrag()" (mouseleave)="stopDrag()"
+        [style.cursor]="isDragging ? 'grabbing' : 'grab'">
+
         <div class="absolute inset-0 pattern-grid-lg opacity-5 pointer-events-none"></div>
 
-        <!-- Scaled Preview Wrapper to fit viewing area -->
-        <div
-          class="transform scale-75 origin-top bg-white shadow-2xl transition-transform duration-300 hover:scale-[0.80] cursor-zoom-in relative z-10">
+        <!-- Zoom Controls (Fixed inside container) -->
+        <div class="absolute bottom-4 right-4 z-40 flex flex-col gap-2 pointer-events-auto"
+          (mousedown)="$event.stopPropagation()">
+          <button (click)="zoomIn()"
+            class="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 text-gray-700 border border-gray-200 transition-all"
+            title="Zoom In">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+              </path>
+            </svg>
+          </button>
+          <div
+            class="bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-mono text-center shadow-sm border border-gray-200">
+            {{ (zoomLevel * 100) | number:'1.0-0' }}%
+          </div>
+          <button (click)="zoomOut()"
+            class="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 text-gray-700 border border-gray-200 transition-all"
+            title="Zoom Out">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Scaled Preview Wrapper to fit viewing area (A4 Landscape) -->
+        <!-- A4 Landscape (297mm x 210mm) is approx 1123px x 794px at 96PPI. 
+             We force these dimensions and scale it down to fit the UI. -->
+        <div class="relative overflow-hidden transition-transform duration-75 origin-center shadow-2xl bg-white"
+          [style.width]="'297mm'" [style.height]="'210mm'"
+          [style.transform]="'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoomLevel + ')'"
+          [class.transition-none]="isDragging" [class.duration-300]="!isDragging">
+
           <!-- Direct Component Usage for Preview -->
-          <app-alarmplan></app-alarmplan>
+          <app-alarmplan class="block w-full h-full"></app-alarmplan>
+
           <!-- Overlay to prevent interaction -->
           <div class="absolute inset-0 z-20 bg-transparent"></div>
         </div>
