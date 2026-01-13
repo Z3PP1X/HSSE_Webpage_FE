@@ -7,10 +7,20 @@ import {
   HospitalInfo,
   ImportantContacts
 } from './form-data.interface';
-import { AlarmplanFields, FirstAider, NextHospital, AddedContact  } from '../../modules/safety-module/components/alarmplan/alarmplan.model.interface'; // adjust import
+import { AlarmplanFields, FirstAider, NextHospital, AddedContact } from '../../modules/safety-module/components/alarmplan/alarmplan.model.interface'; // adjust import
 
 @Injectable({ providedIn: 'root' })
 export class FormDataService {
+  constructor() {
+    // Legacy support: if raw data changes, update the alarmplan subject
+    this.normalized$.subscribe(n => {
+      const mapped = this.toAlarmplanFields(n);
+      // Only emit if not empty to avoid overwriting manual set with initial empty raw
+      if (mapped.costCenter || mapped.assemblyPoint) {
+        this._alarmplan.next(mapped);
+      }
+    });
+  }
   private raw$ = new BehaviorSubject<RawAlarmplanFormData | null>(null);
 
   // Public raw data observable
@@ -21,13 +31,21 @@ export class FormDataService {
     map(raw => this.normalize(raw))
   );
 
-  // New: transformed Alarmplan model observable
-  alarmplan$: Observable<AlarmplanFields> = this.normalized$.pipe(
-    map(n => this.toAlarmplanFields(n))
-  );
+  // State for the alarmplan model
+  private _alarmplan = new BehaviorSubject<AlarmplanFields>({} as AlarmplanFields);
+  alarmplan$ = this._alarmplan.asObservable();
 
+  setAlarmplanFields(data: AlarmplanFields) {
+    this._alarmplan.next(data);
+  }
+
+  // Legacy raw data handling (kept for backward compat or if Raw input is needed)
   setFormData(formValue: any) {
     this.raw$.next(formValue as RawAlarmplanFormData);
+    // Also trigger the pipeline to update _alarmplan if needed
+    // But since we are moving away from raw normalization for the main flow, we'll leave it as is 
+    // or trigger _alarmplan update from normalized data subscription?
+    // Let's rely on setAlarmplanFields for the main flow.
   }
 
   // Public snapshot helpers
@@ -58,12 +76,12 @@ export class FormDataService {
 
     const hospital: HospitalInfo | undefined = raw['Nächstes Krankenhaus']
       ? {
-          name: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Name des Krankenhauses'],
-          street: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Straße und Hausnummer'],
-            // Accept string or number for PLZ; convert to string
-          zipcode: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Postleitzahl']?.toString(),
-          phoneNumber: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Telefonnummer']?.toString()
-        }
+        name: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Name des Krankenhauses'],
+        street: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Straße und Hausnummer'],
+        // Accept string or number for PLZ; convert to string
+        zipcode: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Postleitzahl']?.toString(),
+        phoneNumber: raw['Nächstes Krankenhaus']['Nächstes Krankenhaus_Telefonnummer']?.toString()
+      }
       : undefined;
 
     const allContacts = [...firstAiders, ...fireAssistants];
@@ -78,7 +96,7 @@ export class FormDataService {
           email: importantRaw['Wichtige Kontakte_Email des Branch Managers']
         },
         management: {
-          name: importantRaw['Wichtige Kontakte_Name des Geschaftsführers'] 
+          name: importantRaw['Wichtige Kontakte_Name des Geschaftsführers']
             || importantRaw['Wichtige Kontakte_Name des Geschäftsführers'],
           email: importantRaw['Wichtige Kontakte_Email des Geschäftsführers']
         }

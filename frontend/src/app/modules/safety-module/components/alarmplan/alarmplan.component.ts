@@ -36,6 +36,7 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
     this.formDataService.alarmplan$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(model => {
+        console.log('✅ AlarmplanComponent Received Data:', model);
         this.config.set(model);
         this.timestamp = this.currentTime();
       });

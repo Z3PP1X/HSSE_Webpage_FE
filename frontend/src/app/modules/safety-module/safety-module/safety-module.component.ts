@@ -66,16 +66,19 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
    * Handle form submission from DynamicFormComponent
    */
   handleFormSubmit(formValue: any): void {
+    console.log('📝 RAW FORM VALUE:', JSON.stringify(formValue, null, 2));
     this.log.info('📝 Form Submitted', formValue);
 
     try {
       const mappedData = this.mapFormToModel(formValue);
+      console.log('🗺️ MAPPED DATA:', JSON.stringify(mappedData, null, 2));
       this.log.info('🗺️ Mapped Data', mappedData);
 
-      this.formDataService.setFormData(mappedData);
+      this.formDataService.setAlarmplanFields(mappedData);
       this.step = 'review';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
+      console.error('❌ MAPPING ERROR:', err);
       this.log.error('❌ Mapping failed', err);
       this.error = "Failed to process form data.";
     }

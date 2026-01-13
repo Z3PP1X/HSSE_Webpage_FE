@@ -21,7 +21,7 @@ export class PdfComponent implements OnInit, OnDestroy {
   constructor(
     private formDataService: FormDataService,
     private elementRef: ElementRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Optional: keep a local copy (AlarmplanComponent still renders via service)
@@ -42,16 +42,22 @@ export class PdfComponent implements OnInit, OnDestroy {
     this.elementRef.nativeElement.classList.remove('generating-pdf');
   }
 
-  // Await until data populated (costCenter or at least one first aider)
+  // Await until data populated
   async waitForData(): Promise<void> {
-    await firstValueFrom(
+    console.log('⏳ PDF waiting for data...');
+    const result = await firstValueFrom(
       this.formDataService.alarmplan$.pipe(
-        filter(m => !!m && (m.costCenter !== '' || (m.firstAiderDict?.length || 0) > 0))
+        filter(m => {
+          const hasData = !!m && Object.keys(m).length > 0;
+          console.log('🔍 PDF data check:', { received: !!m, keys: m ? Object.keys(m).length : 0, pass: hasData });
+          return hasData;
+        })
       )
     );
+    console.log('✅ PDF data received:', result);
     // Allow fonts/layout settle
     if (document?.fonts) {
-      try { await (document.fonts as any).ready; } catch {}
+      try { await (document.fonts as any).ready; } catch { }
     }
     // Minor reflow delay
     await new Promise(res => setTimeout(res, 50));
