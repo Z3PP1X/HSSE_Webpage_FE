@@ -128,7 +128,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
 
     // In production, always fetch from API
     // In development, allow fallback to demo data
-    this.apiService.get<FormConfig>('/forms/alarmplan/').subscribe({
+    this.apiService.get<FormConfig>('/alarmplan/emergency-planning/form_schema/?format=json').subscribe({
       next: (config) => {
         this.log.info('✅ Form config loaded from API', config);
         this.formConfig = config;
