@@ -15,9 +15,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
     imports: [CommonModule, ReactiveFormsModule],
     template: `
     <div [formGroup]="group()" class="mb-4 relative">
-      <label [for]="config().key" class="block text-sm font-medium text-gray-700 mb-1">
+      <label [for]="config().key" class="block text-sm font-bold text-zinc-400 mb-2">
         {{ config().label }}
-        <span *ngIf="config().required" class="text-red-500">*</span>
+        <span *ngIf="config().required" class="text-sixt-orange">*</span>
       </label>
       
       <div class="relative">
@@ -25,43 +25,50 @@ import { toSignal } from '@angular/core/rxjs-interop';
             [id]="config().key + '_search'"
             type="text"
             [formControl]="searchControl"
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-            [ngClass]="{'border-red-500': hasControlError}"
+            class="block w-full rounded-xl bg-zinc-950 border border-zinc-700 text-white placeholder-zinc-600 shadow-inner focus:border-sixt-orange focus:ring-1 focus:ring-sixt-orange sm:text-sm p-3 transition-all hover:border-zinc-600"
+            [ngClass]="{'border-red-500 focus:border-red-500 focus:ring-red-500': hasControlError}"
             [placeholder]="config().help_text || 'Search...'"
             (focus)="onFocus()"
             (blur)="onBlur()"
             autocomplete="off"
         />
-        <!-- Hidden input for the actual value if needed, or we just rely on the control value which we set programmatically -->
         
-        <div *ngIf="isLoading()" class="absolute right-2 top-2">
-            <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <div *ngIf="isLoading()" class="absolute right-3 top-3">
+            <svg class="animate-spin h-5 w-5 text-sixt-orange" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
         </div>
 
-        <ul *ngIf="showDropdown() && options().length > 0" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+        <ul *ngIf="showDropdown() && options().length > 0" class="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-zinc-900 border border-zinc-700 py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm animate-fadeIn">
             <li *ngFor="let opt of options()" 
                 (click)="selectOption(opt)"
-                class="relative cursor-default select-none py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900">
-                <span class="block truncate" [class.font-semibold]="isSelected(opt)">
+                class="relative cursor-pointer select-none py-3 pl-4 pr-9 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors">
+                <span class="block truncate" [class.font-bold]="isSelected(opt)" [class.text-sixt-orange]="isSelected(opt)">
                     {{ getDisplayValue(opt) }}
+                </span>
+                <span *ngIf="isSelected(opt)" class="absolute inset-y-0 right-0 flex items-center pr-4 text-sixt-orange">
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
                 </span>
             </li>
         </ul>
         
-        <div *ngIf="showDropdown() && options().length === 0 && !isLoading() && searchControl.value" class="absolute z-10 mt-1 w-full bg-white p-2 text-sm text-gray-500 shadow-lg border rounded-md">
+        <div *ngIf="showDropdown() && options().length === 0 && !isLoading() && searchControl.value" class="absolute z-20 mt-1 w-full bg-zinc-900 border border-zinc-700 p-3 text-sm text-zinc-400 shadow-xl rounded-xl">
             No results found.
         </div>
       </div>
       
-      <div *ngIf="selectedLabel()" class="mt-1 text-sm text-gray-600 flex items-center justify-between bg-gray-50 p-2 rounded">
-          <span>Selected: <strong>{{ selectedLabel() }}</strong></span>
-          <button type="button" (click)="clearSelection()" class="text-red-500 hover:text-red-700 ml-2">Clear</button>
+      <div *ngIf="selectedLabel()" class="mt-2 text-sm text-zinc-400 flex items-center justify-between bg-zinc-900/50 p-2 rounded-lg border border-zinc-800">
+          <span>Selected: <strong class="text-zinc-200">{{ selectedLabel() }}</strong></span>
+          <button type="button" (click)="clearSelection()" class="text-red-400 hover:text-red-300 ml-2 hover:bg-white/5 p-1 rounded transition-colors" title="Clear Selection">
+            <span class="material-icons text-sm">close</span>
+          </button>
       </div>
 
-      <div *ngIf="hasControlError" class="text-red-500 text-xs mt-1">
+      <div *ngIf="hasControlError" class="text-red-400 text-xs mt-2 flex items-center gap-1 animate-fadeIn">
+         <span class="material-icons text-[14px]">error_outline</span>
          <div *ngIf="control?.errors?.['required']">{{ validationService.getErrorMessage('required', true) }}</div>
       </div>
     </div>
