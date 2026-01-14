@@ -48,6 +48,14 @@ export class FormDataService {
     // Let's rely on setAlarmplanFields for the main flow.
   }
 
+  /**
+   * Clear all cached form data after PDF generation
+   */
+  clearData(): void {
+    this.raw$.next(null);
+    this._alarmplan.next({} as AlarmplanFields);
+  }
+
   // Public snapshot helpers
   getAlarmplanSnapshot(): AlarmplanFields {
     return this.toAlarmplanFields(this.normalize(this.raw$.value));

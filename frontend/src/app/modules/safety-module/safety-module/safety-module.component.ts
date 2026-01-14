@@ -255,6 +255,8 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
 
     try {
       await this.generatePdfWithData();
+      // Clear cached form data after successful PDF generation
+      this.formDataService.clearData();
       this.router.navigate(['/success']);
     } catch (err) {
       this.log.error("PDF Generation failed", err);
