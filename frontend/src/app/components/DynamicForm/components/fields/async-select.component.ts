@@ -150,7 +150,7 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
         // Given complexity, 300ms static or re-subscribing in ngOnInit is better. 
         // Let's assume 300ms is fine for all or we fix it later.
 
-        const paramType = config.param_type || 'path';
+        const paramType = config.param_type || 'query';
 
         if (paramType === 'path') {
             // Path parameter mode: append search term to URL path
@@ -186,10 +186,16 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
         const val = opt[valueField];
         const label = opt[displayField];
 
+        console.log('[AsyncSelect] selectOption called:', { opt, valueField, displayField, val, label });
+        console.log('[AsyncSelect] control before:', { value: this.control?.value, valid: this.control?.valid, errors: this.control?.errors });
+
         this.control?.setValue(val);
         this.control?.markAsDirty();
         this.control?.markAsTouched();
+        this.control?.updateValueAndValidity(); // Force validation update
         this.selectedLabel.set(label);
+
+        console.log('[AsyncSelect] control after:', { value: this.control?.value, valid: this.control?.valid, errors: this.control?.errors });
 
         this.searchControl.setValue('', { emitEvent: false }); // Reset search
         this.showDropdown.set(false);
