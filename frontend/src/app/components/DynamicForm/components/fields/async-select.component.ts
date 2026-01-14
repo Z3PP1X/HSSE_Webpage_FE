@@ -190,21 +190,22 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
         const valueField = this.config().value_field || 'sys_id';
         const displayField = this.config().display_field || 'name';
 
-        const val = opt[valueField];
         const label = opt[displayField];
 
-        console.log('[AsyncSelect] selectOption called:', { opt, valueField, displayField, val, label });
+        console.log('[AsyncSelect] selectOption called:', { opt, valueField, displayField, label });
         console.log('[AsyncSelect] control before:', { value: this.control?.value, valid: this.control?.valid, errors: this.control?.errors });
 
-        this.control?.setValue(val);
+        // Store the FULL object instead of just the ID
+        // This makes all branch fields (Street, City, etc.) available at form submission
+        this.control?.setValue(opt);
         this.control?.markAsDirty();
         this.control?.markAsTouched();
-        this.control?.updateValueAndValidity(); // Force validation update
+        this.control?.updateValueAndValidity();
         this.selectedLabel.set(label);
 
         console.log('[AsyncSelect] control after:', { value: this.control?.value, valid: this.control?.valid, errors: this.control?.errors });
 
-        this.searchControl.setValue('', { emitEvent: false }); // Reset search
+        this.searchControl.setValue('', { emitEvent: false });
         this.showDropdown.set(false);
     }
 

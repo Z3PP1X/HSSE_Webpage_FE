@@ -1,15 +1,17 @@
 export interface AlarmplanFields {
-    id?: number;                        
-    costCenter: string | number;        
+    id?: number;
+    costCenter: string | number;
     firstAiderDict: FirstAider[];
     assemblyPoint?: string;
     poisonEmergencyCall?: string;
     nextHospital?: NextHospital;
-    addedContact?: AddedContact[];      
+    addedContact?: AddedContact[];
+    branchStreet?: string;
+    branchCity?: string;
 }
 
 export interface FirstAider {
-    id?: number;                        
+    id?: number;
     name: string;
     phoneNumber: string;
 }
@@ -23,10 +25,10 @@ export interface NextHospital {
 }
 
 export interface AddedContact {
-    id?: number;                        
+    id?: number;
     name: string;
     phoneNumber?: string;
-    email?: string; 
+    email?: string;
     contactClass: "BranchManager" | "Management" | "EnvironmentalAdvisor" | "SafetyAdvisor" | "QualityManagement" | "CompanyDoctor";
 }
 
@@ -36,4 +38,4 @@ export interface AddedContact {
     phoneNumber?: string;
     contactClass: "BranchManager" | "Management" | "EnvironmentalAdvisor" | "SafetyAdvisor" | "QualityManagement" | "CompanyDoctor";
     email?: string;
-  }
+}

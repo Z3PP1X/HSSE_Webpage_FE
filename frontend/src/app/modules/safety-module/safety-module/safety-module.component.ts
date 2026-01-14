@@ -228,13 +228,18 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
       houseNumber: '' // Form combines Street/Number or maps differently?
     };
 
+    // The async-select now stores the FULL branch object, not just the ID
+    const branchData = form['Branch']?.['alarmplan_RelatedBranch'];
+
     return {
-      costCenter: form['Branch']?.['alarmplan_RelatedBranch'],
+      costCenter: branchData?.CostCenter || branchData,
       assemblyPoint: form['Sammelplatz']?.['Sammelplatz_Sammelplatz'],
       poisonEmergencyCall: important['Wichtige Kontakte_Nummer des Giftnotrufs'],
       firstAiderDict: firstAiders,
       addedContact: contacts,
-      nextHospital: nextHospital
+      nextHospital: nextHospital,
+      branchStreet: branchData?.Street,
+      branchCity: branchData?.City
     };
   }
 
