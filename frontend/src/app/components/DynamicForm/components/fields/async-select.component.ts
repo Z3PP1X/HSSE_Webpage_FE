@@ -165,8 +165,8 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
             );
         } else {
             // Query parameter mode (default): append as query string
-            // Use 'search' as the default param name for DRF SearchFilter
-            const searchParamName = this.config().search_field || 'search';
+            // DRF SearchFilter always uses 'search' as the query parameter name
+            const searchParamName = 'search';
             const params = new HttpParams().set(searchParamName, term);
 
             console.log('[AsyncSelect] performSearch query mode:', {
