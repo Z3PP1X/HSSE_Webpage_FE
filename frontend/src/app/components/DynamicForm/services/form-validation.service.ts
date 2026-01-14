@@ -10,7 +10,8 @@ export class FormValidationService {
     getValidators(field: FieldConfig): ValidatorFn[] {
         const validators: ValidatorFn[] = [];
 
-        if (field.required) {
+        // Skip required validation for ajax_select fields
+        if (field.required && field.field_type !== 'ajax_select') {
             validators.push(Validators.required);
         }
 
