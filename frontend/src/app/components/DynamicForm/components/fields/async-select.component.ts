@@ -67,10 +67,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
           </button>
       </div>
 
-      <div *ngIf="hasControlError" class="text-red-400 text-xs mt-2 flex items-center gap-1 animate-fadeIn">
-         <span class="material-icons text-[14px]">error_outline</span>
-         <div *ngIf="control?.errors?.['required']">{{ validationService.getErrorMessage('required', true) }}</div>
-      </div>
+
     </div>
   `
 })
@@ -168,9 +165,19 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
             );
         } else {
             // Query parameter mode (default): append as query string
-            const params = new HttpParams().set(this.config().search_field || 'search', term);
+            // Use 'search' as the default param name for DRF SearchFilter
+            const searchParamName = this.config().search_field || 'search';
+            const params = new HttpParams().set(searchParamName, term);
+
+            console.log('[AsyncSelect] performSearch query mode:', {
+                endpoint: config.endpoint,
+                searchParamName,
+                term,
+                fullUrl: `${config.endpoint}?${searchParamName}=${term}`
+            });
 
             return this.http.request<any[]>(config.method || 'GET', config.endpoint, { params }).pipe(
+                tap(results => console.log('[AsyncSelect] Search results:', results)),
                 catchError(err => {
                     console.error('Ajax search failed', err);
                     return of([]);
