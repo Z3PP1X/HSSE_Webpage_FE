@@ -14,10 +14,7 @@ import { Router } from '@angular/router';
 import { FormDataService } from '../../../global-services/form-data-service/form-data.service';
 import { LoggingService } from '../../../global-services/logging/logging.service';
 import { ApiService } from '../../../global-services/api-service/api-service';
-import { environment } from '../../../../environments/environment';
 
-// Fallback demo config for development
-import { ALARM_PLAN_FORM_CONFIG } from '../../../components/DynamicForm/demo-data';
 
 @Component({
   selector: 'app-safety-module',
@@ -135,17 +132,9 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (err) => {
-        this.log.warn('⚠️ Failed to load form config from API', err);
-
-        // In development, fallback to demo data
-        if (!environment.production) {
-          this.log.info('📦 Using demo data fallback');
-          this.formConfig = ALARM_PLAN_FORM_CONFIG;
-          this.isLoading = false;
-        } else {
-          this.error = 'Failed to load form configuration. Please try again.';
-          this.isLoading = false;
-        }
+        this.log.error('❌ Failed to load form config from API', err);
+        this.error = 'Failed to load form configuration. Please try again.';
+        this.isLoading = false;
       }
     });
   }

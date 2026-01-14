@@ -8,6 +8,12 @@ export interface AjaxConfig {
     method: 'GET' | 'POST';
     triggerEvents: string[];
     debounceTime: number;
+    /** 
+     * How to pass the search term to the endpoint.
+     * - 'query' (default): Append as query parameter (e.g., ?search=term)
+     * - 'path': Append to URL path (e.g., /endpoint/term/)
+     */
+    param_type?: 'path' | 'query';
 }
 
 export interface AjaxConfigs {

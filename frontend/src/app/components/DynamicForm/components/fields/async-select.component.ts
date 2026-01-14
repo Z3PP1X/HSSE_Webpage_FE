@@ -5,7 +5,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { QuestionBaseComponent } from '../question-base/question-base.component';
 import { FormStateService } from '../../services/form-state.service';
 import { FormValidationService } from '../../services/form-validation.service';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, tap, map } from 'rxjs/operators';
 import { of, Observable } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -97,7 +97,7 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
     }
 
     get hasControlError() {
-        return this.hasError || (this.control?.invalid && this.control?.touched && !this.searchControl.dirty); // Check dirty on search too?
+        return this.control?.invalid && this.control?.touched;
     }
 
     constructor() {
@@ -150,14 +150,33 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
         // Given complexity, 300ms static or re-subscribing in ngOnInit is better. 
         // Let's assume 300ms is fine for all or we fix it later.
 
-        const params = new HttpParams().set(this.config().search_field || 'search', term);
+        const paramType = config.param_type || 'path';
 
-        return this.http.request<any[]>(config.method || 'GET', config.endpoint, { params }).pipe(
-            catchError(err => {
-                console.error('Ajax search failed', err);
-                return of([]);
-            })
-        );
+        if (paramType === 'path') {
+            // Path parameter mode: append search term to URL path
+            // e.g., /api/branchnetwork/branchnetwork/{term}/
+            const baseUrl = config.endpoint.endsWith('/') ? config.endpoint : config.endpoint + '/';
+            const url = `${baseUrl}${encodeURIComponent(term)}/`;
+
+            return this.http.request<any[]>(config.method || 'GET', url).pipe(
+                // API may return a single object for path params, wrap in array
+                map((response: any) => Array.isArray(response) ? response : [response]),
+                catchError(err => {
+                    console.error('Ajax search failed', err);
+                    return of([]);
+                })
+            );
+        } else {
+            // Query parameter mode (default): append as query string
+            const params = new HttpParams().set(this.config().search_field || 'search', term);
+
+            return this.http.request<any[]>(config.method || 'GET', config.endpoint, { params }).pipe(
+                catchError(err => {
+                    console.error('Ajax search failed', err);
+                    return of([]);
+                })
+            );
+        }
     }
 
     selectOption(opt: any) {
@@ -168,6 +187,8 @@ export class AsyncSelectComponent extends QuestionBaseComponent {
         const label = opt[displayField];
 
         this.control?.setValue(val);
+        this.control?.markAsDirty();
+        this.control?.markAsTouched();
         this.selectedLabel.set(label);
 
         this.searchControl.setValue('', { emitEvent: false }); // Reset search
