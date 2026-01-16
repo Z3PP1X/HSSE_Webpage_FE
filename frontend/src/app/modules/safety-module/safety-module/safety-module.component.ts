@@ -166,26 +166,23 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     // Map "Wichtige Kontakte" to AddedContacts
     const important = form['Wichtige Kontakte'] || {};
 
-    if (important['Wichtige Kontakte_BranchManager_Name']) {
+    // Debug: Log the actual keys in important to verify field names
+    this.log.info('🔑 Wichtige Kontakte keys:', Object.keys(important));
+    this.log.info('🔑 Wichtige Kontakte full object:', JSON.stringify(important, null, 2));
+
+    if (important['Wichtige Kontakte_Name des Branch Managers']) {
       contacts.push({
-        name: important['Wichtige Kontakte_BranchManager_Name'],
-        email: important['Wichtige Kontakte_BranchManager_Email'],
+        name: important['Wichtige Kontakte_Name des Branch Managers'],
+        email: important['Wichtige Kontakte_Email des Branch Managers'],
         contactClass: 'BranchManager'
       });
     }
-    // Managing Director 1
-    if (important['Wichtige Kontakte_ManagingDirector1_Name']) {
+    // Managing Director(s) - Note: Backend has key collision, only one director is captured
+    // TODO: Update backend to use unique keys like ManagingDirector1_Name, ManagingDirector2_Name
+    if (important['Wichtige Kontakte_Name des Geschaftsführers'] || important['Wichtige Kontakte_Name des Geschäftsführers']) {
       contacts.push({
-        name: important['Wichtige Kontakte_ManagingDirector1_Name'],
-        email: important['Wichtige Kontakte_ManagingDirector1_Email'],
-        contactClass: 'Management'
-      });
-    }
-    // Managing Director 2
-    if (important['Wichtige Kontakte_ManagingDirector2_Name']) {
-      contacts.push({
-        name: important['Wichtige Kontakte_ManagingDirector2_Name'],
-        email: important['Wichtige Kontakte_ManagingDirector2_Email'],
+        name: important['Wichtige Kontakte_Name des Geschaftsführers'] || important['Wichtige Kontakte_Name des Geschäftsführers'],
+        email: important['Wichtige Kontakte_Email des Geschäftsführers'],
         contactClass: 'Management'
       });
     }
@@ -243,7 +240,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     return {
       costCenter: branchData?.CostCenter || branchData,
       assemblyPoint: form['Sammelplatz']?.['Sammelplatz_Sammelplatz'],
-      poisonEmergencyCall: important['Wichtige Kontakte_PoisonEmergencyHotline'],
+      poisonEmergencyCall: important['Wichtige Kontakte_Nummer des Giftnotrufs'],
       firstAiderDict: firstAiders,
       addedContact: contacts,
       nextHospital: nextHospital,
