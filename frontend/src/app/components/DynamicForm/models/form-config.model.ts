@@ -32,6 +32,8 @@ export interface FieldConfig {
     field_type: FieldType;
     choices: Choice[] | null;
     model: string;
+    /** Group identifier for rendering related fields together on the same line */
+    group?: string;
     // Specific to AJAX fields
     ajax_config?: string;
     search_field?: string;

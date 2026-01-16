@@ -220,7 +220,7 @@ export const ALARM_PLAN_FORM_CONFIG: FormConfig = {
             "expandable": false,
             "fields": [
                 {
-                    "key": "Wichtige Kontakte_Nummer des Giftnotrufs",
+                    "key": "Wichtige Kontakte_PoisonEmergencyHotline",
                     "original_key": "PoisonEmergencyHotline",
                     "instance_key": "alarmplan",
                     "label": "Nummer des Giftnotrufs",
@@ -231,48 +231,76 @@ export const ALARM_PLAN_FORM_CONFIG: FormConfig = {
                     "model": "Alarmplan"
                 },
                 {
-                    "key": "Wichtige Kontakte_Name des Branch Managers",
-                    "original_key": "ContactPersonName",
+                    "key": "Wichtige Kontakte_BranchManager_Name",
+                    "original_key": "BranchManager_Name",
                     "instance_key": "contactperson",
                     "label": "Name des Branch Managers",
                     "help_text": "",
                     "required": true,
                     "field_type": "text",
                     "choices": null,
-                    "model": "ContactPerson"
+                    "model": "ContactPerson",
+                    "group": "branchManager"
                 },
                 {
-                    "key": "Wichtige Kontakte_Email des Branch Managers",
-                    "original_key": "ContactPersonEmail",
+                    "key": "Wichtige Kontakte_BranchManager_Email",
+                    "original_key": "BranchManager_Email",
                     "instance_key": "contactperson",
                     "label": "Email des Branch Managers",
                     "help_text": "",
                     "required": false,
                     "field_type": "email",
                     "choices": null,
-                    "model": "ContactPerson"
+                    "model": "ContactPerson",
+                    "group": "branchManager"
                 },
                 {
-                    "key": "Wichtige Kontakte_Name des Geschaftsführers",
-                    "original_key": "ContactPersonName",
+                    "key": "Wichtige Kontakte_ManagingDirector1_Name",
+                    "original_key": "ManagingDirector1_Name",
                     "instance_key": "contactperson",
-                    "label": "Name des Geschaftsführers",
+                    "label": "Name des Geschäftsführers 1",
                     "help_text": "",
                     "required": true,
                     "field_type": "text",
                     "choices": null,
-                    "model": "ContactPerson"
+                    "model": "ContactPerson",
+                    "group": "management1"
                 },
                 {
-                    "key": "Wichtige Kontakte_Email des Geschäftsführers",
-                    "original_key": "ContactPersonEmail",
+                    "key": "Wichtige Kontakte_ManagingDirector1_Email",
+                    "original_key": "ManagingDirector1_Email",
                     "instance_key": "contactperson",
-                    "label": "Email des Geschäftsführers",
+                    "label": "Email des Geschäftsführers 1",
                     "help_text": "",
                     "required": false,
                     "field_type": "email",
                     "choices": null,
-                    "model": "ContactPerson"
+                    "model": "ContactPerson",
+                    "group": "management1"
+                },
+                {
+                    "key": "Wichtige Kontakte_ManagingDirector2_Name",
+                    "original_key": "ManagingDirector2_Name",
+                    "instance_key": "contactperson",
+                    "label": "Name des Geschäftsführers 2",
+                    "help_text": "",
+                    "required": true,
+                    "field_type": "text",
+                    "choices": null,
+                    "model": "ContactPerson",
+                    "group": "management2"
+                },
+                {
+                    "key": "Wichtige Kontakte_ManagingDirector2_Email",
+                    "original_key": "ManagingDirector2_Email",
+                    "instance_key": "contactperson",
+                    "label": "Email des Geschäftsführers 2",
+                    "help_text": "",
+                    "required": false,
+                    "field_type": "email",
+                    "choices": null,
+                    "model": "ContactPerson",
+                    "group": "management2"
                 }
             ]
         }

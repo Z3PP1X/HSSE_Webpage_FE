@@ -166,17 +166,26 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     // Map "Wichtige Kontakte" to AddedContacts
     const important = form['Wichtige Kontakte'] || {};
 
-    if (important['Wichtige Kontakte_Name des Branch Managers']) {
+    if (important['Wichtige Kontakte_BranchManager_Name']) {
       contacts.push({
-        name: important['Wichtige Kontakte_Name des Branch Managers'],
-        email: important['Wichtige Kontakte_Email des Branch Managers'],
+        name: important['Wichtige Kontakte_BranchManager_Name'],
+        email: important['Wichtige Kontakte_BranchManager_Email'],
         contactClass: 'BranchManager'
       });
     }
-    if (important['Wichtige Kontakte_Name des Geschaftsführers']) {
+    // Managing Director 1
+    if (important['Wichtige Kontakte_ManagingDirector1_Name']) {
       contacts.push({
-        name: important['Wichtige Kontakte_Name des Geschaftsführers'],
-        email: important['Wichtige Kontakte_Email des Geschäftsführers'],
+        name: important['Wichtige Kontakte_ManagingDirector1_Name'],
+        email: important['Wichtige Kontakte_ManagingDirector1_Email'],
+        contactClass: 'Management'
+      });
+    }
+    // Managing Director 2
+    if (important['Wichtige Kontakte_ManagingDirector2_Name']) {
+      contacts.push({
+        name: important['Wichtige Kontakte_ManagingDirector2_Name'],
+        email: important['Wichtige Kontakte_ManagingDirector2_Email'],
         contactClass: 'Management'
       });
     }
@@ -234,7 +243,7 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     return {
       costCenter: branchData?.CostCenter || branchData,
       assemblyPoint: form['Sammelplatz']?.['Sammelplatz_Sammelplatz'],
-      poisonEmergencyCall: important['Wichtige Kontakte_Nummer des Giftnotrufs'],
+      poisonEmergencyCall: important['Wichtige Kontakte_PoisonEmergencyHotline'],
       firstAiderDict: firstAiders,
       addedContact: contacts,
       nextHospital: nextHospital,

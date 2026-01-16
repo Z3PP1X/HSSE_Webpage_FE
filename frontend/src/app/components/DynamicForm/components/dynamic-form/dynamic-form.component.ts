@@ -36,9 +36,20 @@ import { AsyncSelectComponent } from '../fields/async-select.component';
              {{ category.title }}
           </h3>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <ng-container *ngFor="let field of category.fields">
-                <ng-container *ngTemplateOutlet="fieldRenderer; context: { field: field, group: getGroup(category.key) }"></ng-container>
+          <div class="space-y-6">
+             <ng-container *ngFor="let fieldGroup of getFieldGroups(category.fields)">
+               <!-- Grouped fields rendered side by side -->
+               <div *ngIf="fieldGroup.isGrouped" class="grid grid-cols-2 gap-4">
+                  <ng-container *ngFor="let field of fieldGroup.fields">
+                     <ng-container *ngTemplateOutlet="fieldRenderer; context: { field: field, group: getGroup(category.key) }"></ng-container>
+                  </ng-container>
+               </div>
+               <!-- Standalone fields -->
+               <div *ngIf="!fieldGroup.isGrouped">
+                  <ng-container *ngFor="let field of fieldGroup.fields">
+                     <ng-container *ngTemplateOutlet="fieldRenderer; context: { field: field, group: getGroup(category.key) }"></ng-container>
+                  </ng-container>
+               </div>
              </ng-container>
           </div>
         </div>
@@ -184,5 +195,31 @@ export class DynamicFormComponent implements OnInit {
             ...field,
             key: field.key.replace('{index}', index.toString())
         };
+    }
+
+    /**
+     * Groups fields by their `group` property for rendering related fields on the same line.
+     * Fields without a group are treated as standalone and rendered individually.
+     */
+    getFieldGroups(fields: FieldConfig[] | undefined): { groupKey: string; isGrouped: boolean; fields: FieldConfig[] }[] {
+        if (!fields) return [];
+
+        const groups: Map<string, FieldConfig[]> = new Map();
+        const order: string[] = [];
+
+        fields.forEach(field => {
+            const key = field.group || `__standalone_${field.key}`;
+            if (!groups.has(key)) {
+                groups.set(key, []);
+                order.push(key);
+            }
+            groups.get(key)!.push(field);
+        });
+
+        return order.map(key => ({
+            groupKey: key,
+            isGrouped: !key.startsWith('__standalone_'),
+            fields: groups.get(key)!
+        }));
     }
 }

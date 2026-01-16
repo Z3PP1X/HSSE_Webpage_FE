@@ -98,15 +98,18 @@ export class FormDataService {
     let important: ImportantContacts | undefined;
     if (importantRaw) {
       important = {
-        poisonEmergencyCall: importantRaw['Wichtige Kontakte_Nummer des Giftnotrufs'],
+        poisonEmergencyCall: importantRaw['Wichtige Kontakte_PoisonEmergencyHotline'],
         branchManager: {
-          name: importantRaw['Wichtige Kontakte_Name des Branch Managers'],
-          email: importantRaw['Wichtige Kontakte_Email des Branch Managers']
+          name: importantRaw['Wichtige Kontakte_BranchManager_Name'],
+          email: importantRaw['Wichtige Kontakte_BranchManager_Email']
         },
-        management: {
-          name: importantRaw['Wichtige Kontakte_Name des Geschaftsführers']
-            || importantRaw['Wichtige Kontakte_Name des Geschäftsführers'],
-          email: importantRaw['Wichtige Kontakte_Email des Geschäftsführers']
+        management1: {
+          name: importantRaw['Wichtige Kontakte_ManagingDirector1_Name'],
+          email: importantRaw['Wichtige Kontakte_ManagingDirector1_Email']
+        },
+        management2: {
+          name: importantRaw['Wichtige Kontakte_ManagingDirector2_Name'],
+          email: importantRaw['Wichtige Kontakte_ManagingDirector2_Email']
         }
       };
     }
@@ -200,11 +203,19 @@ export class FormDataService {
       });
     }
 
-    if (n.important?.management?.name || n.important?.management?.email) {
+    if (n.important?.management1?.name || n.important?.management1?.email) {
       addedContact.push({
         contactClass: 'Management',
-        name: n.important.management.name || '',
-        email: n.important.management.email || ''
+        name: n.important.management1.name || '',
+        email: n.important.management1.email || ''
+      });
+    }
+
+    if (n.important?.management2?.name || n.important?.management2?.email) {
+      addedContact.push({
+        contactClass: 'Management',
+        name: n.important.management2.name || '',
+        email: n.important.management2.email || ''
       });
     }
 
