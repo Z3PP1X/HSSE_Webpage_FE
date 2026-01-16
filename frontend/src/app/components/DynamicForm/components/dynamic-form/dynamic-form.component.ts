@@ -187,7 +187,19 @@ export class DynamicFormComponent implements OnInit {
         this.formBuilder.removeCategoryInstance(this.getArray(key), index, category);
     }
 
+    // Cache for resolved configs to prevent re-creating objects on each change detection
+    // Key format: `${field.key}_${index ?? 'null'}_${field.group ?? ''}`
+    private resolvedConfigCache = new Map<string, FieldConfig>();
+
     resolveConfig(field: FieldConfig, index?: number): FieldConfig {
+        // Build cache key
+        const cacheKey = `${field.key}_${index ?? 'null'}_${field.group ?? ''}`;
+
+        // Return cached version if available
+        if (this.resolvedConfigCache.has(cacheKey)) {
+            return this.resolvedConfigCache.get(cacheKey)!;
+        }
+
         let effectiveKey = field.key;
 
         // Replace {index} for expandable fields
@@ -201,13 +213,18 @@ export class DynamicFormComponent implements OnInit {
         }
 
         // Return original if no changes needed
-        if (effectiveKey === field.key) return field;
+        if (effectiveKey === field.key) {
+            this.resolvedConfigCache.set(cacheKey, field);
+            return field;
+        }
 
-        // Clone with updated key
-        return {
+        // Clone with updated key and cache it
+        const resolved: FieldConfig = {
             ...field,
             key: effectiveKey
         };
+        this.resolvedConfigCache.set(cacheKey, resolved);
+        return resolved;
     }
 
     /**
