@@ -188,12 +188,25 @@ export class DynamicFormComponent implements OnInit {
     }
 
     resolveConfig(field: FieldConfig, index?: number): FieldConfig {
-        if (index === undefined || index === null) return field;
+        let effectiveKey = field.key;
 
-        // Clone and replace key
+        // Replace {index} for expandable fields
+        if (index !== undefined && index !== null) {
+            effectiveKey = effectiveKey.replace('{index}', index.toString());
+        }
+
+        // Append group to key for uniqueness (matches FormBuilderService behavior)
+        if (field.group) {
+            effectiveKey = `${effectiveKey}_${field.group}`;
+        }
+
+        // Return original if no changes needed
+        if (effectiveKey === field.key) return field;
+
+        // Clone with updated key
         return {
             ...field,
-            key: field.key.replace('{index}', index.toString())
+            key: effectiveKey
         };
     }
 

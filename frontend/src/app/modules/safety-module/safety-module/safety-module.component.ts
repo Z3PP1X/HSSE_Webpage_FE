@@ -170,19 +170,27 @@ export class SafetyModuleComponent implements OnInit, OnDestroy {
     this.log.info('🔑 Wichtige Kontakte keys:', Object.keys(important));
     this.log.info('🔑 Wichtige Kontakte full object:', JSON.stringify(important, null, 2));
 
-    if (important['Wichtige Kontakte_Name des Branch Managers']) {
+    // Branch Manager - now uses composite key with group suffix
+    if (important['Wichtige Kontakte_Name des Branch Managers_branchManager']) {
       contacts.push({
-        name: important['Wichtige Kontakte_Name des Branch Managers'],
-        email: important['Wichtige Kontakte_Email des Branch Managers'],
+        name: important['Wichtige Kontakte_Name des Branch Managers_branchManager'],
+        email: important['Wichtige Kontakte_Email des Branch Managers_branchManager'],
         contactClass: 'BranchManager'
       });
     }
-    // Managing Director(s) - Note: Backend has key collision, only one director is captured
-    // TODO: Update backend to use unique keys like ManagingDirector1_Name, ManagingDirector2_Name
-    if (important['Wichtige Kontakte_Name des Geschaftsführers'] || important['Wichtige Kontakte_Name des Geschäftsführers']) {
+    // Managing Director 1 - uses composite key with management1 group suffix
+    if (important['Wichtige Kontakte_Name des Geschaftsführers_management1']) {
       contacts.push({
-        name: important['Wichtige Kontakte_Name des Geschaftsführers'] || important['Wichtige Kontakte_Name des Geschäftsführers'],
-        email: important['Wichtige Kontakte_Email des Geschäftsführers'],
+        name: important['Wichtige Kontakte_Name des Geschaftsführers_management1'],
+        email: important['Wichtige Kontakte_Email des Geschäftsführers_management1'],
+        contactClass: 'Management'
+      });
+    }
+    // Managing Director 2 - uses composite key with management2 group suffix
+    if (important['Wichtige Kontakte_Name des Geschaftsführers_management2']) {
+      contacts.push({
+        name: important['Wichtige Kontakte_Name des Geschaftsführers_management2'],
+        email: important['Wichtige Kontakte_Email des Geschäftsführers_management2'],
         contactClass: 'Management'
       });
     }

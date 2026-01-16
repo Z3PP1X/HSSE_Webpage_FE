@@ -30,7 +30,12 @@ export class FormBuilderService {
         const group: any = {};
         if (category.fields) {
             category.fields.forEach(field => {
-                group[field.key] = this.createControl(field);
+                // Generate unique key by appending group if present
+                // This prevents collisions when backend sends duplicate keys with different groups
+                const effectiveKey = field.group
+                    ? `${field.key}_${field.group}`
+                    : field.key;
+                group[effectiveKey] = this.createControl(field);
             });
         }
         return this.fb.group(group);
