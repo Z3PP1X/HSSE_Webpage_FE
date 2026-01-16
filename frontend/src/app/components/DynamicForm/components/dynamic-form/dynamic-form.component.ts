@@ -27,7 +27,7 @@ import { AsyncSelectComponent } from '../fields/async-select.component';
       <h2 class="text-3xl font-bold mb-8 text-white tracking-tight relative z-10">{{ config.form_title }}</h2>
 
       <!-- Loop through Structure (Categories) -->
-      <div *ngFor="let category of config.structure">
+      <div *ngFor="let category of config.structure; trackBy: trackByCategoryKey">
         
         <!-- Standard Category (Group) -->
         <div *ngIf="category.isCategory && !category.expandable" [formGroupName]="category.key" class="mb-10 last:mb-0 last:border-0 border-b border-zinc-800/50 pb-8">
@@ -37,16 +37,16 @@ import { AsyncSelectComponent } from '../fields/async-select.component';
           </h3>
           
           <div class="space-y-6">
-             <ng-container *ngFor="let fieldGroup of getFieldGroups(category.fields)">
+             <ng-container *ngFor="let fieldGroup of getFieldGroups(category.fields); trackBy: trackByGroupKey">
                <!-- Grouped fields rendered side by side -->
                <div *ngIf="fieldGroup.isGrouped" class="grid grid-cols-2 gap-4">
-                  <ng-container *ngFor="let field of fieldGroup.fields">
+                  <ng-container *ngFor="let field of fieldGroup.fields; trackBy: trackByFieldKey">
                      <ng-container *ngTemplateOutlet="fieldRenderer; context: { field: field, group: getGroup(category.key) }"></ng-container>
                   </ng-container>
                </div>
                <!-- Standalone fields -->
                <div *ngIf="!fieldGroup.isGrouped">
-                  <ng-container *ngFor="let field of fieldGroup.fields">
+                  <ng-container *ngFor="let field of fieldGroup.fields; trackBy: trackByFieldKey">
                      <ng-container *ngTemplateOutlet="fieldRenderer; context: { field: field, group: getGroup(category.key) }"></ng-container>
                   </ng-container>
                </div>
@@ -68,7 +68,7 @@ import { AsyncSelectComponent } from '../fields/async-select.component';
                </button>
             </div>
 
-            <div *ngFor="let instance of getArray(category.key).controls; let i = index" [formGroupName]="i" class="mb-4 p-6 border border-zinc-800 rounded-xl bg-zinc-950/50 relative group hover:border-zinc-700 transition-colors">
+            <div *ngFor="let instance of getArray(category.key).controls; let i = index; trackBy: trackByIndex" [formGroupName]="i" class="mb-4 p-6 border border-zinc-800 rounded-xl bg-zinc-950/50 relative group hover:border-zinc-700 transition-colors">
                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button type="button" (click)="removeInstance(category.key, i, category)" 
                      class="text-zinc-500 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-500/10">
@@ -79,7 +79,7 @@ import { AsyncSelectComponent } from '../fields/async-select.component';
                <h4 class="font-medium text-zinc-500 mb-4 text-xs uppercase tracking-wider">Entry #{{ i + 1 }}</h4>
                
                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <ng-container *ngFor="let field of category.fields">  
+                 <ng-container *ngFor="let field of category.fields; trackBy: trackByFieldKey">  
                     <ng-container *ngTemplateOutlet="fieldRenderer; context: { field: field, group: getInstanceGroup(category.key, i), index: i }"></ng-container>
                  </ng-container>
                </div>
@@ -227,12 +227,42 @@ export class DynamicFormComponent implements OnInit {
         return resolved;
     }
 
+    // ============================================
+    // TrackBy Functions - Preserve component identity
+    // ============================================
+    trackByCategoryKey(index: number, category: FormCategory): string {
+        return category.key;
+    }
+
+    trackByGroupKey(index: number, group: { groupKey: string }): string {
+        return group.groupKey;
+    }
+
+    trackByFieldKey(index: number, field: FieldConfig): string {
+        return field.key + (field.group ?? '');
+    }
+
+    trackByIndex(index: number): number {
+        return index;
+    }
+
+    // ============================================
+    // Field Grouping - Memoized to prevent re-renders
+    // ============================================
+    private fieldGroupsCache = new Map<FieldConfig[], { groupKey: string; isGrouped: boolean; fields: FieldConfig[] }[]>();
+
     /**
      * Groups fields by their `group` property for rendering related fields on the same line.
      * Fields without a group are treated as standalone and rendered individually.
+     * MEMOIZED: Returns the same array reference for the same input to prevent re-renders.
      */
     getFieldGroups(fields: FieldConfig[] | undefined): { groupKey: string; isGrouped: boolean; fields: FieldConfig[] }[] {
         if (!fields) return [];
+
+        // Return cached result if available (same array reference)
+        if (this.fieldGroupsCache.has(fields)) {
+            return this.fieldGroupsCache.get(fields)!;
+        }
 
         const groups: Map<string, FieldConfig[]> = new Map();
         const order: string[] = [];
@@ -246,10 +276,14 @@ export class DynamicFormComponent implements OnInit {
             groups.get(key)!.push(field);
         });
 
-        return order.map(key => ({
+        const result = order.map(key => ({
             groupKey: key,
             isGrouped: !key.startsWith('__standalone_'),
             fields: groups.get(key)!
         }));
+
+        // Cache for future calls with same fields array
+        this.fieldGroupsCache.set(fields, result);
+        return result;
     }
 }
