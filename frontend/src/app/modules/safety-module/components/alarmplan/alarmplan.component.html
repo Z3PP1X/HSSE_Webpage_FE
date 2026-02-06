@@ -16,7 +16,10 @@
       <h2 class="text-customAlarmplanSubheadline text-fs-subheading">
         {{ config().branchStreet }} {{ config().branchCity }}
       </h2>
-      <p class=" text-customAlarmplanSubheadline text-right text-xs ml-10">{{this.timestamp}}</p>
+      <p class="text-customAlarmplanSubheadline text-right text-xs ml-10">{{this.timestamp}}</p>
+      @if (companyNumber()) {
+      <p class="text-customAlarmplanSubheadline text-right text-xs ml-4">BG-Nummer: {{ companyNumber() }}</p>
+      }
     </div>
   </div>
 
@@ -77,13 +80,13 @@
         <div class="ml-8 mr-4 text-fs-text">
           <p>Rettungsleitstelle <span class="font-bold text-orange-600">Telefon:112</span></p>
 
-            <ul>
-              <li>><span class="font-bold text-sixt-orange">Wo</span>?</li>
-              <li> <span class="font-bold text-sixt-orange">Was</span> ist passiert? </li>
-              <li><span class="font-bold text-sixt-orange">Wie viele</span> Verletzte? </li>
-              <li><span class="font-bold text-sixt-orange">Welche</span> Voraussetzungen? </li>
-              <li><span class="text-sixt-orange font-bold">Warten</span> auf Rückfragen!</li>
-            </ul>            
+          <ul>
+            <li>><span class="font-bold text-sixt-orange">Wo</span>?</li>
+            <li> <span class="font-bold text-sixt-orange">Was</span> ist passiert? </li>
+            <li><span class="font-bold text-sixt-orange">Wie viele</span> Verletzte? </li>
+            <li><span class="font-bold text-sixt-orange">Welche</span> Voraussetzungen? </li>
+            <li><span class="text-sixt-orange font-bold">Warten</span> auf Rückfragen!</li>
+          </ul>
         </div>
       </div>
       <div>

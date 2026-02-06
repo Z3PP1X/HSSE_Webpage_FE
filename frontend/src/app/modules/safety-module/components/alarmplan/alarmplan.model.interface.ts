@@ -1,6 +1,7 @@
 export interface AlarmplanFields {
     id?: number;
     costCenter: string | number;
+    companyNumber?: string;
     firstAiderDict: FirstAider[];
     assemblyPoint?: string;
     poisonEmergencyCall?: string;

@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AlarmplanFields, AddedContact } from './alarmplan.model.interface';
 import { FormDataService } from '../../../../global-services/form-data-service/form-data.service';
+import { BranchRegionService } from '../../../../global-services/branch-region-service/branch-region.service';
 
 @Component({
   selector: 'app-alarmplan',
@@ -28,8 +29,10 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
 
   timestamp = '';
   config = signal<AlarmplanFields>({} as AlarmplanFields);
+  companyNumber = signal<string>('');
 
   private formDataService = inject(FormDataService);
+  private branchRegionService = inject(BranchRegionService);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
@@ -39,6 +42,16 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
         console.log('✅ AlarmplanComponent Received Data:', model);
         this.config.set(model);
         this.timestamp = this.currentTime();
+
+        // Fetch Company_Number when costCenter is available
+        if (model.costCenter) {
+          this.branchRegionService.getCompanyNumber(model.costCenter.toString())
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(num => {
+              console.log('✅ AlarmplanComponent Received Company_Number:', num);
+              this.companyNumber.set(num);
+            });
+        }
       });
   }
 
