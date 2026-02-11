@@ -30,21 +30,24 @@
       <div class="col-span-8 whitespace-nowrap">
         <h1 class="font-bold col-start-2 text-fs-category-heading">Verhalten bei Unfällen</h1>
       </div>
-      <div class="ml-2 h-10 w-10"><img [src]="titleFirstAid"></div>
+      <div class="ml-2 h-10 w-10 min-w-[2.5rem] min-h-[2.5rem] shrink-0"><img [src]="titleFirstAid"
+          class="w-full h-full object-contain"></div>
     </div>
 
     <div class="col-span-1 grid grid-cols-10 grid-rows-1">
       <div class="col-span-8 whitespace-nowrap">
         <h1 class="font-bold col-start-2 ml-3  text-fs-category-heading">Verhalten im Brandfall</h1>
       </div>
-      <div class=" ml-2 h-10 w-10"><img [src]="titleFireAlarm"></div>
+      <div class="ml-2 h-10 w-10 min-w-[2.5rem] min-h-[2.5rem] shrink-0"><img [src]="titleFireAlarm"
+          class="w-full h-full object-contain"></div>
     </div>
 
     <div class="col-span-1 grid grid-cols-10 grid-rows-1">
       <div class="col-span-8 whitespace-nowrap">
         <h1 class="font-bold ml-3 text-fs-category-heading">Wichtige Rufnummern</h1>
       </div>
-      <div class="ml-2 bg-black h-10 w-10"><img [src]="titleImportantNumbers"></div>
+      <div class="ml-2 bg-black h-10 w-10 min-w-[2.5rem] min-h-[2.5rem] shrink-0"><img [src]="titleImportantNumbers"
+          class="w-full h-full object-contain"></div>
     </div>
   </div>
 
@@ -94,20 +97,23 @@
         <div class="grid grid-cols-2 ml-8 text-fs-text">
           <div class="grid grid-rows-3">
             <div class="flex flex-row mt-1">
-              <div class="w-6 h-6"><img [src]="employeeIcon"></div>
+              <div class="w-6 h-6 min-w-[1.5rem] min-h-[1.5rem] shrink-0"><img [src]="employeeIcon"
+                  class="w-full h-full object-contain"></div>
               <p class="ml-2">Employee</p>
             </div>
             <div class="flex flex-row mt-1">
-              <div class="w-6 h-6"><img [src]="healthIcon"></div>
+              <div class="w-6 h-6 min-w-[1.5rem] min-h-[1.5rem] shrink-0"><img [src]="healthIcon"
+                  class="w-full h-full object-contain"></div>
               <p class="ml-2">Health</p>
             </div>
             <div class="flex flex-row mt-1">
-              <div class="w-6 h-6"><img [src]="safetyIcon"></div>
+              <div class="w-6 h-6 min-w-[1.5rem] min-h-[1.5rem] shrink-0"><img [src]="safetyIcon"
+                  class="w-full h-full object-contain"></div>
               <p class="ml-2">Safety</p>
             </div>
           </div>
-          <div class="w-16 h-16 min-w-[4rem] min-h-[4rem] shrink-0"><img [src]="qrCode" alt="QR Code Verbandbuch"
-              class="w-full h-full object-contain"></div>
+          <div class="w-16 h-16 min-w-[4rem] min-h-[4rem] shrink-0 self-end mt-auto"><img [src]="qrCode"
+              alt="QR Code Verbandbuch" class="w-full h-full object-contain"></div>
         </div>
       </div>
 
@@ -118,13 +124,15 @@
         <h1 class="font-bold text-black text-fs-subheading ml-2 mt-4">1 Menschen retten</h1>
         <div class="flex flex-row ml-2 mt-2">
           <h1 class="font-bold text-black text-fs-subheading">2</h1>
-          <div class="w-8 h-8 ml-1 mr-1"><img [src]="fireAlarmIcon"></div>
+          <div class="w-8 h-8 min-w-[2rem] min-h-[2rem] shrink-0 ml-1 mr-1"><img [src]="fireAlarmIcon"
+              class="w-full h-full object-contain"></div>
           <h1 class="font-bold text-black text-fs-subheading">Feuermelder betätigen</h1>
         </div>
         <div class="grid grid-cols-[1fr_8fr]">
           <div class="ml-2 flex flex-row mt-1">
             <h1 class="text-black font-bold text-fs-subheading">3</h1>
-            <div class="w-8 h-8 ml-1"><img [src]="callFireDepartmentIcon"></div>
+            <div class="w-8 h-8 min-w-[2rem] min-h-[2rem] shrink-0 ml-1"><img [src]="callFireDepartmentIcon"
+                class="w-full h-full object-contain"></div>
           </div>
           <div class="text-fs-subheading ml-1">
             <h1 class="font-bold text-black">Brand sofort melden:</h1>
@@ -147,20 +155,23 @@
 
               <li>• Gefahrenbereich verlassen</li>
               <li>• Verletzten und Hilfsvedürftigen helfen</li>
-              <li class="flex flex-row">• Gekennzeichnette Rettungswege benutzen <div class="w-8 h-8 ml-1"><img
-                    [src]="escapeRouteIcon"></div>
+              <li class="flex flex-row items-center">• Gekennzeichnette Rettungswege benutzen <div
+                  class="w-8 h-8 min-w-[2rem] min-h-[2rem] shrink-0 ml-1"><img [src]="escapeRouteIcon"
+                    class="w-full h-full object-contain"></div>
               </li>
               <li>• Keine Aufzüge benutzen</li>
               <li>• Verqualmte Räume in Bodennähe verlassen</li>
               <li>• Türen und Fenster schließen</li>
               <li>• Entstehungsbrand bekämpfen, sofern Eigenschutz gewährleistet!</li>
-              <li class="flex flex-row">• Nächster Feuerlöscher in max. 20m <div class="w-8 h-8 ml-1"><img
-                    [src]="fireExtinguisherIcon"></div>
+              <li class="flex flex-row items-center">• Nächster Feuerlöscher in max. 20m <div
+                  class="w-8 h-8 min-w-[2rem] min-h-[2rem] shrink-0 ml-1"><img [src]="fireExtinguisherIcon"
+                    class="w-full h-full object-contain"></div>
               </li>
               <li>• Sammelplatz aufsuchen und auf Anweisungen warten:</li>
 
               <div class="grid grid-cols-[1fr_8fr] mt-1">
-                <div class="w-10 h-10"><img [src]="assemblyPointIcon" alt="SVG Bild">
+                <div class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] shrink-0"><img [src]="assemblyPointIcon"
+                    alt="SVG Bild" class="w-full h-full object-contain">
                 </div>
                 <div class="ml-1">
                   <p>Sammelplatz:</p>
