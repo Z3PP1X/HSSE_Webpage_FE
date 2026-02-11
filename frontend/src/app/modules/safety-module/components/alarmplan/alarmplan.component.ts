@@ -17,7 +17,7 @@ export class AlarmplanComponent implements OnInit, OnDestroy {
   healthIcon = 'ehs-icons/safety.svg';
   employeeIcon = 'ehs-icons/health.svg';
   safetyIcon = 'ehs-icons/person.svg';
-  qrCode = 'qr-codes/qr-code-png';
+  qrCode = 'qr-codes/first_aid_book_qr.png';
   fireAlarmIcon = 'ehs-icons/fireAlarmIcon.svg';
   callFireDepartmentIcon = 'ehs-icons/callFireDepartmentIcon.svg';
   escapeRouteIcon = 'ehs-icons/escapeRouteIcon.svg';
